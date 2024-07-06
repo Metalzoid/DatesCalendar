@@ -34,7 +34,7 @@ Rails.application.configure do
   config.active_storage.service = :local
 
   # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+
 
   config.action_mailer.perform_caching = false
 
@@ -70,4 +70,22 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+
+  config.action_mailer.raise_delivery_errors = true
+
+  config.action_mailer.delivery_method = :mailtrap
+
+  config.action_mailer.mailtrap_settings = {
+    api_key: ENV.fetch('MAILTRAP_API_KEY'),
+    api_host: 'sandbox.api.mailtrap.io'
+  }
+
+  # config.action_mailer.smtp_settings = {
+  #   user_name: 'acf457618bb0bb',
+  #   password: 'caf64fda3e8b96',
+  #   address: 'sandbox.smtp.mailtrap.io',
+  #   host: 'sandbox.smtp.mailtrap.io',
+  #   port: '2525',
+  #   authentication: :login
+  # }
 end
