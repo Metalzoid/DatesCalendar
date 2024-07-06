@@ -32,7 +32,7 @@ class AppointmentsController < ApplicationController
         render json: { errors: @appointment.errors.messages }
       end
     elsif current_user.role == "admin"
-      if @appointment.update(appointment_params)
+      if @appointment.update(appointment_params_admin)
         render json: { message: "Appointment updated." }
       else
         render json: { errors: @appointment.errors.messages }
@@ -46,7 +46,11 @@ class AppointmentsController < ApplicationController
   private
 
   def appointment_params
-    params.require(:appointment).permit(:start_date, :end_date, :comment)
+    params.require(:appointment).permit(:start_date, :end_date, :comment, :status)
+  end
+
+  def appointment_params_admin
+    params.require(:appointment).permit(:status, :admin_comment)
   end
 
   def set_appointment
