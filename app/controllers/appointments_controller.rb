@@ -25,9 +25,12 @@ class AppointmentsController < ApplicationController
   end
 
   def update
+    @old_start_date = @appointment.start_date
+    @old_end_date = @appointment.end_date
     if @appointment.status == "hold" && @appointment.user == current_user
       if @appointment.update(appointment_params)
         render json: { message: "Appointment updated." }
+        @appointment.mailer_update(@old_start_date, @old_end_date, @appointment.start_date, @appointment.end_date, "433f7b20-99e4-42e2-a502-21a37867cdf6")
       else
         render json: { errors: @appointment.errors.messages }
       end

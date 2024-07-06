@@ -64,7 +64,7 @@ class Availability < ApplicationRecord
     if current_availability.size > 0 && self.available == false
       current_availability.each do |cur|
         new_availability = Availability.new(start_date: self.end_date, end_date: cur.end_date, available: true)
-        new_availability.skip_before_create = true # Skip the before_create callback
+        new_availability.skip_before_create = true
         new_availability.save!
         unavailable_update_mailer({old_start_date: cur.start_date, old_end_date: cur.end_date, cur_start_date: cur.start_date, cur_end_date: self.start_date, new_start_date: self.end_date, new_end_date: cur.end_date, template_uuid: '825c3c39-49d7-4c6e-b72d-bf07d62a74ad'})
         cur.update(end_date: self.start_date)

@@ -8,8 +8,7 @@ class Appointment < ApplicationRecord
   belongs_to :user
 
   validates :start_date, presence: true, comparison: { greater_than: Date.today }
-  validates :end_date, comparison: { greater_than: :start_date },
-                       presence: true
+  validates :end_date, comparison: { greater_than: :start_date }, presence: true
   validates :user_id, presence: true
   validates :comment, presence: true, length: { maximum: 500 }
 
@@ -19,6 +18,32 @@ class Appointment < ApplicationRecord
     finished: 2,
     canceled: 3
   }
+
+  def mailer_update(old_start_date, old_end_date, new_start_date, new_end_date, template_uuid)
+
+    I18n.locale = :fr
+    self.admin_comment.nil? ? message = "" : message = self.admin_comment
+    mail = Mailtrap::Mail::FromTemplate.new(
+      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
+      to: [
+        { email: 'gagnaire.flo@gmail.com' }
+      ],
+      template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6",
+      template_variables: {
+        firstname: self.user.firstname,
+        lastname: self.user.lastname,
+        link: "http://localhost/dashboard/#{user_id}",
+        message: message,
+        old_start_date: I18n.l(old_start_date, format: :custom),
+        old_end_date: I18n.l(old_end_date, format: :custom),
+        new_start_date: I18n.l(new_start_date, format: :custom),
+        new_end_date: I18n.l(new_end_date, format: :custom)
+
+      }
+    )
+    client = Mailtrap::Client.new()
+    client.send(mail)
+  end
 
   private
 
@@ -53,18 +78,24 @@ class Appointment < ApplicationRecord
   def mailer_user
     I18n.locale = :fr
     self.admin_comment.nil? ? message = "" : message = self.admin_comment
+    if self.status.nil?
+      @template_uuid = "3e4c9e12-c352-491a-a6ee-5f967263b92c"
+      self.update(status: 0)
+    end
     case self.status
-      when "hold" then template_uuid = "3e4c9e12-c352-491a-a6ee-5f967263b92c"
-      when "accepted" then template_uuid = "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
-      when "finished" then template_uuid = "363b50b7-0689-4e53-872f-04df9ffb2063"
-      when "canceled" then template_uuid = "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
+      when "accepted" then @template_uuid = "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
+      when "finished" then @template_uuid = "363b50b7-0689-4e53-872f-04df9ffb2063"
+      when "canceled" then @template_uuid = "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
+    end
+    if @template_uuid.nil?
+      return
     end
     mail = Mailtrap::Mail::FromTemplate.new(
       from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
       to: [
         { email: 'gagnaire.flo@gmail.com' }
       ],
-      template_uuid: template_uuid,
+      template_uuid: @template_uuid,
       template_variables: {
         firstname: self.user.firstname,
         lastname: self.user.lastname,
@@ -72,12 +103,14 @@ class Appointment < ApplicationRecord
         end_date: I18n.l(self.end_date, format: :custom),
         created_at: I18n.l(self.created_at, format: :custom),
         link: "http://localhost/dashboard/#{user_id}",
-        message: message
+        message: message,
       }
     )
     client = Mailtrap::Client.new()
     client.send(mail)
   end
+
+
 
   def create_availability
     Availability.create!(start_date: self.start_date, end_date: self.end_date, available: false) if self.status == "accepted"

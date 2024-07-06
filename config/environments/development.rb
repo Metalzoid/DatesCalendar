@@ -73,19 +73,20 @@ Rails.application.configure do
 
   config.action_mailer.raise_delivery_errors = true
 
-  config.action_mailer.delivery_method = :mailtrap
-
-  config.action_mailer.mailtrap_settings = {
-    api_key: ENV.fetch('MAILTRAP_API_KEY'),
-    api_host: 'sandbox.api.mailtrap.io'
-  }
-
-  # config.action_mailer.smtp_settings = {
-  #   user_name: 'acf457618bb0bb',
-  #   password: 'caf64fda3e8b96',
-  #   address: 'sandbox.smtp.mailtrap.io',
-  #   host: 'sandbox.smtp.mailtrap.io',
-  #   port: '2525',
-  #   authentication: :login
+  # config.action_mailer.delivery_method = :mailtrap
+  # config.action_mailer.mailtrap_settings = {
+  #   api_key: ENV.fetch('MAILTRAP_API_KEY'),
+  #   api_host: 'sandbox.api.mailtrap.io',
+  #   enable_starttls_auto: true
   # }
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    :user_name => 'acf457618bb0bb',
+    :password => ENV.fetch('MAILTRAP_PASSWORD'),
+    :address => 'sandbox.smtp.mailtrap.io',
+    :host => 'sandbox.smtp.mailtrap.io',
+    :port => '2525',
+    :authentication => :login
+  }
 end
