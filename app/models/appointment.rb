@@ -20,7 +20,6 @@ class Appointment < ApplicationRecord
   }
 
   def mailer_update(old_start_date, old_end_date, new_start_date, new_end_date, template_uuid)
-
     I18n.locale = :fr
     self.admin_comment.nil? ? message = "" : message = self.admin_comment
     mail = Mailtrap::Mail::FromTemplate.new(
@@ -28,7 +27,7 @@ class Appointment < ApplicationRecord
       to: [
         { email: 'gagnaire.flo@gmail.com' }
       ],
-      template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6",
+      template_uuid: template_uuid,
       template_variables: {
         firstname: self.user.firstname,
         lastname: self.user.lastname,

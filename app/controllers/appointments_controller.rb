@@ -31,6 +31,7 @@ class AppointmentsController < ApplicationController
       if @appointment.update(appointment_params)
         render json: { message: "Appointment updated." }
         @appointment.mailer_update(@old_start_date, @old_end_date, @appointment.start_date, @appointment.end_date, "433f7b20-99e4-42e2-a502-21a37867cdf6")
+        @appointment.mailer_update(@old_start_date, @old_end_date, @appointment.start_date, @appointment.end_date, "abaea168-a2fd-4d7c-8530-5637149234a1")
       else
         render json: { errors: @appointment.errors.messages }
       end
