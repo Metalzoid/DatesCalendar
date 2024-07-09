@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_06_195947) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_09_084049) do
+  create_table "appointment_services", force: :cascade do |t|
+    t.integer "appointment_id", null: false
+    t.integer "service_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id"], name: "index_appointment_services_on_appointment_id"
+    t.index ["service_id"], name: "index_appointment_services_on_service_id"
+  end
+
   create_table "appointments", force: :cascade do |t|
     t.datetime "start_date"
     t.datetime "end_date"
@@ -20,6 +29,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_06_195947) do
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.float "price"
     t.index ["user_id"], name: "index_appointments_on_user_id"
   end
 
@@ -29,6 +39,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_06_195947) do
     t.boolean "available"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "services", force: :cascade do |t|
+    t.string "title"
+    t.float "price"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_services_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -58,5 +77,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_06_195947) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "appointment_services", "appointments"
+  add_foreign_key "appointment_services", "services"
   add_foreign_key "appointments", "users"
+  add_foreign_key "services", "users"
 end
