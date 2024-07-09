@@ -6,13 +6,15 @@ class User < ApplicationRecord
          :jwt_authenticatable, :confirmable, :lockable, jwt_revocation_strategy: self
 
   has_many :apointments
+  has_many :services, dependent: :destroy
 
   validates :firstname, presence: true
   validates :lastname, presence: true
   validates :entreprise, presence: true
 
   enum role: {
-    user: 0,
-    admin: 1
+    client: 0,
+    vendor: 1,
+    admin: 2
   }
 end

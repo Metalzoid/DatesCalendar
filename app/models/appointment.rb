@@ -1,11 +1,14 @@
 require 'mailtrap'
 require 'i18n'
+
 class Appointment < ApplicationRecord
   after_save :create_availability
-  after_save :mailer_admin
   after_save :mailer_user
+  after_save :mailer_admin
+  after_save :calculate_total_price
 
   belongs_to :user
+  has_many :appointment_services, dependent: :destroy
 
   validates :start_date, presence: true, comparison: { greater_than: Date.today }
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
@@ -19,99 +22,108 @@ class Appointment < ApplicationRecord
     canceled: 3
   }
 
-  def mailer_update(old_start_date, old_end_date, new_start_date, new_end_date, template_uuid)
+  def mailer_update(params = {})
     I18n.locale = :fr
-    self.admin_comment.nil? ? message = "" : message = self.admin_comment
-    mail = Mailtrap::Mail::FromTemplate.new(
-      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
-      to: [
-        { email: 'gagnaire.flo@gmail.com' }
-      ],
-      template_uuid: template_uuid,
+    send_mail(
+      template_uuid: params[:template_uuid],
       template_variables: {
-        firstname: self.user.firstname,
-        lastname: self.user.lastname,
+        firstname: params[:firstname],
+        lastname: params[:lastname],
         link: "http://localhost/dashboard/#{user_id}",
-        message: message,
-        old_start_date: I18n.l(old_start_date, format: :custom),
-        old_end_date: I18n.l(old_end_date, format: :custom),
-        new_start_date: I18n.l(new_start_date, format: :custom),
-        new_end_date: I18n.l(new_end_date, format: :custom)
-
+        message: params[:admin_comment] || "",
+        old_start_date: I18n.l(params[:old_start_date], format: :custom),
+        old_end_date: I18n.l(params[:old_end_date], format: :custom),
+        new_start_date: I18n.l(params[:new_start_date], format: :custom),
+        new_end_date: I18n.l(params[:new_end_date], format: :custom),
+        user: "#{params[:user_firstname]} #{params[:user_lastname]}"
       }
     )
-    client = Mailtrap::Client.new()
-    client.send(mail)
+  end
+
+  def calculate_total_price
+    total_price = appointment_services.sum { |appointment_service| appointment_service.service.price }
+    update_column(:price, total_price)
   end
 
   private
 
   def mailer_admin
     I18n.locale = :fr
-    case self.status
-      when "hold" then template_uuid = "7532b4fe-6346-41cc-9edb-e5f7ec75fa29"
-      when "accepted" then template_uuid = "d986b954-3dc0-4f18-a3ba-4ea15f5a7778"
-      when "finished" then template_uuid = "bb50996b-7744-4087-8657-345a8f8aa0d9"
-      when "canceled" then template_uuid = "c6585d13-3c1f-44e5-bc76-665db9068772"
-    end
-    mail = Mailtrap::Mail::FromTemplate.new(
-      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
-      to: [
-        { email: 'gagnaire.flo@gmail.com' }
-      ],
+    template_uuid = determine_admin_template_uuid
+    return if template_uuid.nil?
+
+    send_mail(
       template_uuid: template_uuid,
       template_variables: {
         firstname: 'Valou',
         lastname: 'CDB',
-        start_date: I18n.l(self.start_date, format: :custom),
-        end_date: I18n.l(self.end_date, format: :custom),
-        created_at: I18n.l(self.created_at, format: :custom),
-        link: "http://localhost/reservation/#{self.id}",
-        user: "#{self.user.firstname.capitalize} #{self.user.lastname.capitalize}"
+        start_date: I18n.l(start_date, format: :custom),
+        end_date: I18n.l(end_date, format: :custom),
+        created_at: I18n.l(created_at, format: :custom),
+        link: "http://localhost/reservation/#{id}",
+        user: "#{user.firstname.capitalize} #{user.lastname.capitalize}"
       }
     )
-    client = Mailtrap::Client.new()
-    client.send(mail)
   end
 
   def mailer_user
     I18n.locale = :fr
-    self.admin_comment.nil? ? message = "" : message = self.admin_comment
-    if self.status.nil?
-      @template_uuid = "3e4c9e12-c352-491a-a6ee-5f967263b92c"
-      self.update(status: 0)
-    end
-    case self.status
-      when "accepted" then @template_uuid = "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
-      when "finished" then @template_uuid = "363b50b7-0689-4e53-872f-04df9ffb2063"
-      when "canceled" then @template_uuid = "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
-    end
-    if @template_uuid.nil?
-      return
-    end
-    mail = Mailtrap::Mail::FromTemplate.new(
-      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
-      to: [
-        { email: 'gagnaire.flo@gmail.com' }
-      ],
-      template_uuid: @template_uuid,
+    template_uuid = determine_user_template_uuid
+    return if template_uuid.nil?
+
+    send_mail(
+      template_uuid: template_uuid,
       template_variables: {
-        firstname: self.user.firstname,
-        lastname: self.user.lastname,
-        start_date: I18n.l(self.start_date, format: :custom),
-        end_date: I18n.l(self.end_date, format: :custom),
-        created_at: I18n.l(self.created_at, format: :custom),
+        firstname: user.firstname,
+        lastname: user.lastname,
+        start_date: I18n.l(start_date, format: :custom),
+        end_date: I18n.l(end_date, format: :custom),
+        created_at: I18n.l(created_at, format: :custom),
         link: "http://localhost/dashboard/#{user_id}",
-        message: message,
+        message: admin_comment || ""
       }
     )
-    client = Mailtrap::Client.new()
+  end
+
+  def send_mail(template_uuid:, template_variables:)
+    mail = Mailtrap::Mail::FromTemplate.new(
+      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
+      to: [{ email: 'gagnaire.flo@gmail.com' }],
+      template_uuid: template_uuid,
+      template_variables: template_variables
+    )
+    client = Mailtrap::Client.new
     client.send(mail)
   end
 
+  def determine_admin_template_uuid
+    if status.nil?
+      update_column(:status, 0)
+      "7532b4fe-6346-41cc-9edb-e5f7ec75fa29"
+    else
+      case status
+      when "accepted" then "d986b954-3dc0-4f18-a3ba-4ea15f5a7778"
+      when "finished" then "bb50996b-7744-4087-8657-345a8f8aa0d9"
+      when "canceled" then "c6585d13-3c1f-44e5-bc76-665db9068772"
+      else nil
+      end
+    end
+  end
 
+  def determine_user_template_uuid
+    if status.nil?
+      "3e4c9e12-c352-491a-a6ee-5f967263b92c"
+    else
+      case status
+      when "accepted" then "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
+      when "finished" then "363b50b7-0689-4e53-872f-04df9ffb2063"
+      when "canceled" then "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
+      else nil
+      end
+    end
+  end
 
   def create_availability
-    Availability.create!(start_date: self.start_date, end_date: self.end_date, available: false) if self.status == "accepted"
+    Availability.create!(start_date: start_date, end_date: end_date, available: false) if status == "accepted"
   end
 end
