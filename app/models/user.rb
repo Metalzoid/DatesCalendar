@@ -14,7 +14,7 @@ class User < ApplicationRecord
 
   enum role: {
     client: 0,
-    vendor: 1,
-    admin: 2
+    enterprise: 1,
+    vendor: 2
   }
 end

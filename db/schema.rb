@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_09_084049) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_22_115514) do
   create_table "appointment_services", force: :cascade do |t|
     t.integer "appointment_id", null: false
     t.integer "service_id", null: false
@@ -25,12 +25,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_084049) do
     t.datetime "end_date"
     t.text "comment"
     t.integer "status"
-    t.text "admin_comment"
-    t.integer "user_id", null: false
+    t.text "vendor_comment"
+    t.integer "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.float "price"
-    t.index ["user_id"], name: "index_appointments_on_user_id"
+    t.integer "vendor_id", null: false
+    t.index ["client_id"], name: "index_appointments_on_client_id"
+    t.index ["vendor_id"], name: "index_appointments_on_vendor_id"
   end
 
   create_table "availabilities", force: :cascade do |t|
@@ -79,6 +81,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_09_084049) do
 
   add_foreign_key "appointment_services", "appointments"
   add_foreign_key "appointment_services", "services"
-  add_foreign_key "appointments", "users"
+  add_foreign_key "appointments", "users", column: "client_id"
+  add_foreign_key "appointments", "users", column: "vendor_id"
   add_foreign_key "services", "users"
 end

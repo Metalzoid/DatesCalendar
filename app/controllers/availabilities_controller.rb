@@ -11,9 +11,9 @@ class AvailabilitiesController < ApplicationController
     @availability = Availability.new(availability_params)
     if @availability.save
       render json: { message: "Availability created."}
-      if current_user.role == "admin" && @availability.available == false
+      if current_user.role == "vendor" && @availability.available == false
         @availability.mailer({start_date: @availability.start_date, end_date: @availability.end_date, template_uuid: 'eff70055-6107-4bee-9c08-ad829db8dcd4'})
-      elsif current_user.role == "admin" && @availability.available == true
+      elsif current_user.role == "vendor" && @availability.available == true
         @availability.mailer({start_date: @availability.start_date, end_date: @availability.end_date, template_uuid: 'd2f2779b-3b07-4770-85a1-f86a06d8e62b'})
       end
     else
@@ -51,8 +51,8 @@ class AvailabilitiesController < ApplicationController
   end
 
   def authorize_admin!
-    unless current_user.role == "admin"
-      render json: { message: "You need to be Admin to perform this action." }, status: :forbidden
+    unless current_user.role == "vendor"
+      render json: { message: "You need to be Vendor to perform this action." }, status: :forbidden
     end
   end
 end

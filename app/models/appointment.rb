@@ -2,17 +2,14 @@ require 'mailtrap'
 require 'i18n'
 
 class Appointment < ApplicationRecord
-  after_save :create_availability
-  after_save :mailer_user
-  after_save :mailer_admin
-  after_save :calculate_total_price
+  after_commit :after_save_actions
 
-  belongs_to :user
+  belongs_to :client, class_name: 'User'
+  belongs_to :vendor, class_name: 'User'
   has_many :appointment_services, dependent: :destroy
 
   validates :start_date, presence: true, comparison: { greater_than: Date.today }
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
-  validates :user_id, presence: true
   validates :comment, presence: true, length: { maximum: 500 }
 
   enum status: {
@@ -29,23 +26,33 @@ class Appointment < ApplicationRecord
       template_variables: {
         firstname: params[:firstname],
         lastname: params[:lastname],
-        link: "http://localhost/dashboard/#{user_id}",
-        message: params[:admin_comment] || "",
+        link: "http://localhost/dashboard/",
+        message: params[:vendor_comment] || "",
         old_start_date: I18n.l(params[:old_start_date], format: :custom),
         old_end_date: I18n.l(params[:old_end_date], format: :custom),
         new_start_date: I18n.l(params[:new_start_date], format: :custom),
         new_end_date: I18n.l(params[:new_end_date], format: :custom),
-        user: "#{params[:user_firstname]} #{params[:user_lastname]}"
+        client: "#{params[:client_firstname]} #{params[:client_lastname]}"
       }
     )
   end
 
-  def calculate_total_price
+  def update_price
     total_price = appointment_services.sum { |appointment_service| appointment_service.service.price }
     update_column(:price, total_price)
   end
 
+
   private
+
+  def after_save_actions
+    ActiveRecord::Base.transaction do
+      create_availability
+      mailer_user
+      mailer_admin
+    end
+  end
+
 
   def mailer_admin
     I18n.locale = :fr
@@ -55,13 +62,13 @@ class Appointment < ApplicationRecord
     send_mail(
       template_uuid: template_uuid,
       template_variables: {
-        firstname: 'Valou',
-        lastname: 'CDB',
+        firstname: vendor.firstname,
+        lastname: vendor.lastname,
         start_date: I18n.l(start_date, format: :custom),
         end_date: I18n.l(end_date, format: :custom),
         created_at: I18n.l(created_at, format: :custom),
         link: "http://localhost/reservation/#{id}",
-        user: "#{user.firstname.capitalize} #{user.lastname.capitalize}"
+        user: "#{client.firstname.capitalize} #{client.lastname.capitalize}"
       }
     )
   end
@@ -74,13 +81,13 @@ class Appointment < ApplicationRecord
     send_mail(
       template_uuid: template_uuid,
       template_variables: {
-        firstname: user.firstname,
-        lastname: user.lastname,
+        firstname: client.firstname,
+        lastname: client.lastname,
         start_date: I18n.l(start_date, format: :custom),
         end_date: I18n.l(end_date, format: :custom),
         created_at: I18n.l(created_at, format: :custom),
-        link: "http://localhost/dashboard/#{user_id}",
-        message: admin_comment || ""
+        link: "http://localhost/dashboard/",
+        message: vendor_comment || ""
       }
     )
   end
