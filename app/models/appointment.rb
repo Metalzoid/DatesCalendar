@@ -11,6 +11,8 @@ class Appointment < ApplicationRecord
   validates :start_date, presence: true, comparison: { greater_than: Date.today }
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
   validates :comment, presence: true, length: { maximum: 500 }
+  validates :client_id, presence: true
+  validates :vendor_id, presence: true
 
   enum status: {
     hold: 0,
