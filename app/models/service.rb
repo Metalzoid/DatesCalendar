@@ -7,6 +7,7 @@ class Service < ApplicationRecord
 
   validates :title, presence: true
   validates :price, presence: true, numericality: { only_float: true }
+  validates :time, presence: true
 
   private
 
