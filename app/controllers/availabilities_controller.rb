@@ -9,13 +9,9 @@ class AvailabilitiesController < ApplicationController
 
   def create
     @availability = Availability.new(availability_params)
+    @availability.user = current_user
     if @availability.save
-      render json: { message: "Availability created."}
-      if current_user.role == "vendor" && @availability.available == false
-        @availability.mailer({start_date: @availability.start_date, end_date: @availability.end_date, template_uuid: 'eff70055-6107-4bee-9c08-ad829db8dcd4'})
-      elsif current_user.role == "vendor" && @availability.available == true
-        @availability.mailer({start_date: @availability.start_date, end_date: @availability.end_date, template_uuid: 'd2f2779b-3b07-4770-85a1-f86a06d8e62b'})
-      end
+      render json: { message: 'Availability created.' }
     else
       render json: { errors: @availability.errors.messages }
     end

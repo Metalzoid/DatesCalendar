@@ -3,6 +3,7 @@ require 'i18n'
 
 class Appointment < ApplicationRecord
   after_commit :after_save_actions
+  before_update :before_update_test
 
   belongs_to :client, class_name: 'User'
   belongs_to :vendor, class_name: 'User'
@@ -29,7 +30,7 @@ class Appointment < ApplicationRecord
         firstname: params[:firstname],
         lastname: params[:lastname],
         link: "http://localhost/dashboard/",
-        message: params[:vendor_comment] || "",
+        message: params[:vendor_comment] || '',
         old_start_date: I18n.l(params[:old_start_date], format: :custom),
         old_end_date: I18n.l(params[:old_end_date], format: :custom),
         new_start_date: I18n.l(params[:new_start_date], format: :custom),
@@ -44,23 +45,20 @@ class Appointment < ApplicationRecord
     update_column(:price, total_price)
   end
 
-
   private
 
   def after_save_actions
     ActiveRecord::Base.transaction do
       create_availability
-      mailer_user
-      mailer_admin
+      # mailer_user
+      # mailer_admin
     end
   end
-
 
   def mailer_admin
     I18n.locale = :fr
     template_uuid = determine_admin_template_uuid
     return if template_uuid.nil?
-
     send_mail(
       template_uuid: template_uuid,
       template_variables: {
@@ -133,6 +131,6 @@ class Appointment < ApplicationRecord
   end
 
   def create_availability
-    Availability.create!(start_date: start_date, end_date: end_date, available: false) if status == "accepted"
+    Availability.create!(start_date: start_date, end_date: end_date, available: false, user: vendor) if status == 'accepted'
   end
 end

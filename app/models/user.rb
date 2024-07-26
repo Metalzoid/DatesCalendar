@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   has_many :apointments
   has_many :services, dependent: :destroy
+  has_many :availability
 
   validates :firstname, presence: true
   validates :lastname, presence: true

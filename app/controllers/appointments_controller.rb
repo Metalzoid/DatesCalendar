@@ -4,10 +4,7 @@ class AppointmentsController < ApplicationController
   before_action :set_services_list, only: %i[create update]
 
   def index
-    @appointments = Appointment.all
-    if current_user.role == "enterprise"
-      @appointments = @appointments.where(user: current_user)
-    end
+    @appointments = Appointment.where(client_id: current_user.id).or(Appointment.where(vendor_id: current_user.id))
     render json: @appointments
   end
 
@@ -18,30 +15,30 @@ class AppointmentsController < ApplicationController
   def create
     @appointment = Appointment.new(appointment_params)
     @appointment.client = current_user
+    @appointment.vendor = Service.find(@services.first).user
     if @appointment.save
       create_appointment_service_and_price(services: @services)
-      render json: { message: "Appointment created." }
+      render json: { message: 'Appointment created.' }
     else
       render json: { errors: @appointment.errors.messages }
     end
-
   end
 
   def update
     @old_start_date = @appointment.start_date
     @old_end_date = @appointment.end_date
-    if @appointment.status == "hold" && @appointment.client == current_user
+    if @appointment.status == 'hold' && @appointment.client == current_user
       if @appointment.update(appointment_params)
-        render json: { message: "Appointment updated." }
+        render json: { message: 'Appointment updated.' }
         create_appointment_service_and_price(services: @services) unless @services.nil?
         @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6", firstname: @appointment.client.firstname, lastname: @appointment.client.lastname, user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
         @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", firstname: "Valou", lastname: "Capdeboscq", user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
       else
         render json: { errors: @appointment.errors.messages }
       end
-    elsif current_user.role == "vendor"
+    elsif current_user.role == 'vendor'
       if @appointment.update(appointment_params_admin)
-        render json: { message: "Appointment updated." }
+        render json: { message: 'Appointment updated.' }
         create_appointment_service_and_price(services: @services) unless @services.nil?
       else
         render json: { errors: @appointment.errors.messages }
@@ -50,7 +47,6 @@ class AppointmentsController < ApplicationController
       render json: { errors: "You can't modify this appointment, because you're not the creator of this appointment, or the appointment status is not hold." }
     end
   end
-
 
   private
 
@@ -64,9 +60,7 @@ class AppointmentsController < ApplicationController
 
   def set_appointment
     @appointment = Appointment.find_by(id: params[:id])
-    unless @appointment
-      render json: { errors: "Appointment #{params[:id]} could not be found." }, status: :not_found
-    end
+    render json: { errors: "Appointment #{params[:id]} could not be found." }, status: :not_found unless @appointment
   end
 
   def set_services_list

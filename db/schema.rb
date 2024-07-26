@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_24_064016) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_26_135104) do
   create_table "appointment_services", force: :cascade do |t|
     t.integer "appointment_id", null: false
     t.integer "service_id", null: false
@@ -26,14 +26,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_24_064016) do
     t.text "comment"
     t.integer "status"
     t.text "vendor_comment"
-    t.integer "buyer_id", null: false
+    t.integer "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.float "price"
-    t.integer "admin_id", null: false
     t.integer "vendor_id", null: false
-    t.index ["admin_id"], name: "index_appointments_on_admin_id"
-    t.index ["buyer_id"], name: "index_appointments_on_buyer_id"
+    t.index ["client_id"], name: "index_appointments_on_client_id"
     t.index ["vendor_id"], name: "index_appointments_on_vendor_id"
   end
 
@@ -43,6 +41,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_24_064016) do
     t.boolean "available"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_availabilities_on_user_id"
   end
 
   create_table "services", force: :cascade do |t|
@@ -84,8 +84,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_24_064016) do
 
   add_foreign_key "appointment_services", "appointments"
   add_foreign_key "appointment_services", "services"
-  add_foreign_key "appointments", "users", column: "admin_id"
-  add_foreign_key "appointments", "users", column: "buyer_id"
+  add_foreign_key "appointments", "users", column: "client_id"
   add_foreign_key "appointments", "users", column: "vendor_id"
+  add_foreign_key "availabilities", "users"
   add_foreign_key "services", "users"
 end

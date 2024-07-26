@@ -3,6 +3,10 @@ class ServicesController < ApplicationController
   before_action :authorize_admin!, only: %i[create update destroy]
   before_action :set_service, only: %i[update destroy]
 
+  def index
+    render json: Service.all
+  end
+
   def create
     @service = Service.new(service_params)
     @service.user = current_user
@@ -32,7 +36,7 @@ class ServicesController < ApplicationController
   private
 
   def service_params
-    params.require(:service).permit(:title, :price)
+    params.require(:service).permit(:title, :price, :time)
   end
 
   def set_service
