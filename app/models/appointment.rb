@@ -3,7 +3,6 @@ require 'i18n'
 
 class Appointment < ApplicationRecord
   after_commit :after_save_actions
-  before_update :before_update_test
 
   belongs_to :client, class_name: 'User'
   belongs_to :vendor, class_name: 'User'
@@ -14,6 +13,7 @@ class Appointment < ApplicationRecord
   validates :comment, presence: true, length: { maximum: 500 }
   validates :client_id, presence: true
   validates :vendor_id, presence: true
+  validate :check_availability
 
   enum status: {
     hold: 0,
@@ -52,6 +52,16 @@ class Appointment < ApplicationRecord
       create_availability
       # mailer_user
       # mailer_admin
+    end
+  end
+
+  def check_availability
+    availabilities = Availability.where(available: true)
+    overlapping_availability = availabilities.any? do |availability|
+      (start_date >= availability.start_date && end_date <= availability.end_date)
+    end
+    unless overlapping_availability
+      errors.add(:availability, 'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
     end
   end
 

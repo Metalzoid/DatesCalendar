@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_26_135104) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_27_071942) do
   create_table "appointment_services", force: :cascade do |t|
     t.integer "appointment_id", null: false
     t.integer "service_id", null: false
@@ -26,11 +26,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_26_135104) do
     t.text "comment"
     t.integer "status"
     t.text "vendor_comment"
-    t.integer "client_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.float "price"
     t.integer "vendor_id", null: false
+    t.integer "client_id", null: false
     t.index ["client_id"], name: "index_appointments_on_client_id"
     t.index ["vendor_id"], name: "index_appointments_on_vendor_id"
   end
@@ -39,9 +39,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_26_135104) do
     t.datetime "start_date"
     t.datetime "end_date"
     t.boolean "available"
+    t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
     t.index ["user_id"], name: "index_availabilities_on_user_id"
   end
 
@@ -49,9 +49,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_26_135104) do
     t.string "title"
     t.float "price"
     t.integer "user_id", null: false
+    t.integer "time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "time"
     t.index ["user_id"], name: "index_services_on_user_id"
   end
 
