@@ -47,7 +47,7 @@ class ServicesController < ApplicationController
   end
 
   def authorize_admin!
-    unless current_user.role == "vendor"
+    unless current_user.role >= 2
       render json: { message: "You need to be Vendor to perform this action." }, status: :forbidden
     end
   end

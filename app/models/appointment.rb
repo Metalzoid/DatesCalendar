@@ -1,12 +1,10 @@
-require 'mailtrap'
-require 'i18n'
-
 class Appointment < ApplicationRecord
-  after_commit :after_save_actions
+  after_commit :after_commit_actions, unless: :skip_after_commit_actions?
 
   belongs_to :client, class_name: 'User'
   belongs_to :vendor, class_name: 'User'
   has_many :appointment_services, dependent: :destroy
+  has_many :services, through: :appointment_services
 
   validates :start_date, presence: true, comparison: { greater_than: Date.today }
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
@@ -15,107 +13,131 @@ class Appointment < ApplicationRecord
   validates :vendor_id, presence: true
   validate :check_availability
 
-  enum status: {
-    hold: 0,
-    accepted: 1,
-    finished: 2,
-    canceled: 3
-  }
+  enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
 
-  def mailer_update(params = {})
-    I18n.locale = :fr
-    send_mail(
-      template_uuid: params[:template_uuid],
-      template_variables: {
-        firstname: params[:firstname],
-        lastname: params[:lastname],
-        link: "http://localhost/dashboard/",
-        message: params[:vendor_comment] || '',
-        old_start_date: I18n.l(params[:old_start_date], format: :custom),
-        old_end_date: I18n.l(params[:old_end_date], format: :custom),
-        new_start_date: I18n.l(params[:new_start_date], format: :custom),
-        new_end_date: I18n.l(params[:new_end_date], format: :custom),
-        client: "#{params[:client_firstname]} #{params[:client_lastname]}"
-      }
+  def mailer_client(params = {}, from_controller: false)
+    @template_uuid = params[:template_uuid] || determine_client_template_uuid
+    return if @template_uuid.nil?
+
+    MailtrapJob.perform_later(
+      template_uuid: @template_uuid,
+      template_variables: determine_template_vars_client(from_controller, params),
+      to_email: client.email
     )
   end
 
+
+  def mailer_vendor(params = {}, from_controller: false)
+    @template_uuid = params[:template_uuid] || determine_vendor_template_uuid
+        puts "#######{@template_uuid}######"
+    puts "#######{email_sent?}###########"
+    return if @template_uuid.nil? || email_sent?
+    MailtrapJob.perform_later(
+      template_uuid: @template_uuid,
+      template_variables: determine_template_vars_vendor(from_controller, params),
+      to_email: vendor.email
+    )
+    update_email_sent_for_status!(:vendor)
+  end
+
   def update_price
-    total_price = appointment_services.sum { |appointment_service| appointment_service.service.price }
-    update_column(:price, total_price)
+    new_price = services.sum(&:price)
+    update(price: new_price)
   end
 
   private
 
-  def after_save_actions
+  def after_commit_actions
+    return if destroyed?
+
     ActiveRecord::Base.transaction do
-      create_availability
-      # mailer_user
-      # mailer_admin
+      create_availability if status == 'accepted'
+      mailer_client
+      mailer_vendor
     end
   end
 
-  def check_availability
-    availabilities = Availability.where(available: true)
-    overlapping_availability = availabilities.any? do |availability|
-      (start_date >= availability.start_date && end_date <= availability.end_date)
+  def skip_after_commit_actions?
+    destroyed?
+  end
+
+  def email_sent?
+    case status
+    when "hold" then send("email_sent_hold?")
+    when "accepted" then send("email_sent_accepted?")
+    when "finished" then send("email_sent_finished?")
+    when "canceled" then send("email_sent_canceled?")
+    else false
     end
-    unless overlapping_availability
-      errors.add(:availability, 'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
+  end
+
+  def update_email_sent_for_status!(recipient)
+    case status
+    when "hold" then update_column(:email_sent_hold, true)
+    when "accepted" then update_column(:email_sent_accepted, true)
+    when "finished" then update_column(:email_sent_finished, true)
+    when "canceled" then update_column(:email_sent_canceled, true)
     end
   end
 
-  def mailer_admin
-    I18n.locale = :fr
-    template_uuid = determine_admin_template_uuid
-    return if template_uuid.nil?
-    send_mail(
-      template_uuid: template_uuid,
-      template_variables: {
-        firstname: vendor.firstname,
-        lastname: vendor.lastname,
-        start_date: I18n.l(start_date, format: :custom),
-        end_date: I18n.l(end_date, format: :custom),
-        created_at: I18n.l(created_at, format: :custom),
-        link: "http://localhost/reservation/#{id}",
-        user: "#{client.firstname.capitalize} #{client.lastname.capitalize}"
-      }
-    )
+  def determine_template_vars_vendor(from_controller, params)
+    template_vars = {
+      firstname: vendor.firstname,
+      lastname: vendor.lastname,
+      message: vendor_comment || '',
+      comment: comment || '',
+      start_date: transform_date(start_date),
+      end_date: transform_date(end_date),
+      created_at: transform_date(created_at),
+      client: "#{client.firstname.capitalize} #{client.lastname.capitalize}",
+      link: "test.fr/dashboard"
+    }
+    if from_controller && params[:update].present?
+      params[:update].each do |key, value|
+        template_vars[key] = transform_date(value)
+      end
+    end
+    template_vars
   end
 
-  def mailer_user
-    I18n.locale = :fr
-    template_uuid = determine_user_template_uuid
-    return if template_uuid.nil?
-
-    send_mail(
-      template_uuid: template_uuid,
-      template_variables: {
-        firstname: client.firstname,
-        lastname: client.lastname,
-        start_date: I18n.l(start_date, format: :custom),
-        end_date: I18n.l(end_date, format: :custom),
-        created_at: I18n.l(created_at, format: :custom),
-        link: "http://localhost/dashboard/",
-        message: vendor_comment || ""
-      }
-    )
+  def determine_template_vars_client(from_controller, params)
+    template_vars = {
+      firstname: client.firstname,
+      lastname: client.lastname,
+      vendor: "#{vendor.firstname.capitalize} #{vendor.lastname.capitalize}",
+      message: vendor_comment || '',
+      comment: comment || '',
+      start_date: transform_date(start_date),
+      end_date: transform_date(end_date),
+      created_at: transform_date(created_at),
+      link: "test.fr/dashboard"
+    }
+    if from_controller && params[:update].present?
+      params[:update].each do |key, value|
+        template_vars[key] = transform_date(value)
+      end
+    end
+    template_vars
   end
 
-  def send_mail(template_uuid:, template_variables:)
-    mail = Mailtrap::Mail::FromTemplate.new(
-      from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
-      to: [{ email: 'gagnaire.flo@gmail.com' }],
-      template_uuid: template_uuid,
-      template_variables: template_variables
-    )
-    client = Mailtrap::Client.new
-    client.send(mail)
-  end
-
-  def determine_admin_template_uuid
+  #### Determine Mailtrap template UUID for Client email ####
+  def determine_client_template_uuid
     if status.nil?
-      update_column(:status, 0)
+      "3e4c9e12-c352-491a-a6ee-5f967263b92c"
+    else
+      case status
+      when "accepted" then "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
+      when "finished" then "363b50b7-0689-4e53-872f-04df9ffb2063"
+      when "canceled" then "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
+      else nil
+      end
+    end
+  end
+
+  #### Determine Mailtrap template UUID for Vendor email ####
+  def determine_vendor_template_uuid
+    if status.nil?
+      update(status: 0)
       "7532b4fe-6346-41cc-9edb-e5f7ec75fa29"
     else
       case status
@@ -127,16 +149,17 @@ class Appointment < ApplicationRecord
     end
   end
 
-  def determine_user_template_uuid
-    if status.nil?
-      "3e4c9e12-c352-491a-a6ee-5f967263b92c"
-    else
-      case status
-      when "accepted" then "49d126b2-d0a7-45a5-a237-ebc66a1cf503"
-      when "finished" then "363b50b7-0689-4e53-872f-04df9ffb2063"
-      when "canceled" then "0de9b64b-4d35-4a60-b9a9-b3b508d34e60"
-      else nil
-      end
+  def transform_date(date)
+    I18n.l(date, format: :custom)
+  end
+
+  def check_availability
+    availabilities = Availability.where(available: true)
+    overlapping_availability = availabilities.any? do |availability|
+      (start_date >= availability.start_date && end_date <= availability.end_date)
+    end
+    unless overlapping_availability
+      errors.add(:availability, 'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
     end
   end
 

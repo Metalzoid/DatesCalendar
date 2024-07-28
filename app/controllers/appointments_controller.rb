@@ -29,10 +29,11 @@ class AppointmentsController < ApplicationController
     @old_end_date = @appointment.end_date
     if @appointment.status == 'hold' && @appointment.client == current_user
       if @appointment.update(appointment_params)
-        render json: { message: 'Appointment updated.' }
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6", firstname: @appointment.client.firstname, lastname: @appointment.client.lastname, user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
-        @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", firstname: "Valou", lastname: "Capdeboscq", user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
+        @appointment.mailer_admin({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date }, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", from_controller: true })
+        render json: { message: 'Appointment updated.' }
+        # @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6", firstname: @appointment.client.firstname, lastname: @appointment.client.lastname, user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
+        # @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", firstname: "Valou", lastname: "Capdeboscq", user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
       else
         render json: { errors: @appointment.errors.messages }
       end
