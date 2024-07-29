@@ -87,4 +87,23 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  # MAILING WITH MAILTRAP
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    user_name: ENV.fetch('MAILTRAP_USERNAME'),
+    password: ENV.fetch('MAILTRAP_PASSWORD'),
+    address: 'sandbox.smtp.mailtrap.io',
+    host: 'sandbox.smtp.mailtrap.io',
+    port: '2525',
+    authentication: :login
+  }
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+
+  # This also configures session_options for use below
+  config.session_store :cookie_store, key: '_interslice_session'
+  # Required for all session management (regardless of session_store)
+  config.middleware.use ActionDispatch::Cookies
+  config.middleware.use config.session_store, config.session_options
 end

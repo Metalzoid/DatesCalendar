@@ -35,7 +35,6 @@ Rails.application.configure do
 
   # Don't care if the mailer can't send.
 
-
   config.action_mailer.perform_caching = false
 
   # Print deprecation notices to the Rails logger.
@@ -55,7 +54,6 @@ Rails.application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
-
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
@@ -82,11 +80,11 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :user_name => 'acf457618bb0bb',
-    :password => ENV.fetch('MAILTRAP_PASSWORD'),
-    :address => 'sandbox.smtp.mailtrap.io',
-    :host => 'sandbox.smtp.mailtrap.io',
-    :port => '2525',
-    :authentication => :login
+    user_name: ENV.fetch('MAILTRAP_USERNAME'),
+    password: ENV.fetch('MAILTRAP_PASSWORD'),
+    address: 'sandbox.smtp.mailtrap.io',
+    host: 'sandbox.smtp.mailtrap.io',
+    port: '2525',
+    authentication: :login
   }
 end

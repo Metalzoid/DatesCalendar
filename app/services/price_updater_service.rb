@@ -4,8 +4,8 @@ class PriceUpdaterService
   end
 
   def update_appointments
-    @service.appointments.find_each do |appointment|
-      appointment.update_price
-    end
+    return if @service.appointments.empty?
+
+    @service.appointments.find_each(&:update_price)
   end
 end
