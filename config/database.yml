@@ -79,6 +79,7 @@ test:
 #
 production:
   <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
   database: valou_api_production
   username: valou_api
-  password: <%= ENV["valou_api_DATABASE_PASSWORD"] %>
+  password: <%= ENV["VALOU_API_DATABASE_PASSWORD"] %>
