@@ -11,9 +11,12 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.1].define(version: 2024_07_27_071942) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "appointment_services", force: :cascade do |t|
-    t.integer "appointment_id", null: false
-    t.integer "service_id", null: false
+    t.bigint "appointment_id", null: false
+    t.bigint "service_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["appointment_id"], name: "index_appointment_services_on_appointment_id"
@@ -39,7 +42,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_27_071942) do
     t.datetime "start_date"
     t.datetime "end_date"
     t.boolean "available"
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_availabilities_on_user_id"
@@ -48,7 +51,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_27_071942) do
   create_table "services", force: :cascade do |t|
     t.string "title"
     t.float "price"
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.integer "time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
