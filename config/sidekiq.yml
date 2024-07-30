@@ -1,3 +1,4 @@
+:concurrency: 3
 :timeout: 60
 :verbose: true
 :queues:
@@ -7,7 +8,3 @@
   - mailers
   - active_storage_analysis
   - active_storage_purge
-production:
-  :concurrency: 20
-development:
-  :concurrency: 5
