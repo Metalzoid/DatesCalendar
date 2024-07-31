@@ -7,7 +7,10 @@ class AvailabilitiesController < ApplicationController
   # URL = url/availabilities?user={USER_ID}
   def index
     @availabilities = Availability.where(user_id: params[:user])
-    render json: { availabilities: @availabilities }
+    @dates = @availabilities.where(available: true).map do |availability|
+      { from: availability.start_date, to: availability.end_date }
+    end
+    render json: { availabilities: @availabilities, dates: @dates }
   end
 
   def index_vendors
