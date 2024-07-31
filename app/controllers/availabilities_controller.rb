@@ -3,8 +3,11 @@ class AvailabilitiesController < ApplicationController
   before_action :set_availability, only: %i[update destroy]
   before_action :authorize_admin!, only: %i[create update destroy]
 
+  ## Get Availabilities of one vendor
+  # URL = url/availabilities?user={USER_ID}
   def index
-    render json: { list: Availability.all, dates: Availability.availabilities }
+    @availabilities = Availability.where(user_id: params[:user])
+    render json: { availabilities: @availabilities }
   end
 
   def create

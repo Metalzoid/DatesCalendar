@@ -8,7 +8,7 @@ class Availability < ApplicationRecord
 
   attr_accessor :skip_before_create
 
-  def self.availabilities
+  def availabilities
     where(available: true).map do |availability|
       { from: availability.start_date, to: availability.end_date }
     end
