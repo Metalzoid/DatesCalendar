@@ -10,6 +10,10 @@ class AvailabilitiesController < ApplicationController
     render json: { availabilities: @availabilities }
   end
 
+  def index_vendors
+    @vendors = User.where(role: 'vendor')
+    render json: { vendor: @vendors }
+  end
   def create
     @availability = Availability.new(availability_params)
     @availability.user = current_user

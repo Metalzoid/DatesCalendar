@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
   resources :appointments, only: %i[index show create update]
   resources :availabilities, only: %i[index create update destroy]
+  get "/vendors", to: "availabilities#index_vendors"
   resources :services, only: %i[index create update destroy]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
