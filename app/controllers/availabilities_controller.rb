@@ -6,7 +6,8 @@ class AvailabilitiesController < ApiController
   ## Get Availabilities of one vendor
   # URL = url/availabilities?user={USER_ID}
   def index
-    @availabilities = Availability.where(user_id: params[:user])
+    @availabilities = Availability.all
+    @availabilities = @availabilities.where(user_id: params[:user]) if params[:user]
     @dates = @availabilities.where(available: true).map do |availability|
       { from: availability.start_date, to: availability.end_date }
     end
