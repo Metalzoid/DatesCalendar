@@ -1,4 +1,4 @@
-<h1>COUCOU ADMIN</h1>
+<h1>COUCOU <%= current_admin.email %></h1>
 
 <%= link_to "Destroy", destroy_admin_session_path, data: {
                     turbo_method: :delete,
