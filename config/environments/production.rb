@@ -2,6 +2,7 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
+  config.action_controller.action_on_unpermitted_parameters = :raise
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
@@ -106,6 +107,4 @@ Rails.application.configure do
   # Required for all session management (regardless of session_store)
   config.middleware.use ActionDispatch::Cookies
   config.middleware.use config.session_store, config.session_options
-
-  config.active_record.sqlite3_production_warning=false
 end

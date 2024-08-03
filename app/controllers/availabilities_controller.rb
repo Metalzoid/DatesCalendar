@@ -3,27 +3,28 @@ class AvailabilitiesController < ApiController
   before_action :set_availability, only: %i[update destroy]
   before_action :authorize_admin!, only: %i[create update destroy]
 
-  ## Get Availabilities of one vendor
-  # URL = url/availabilities?user={USER_ID}
+  ## Get Availabilities
+  # URL = url/availabilities?user={USER_ID} for custom seller
+  # URL = url/availabilities for all sellers
   def index
     @availabilities = Availability.all
     @availabilities = @availabilities.where(user_id: params[:user]) if params[:user]
     @dates = @availabilities.where(available: true).map do |availability|
       { from: availability.start_date, to: availability.end_date }
     end
-    render json: { availabilities: @availabilities, dates: @dates }
+    render json: { availabilities: @availabilities, dates: @dates }, status: :ok
   end
 
   def index_sellers
     @sellers = User.where(role: 'seller')
-    render json: { sellers: @sellers }
+    render json: { sellers: @sellers }, status: :ok
   end
 
   def create
     @availability = Availability.new(availability_params)
     @availability.user = current_user
     if @availability.save
-      render json: { message: 'Availability created.' }
+      render json: { message: 'Availability created.' }, status: :created
     else
       render json: { errors: @availability.errors.messages }
     end
@@ -31,7 +32,7 @@ class AvailabilitiesController < ApiController
 
   def update
     if @availability.update(availability_params)
-      render json: { message: "Availability updated."}
+      render json: { message: 'Availability updated.' }, status: :ok
     else
       render json: { errors: @availability.errors.messages }
     end
@@ -39,7 +40,7 @@ class AvailabilitiesController < ApiController
 
   def destroy
     if @availability.destroy
-      render json: { message: "Availability destroyed."}
+      render json: { message: 'Availability destroyed.' }, status: :ok
     else
       render json: { errors: @availability.errors.messages }
     end

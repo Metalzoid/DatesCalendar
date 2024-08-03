@@ -1,6 +1,13 @@
 # Controller for API USE RENDER JSON ##
 class ApiController < ActionController::API
   before_action :configure_permitted_parameters, if: :devise_controller?
+  rescue_from ActionController::UnpermittedParameters, with: :handle_errors
+
+  private
+
+  def handle_errors
+    render json: { "Unpermitted Parameters": params.to_unsafe_h.except(:controller, :action, :id).keys }, status: :unprocessable_entity
+  end
 
   protected
 
