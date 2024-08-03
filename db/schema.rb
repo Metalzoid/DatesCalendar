@@ -14,32 +14,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "active_admin_comments", force: :cascade do |t|
-    t.string "namespace"
-    t.text "body"
-    t.string "resource_type"
-    t.bigint "resource_id"
-    t.string "author_type"
-    t.bigint "author_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
-    t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
-    t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
-  end
-
-  create_table "admin_users", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_admin_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
-  end
-
   create_table "admins", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -66,14 +40,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
     t.datetime "end_date"
     t.text "comment"
     t.integer "status"
-    t.text "vendor_comment"
+    t.text "seller_comment"
+    t.float "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.float "price"
-    t.integer "vendor_id", null: false
-    t.integer "client_id", null: false
-    t.index ["client_id"], name: "index_appointments_on_client_id"
-    t.index ["vendor_id"], name: "index_appointments_on_vendor_id"
+    t.integer "seller_id", null: false
+    t.integer "customer_id", null: false
+    t.index ["customer_id"], name: "index_appointments_on_customer_id"
+    t.index ["seller_id"], name: "index_appointments_on_seller_id"
   end
 
   create_table "availabilities", force: :cascade do |t|
@@ -112,7 +86,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "jti", null: false
-    t.string "entreprise"
+    t.string "company"
     t.string "firstname"
     t.string "lastname"
     t.integer "role", default: 0
@@ -125,8 +99,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
 
   add_foreign_key "appointment_services", "appointments"
   add_foreign_key "appointment_services", "services"
-  add_foreign_key "appointments", "users", column: "client_id"
-  add_foreign_key "appointments", "users", column: "vendor_id"
+  add_foreign_key "appointments", "users", column: "customer_id"
+  add_foreign_key "appointments", "users", column: "seller_id"
   add_foreign_key "availabilities", "users"
   add_foreign_key "services", "users"
 end

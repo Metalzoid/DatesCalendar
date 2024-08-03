@@ -44,9 +44,8 @@ module ValouApi
     config.middleware.use config.session_store, config.session_options
     config.middleware.use ActionDispatch::Flash
 
-
     config.active_job.queue_adapter = :sidekiq
-    config.api_only = false
+    config.api_only = true
     config.time_zone = "Europe/Paris"
     config.active_record.default_timezone = :local
 

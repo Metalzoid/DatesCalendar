@@ -1,0 +1,33 @@
+class ConfirmationsController < Devise::ConfirmationsController
+  # respond_to :json
+
+  # private
+
+  # def render_resource(resource)
+  #   render json: resource
+  # end
+
+  # def render_resource_or_errors(resource, status)
+  #   if resource.errors.empty?
+  #     render json: resource, status: status
+  #   else
+  #     render json: { errors: resource.errors.full_messages }, status: :unprocessable_entity
+  #   end
+  # end
+  #
+  #
+  def show
+    self.resource = resource_class.confirm_by_token(params[:confirmation_token])
+    if resource.errors.empty?
+      set_flash_message(:notice, :confirmed) if is_navigational_format?
+      sign_in(resource_name, resource)
+      respond_with_navigational(resource) { redirect_to confirmation_success_path }
+    else
+      respond_with_navigational(resource.errors, status: :unprocessable_entity) { render_with_scope :new }
+    end
+  end
+
+  def success
+    raise
+  end
+end

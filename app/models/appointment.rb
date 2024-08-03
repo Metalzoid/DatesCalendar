@@ -1,39 +1,39 @@
 class Appointment < ApplicationRecord
   after_commit :after_commit_actions, unless: :skip_after_commit_actions?
 
-  belongs_to :client, class_name: 'User'
-  belongs_to :vendor, class_name: 'User'
+  belongs_to :customer, class_name: 'User'
+  belongs_to :seller, class_name: 'User'
   has_many :appointment_services, dependent: :destroy
   has_many :services, through: :appointment_services
 
   validates :start_date, presence: true, comparison: { greater_than: Time.now }
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
   validates :comment, presence: true, length: { maximum: 500 }
-  validates :client_id, presence: true
-  validates :vendor_id, presence: true
+  validates :customer_id, presence: true
+  validates :seller_id, presence: true
   validate :check_availability
 
   enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
 
-  def mailer_client(params = {}, from_controller: false)
-    @template_uuid = params[:template_uuid] || determine_client_template_uuid
+  def mailer_customer(params = {}, from_controller: false)
+    @template_uuid = params[:template_uuid] || determine_customer_template_uuid
     return if @template_uuid.nil?
 
     MailtrapJob.perform_later(
       template_uuid: @template_uuid,
-      template_variables: determine_template_vars_client(from_controller, params),
-      to_email: client.email
+      template_variables: determine_template_vars_customer(from_controller, params),
+      to_email: customer.email
     )
   end
 
-  def mailer_vendor(params = {}, from_controller: false)
-    @template_uuid = params[:template_uuid] || determine_vendor_template_uuid
+  def mailer_seller(params = {}, from_controller: false)
+    @template_uuid = params[:template_uuid] || determine_seller_template_uuid
     return if @template_uuid.nil?
 
     MailtrapJob.perform_later(
       template_uuid: @template_uuid,
-      template_variables: determine_template_vars_vendor(from_controller, params),
-      to_email: vendor.email
+      template_variables: determine_template_vars_seller(from_controller, params),
+      to_email: seller.email
     )
   end
 
@@ -49,8 +49,8 @@ class Appointment < ApplicationRecord
 
     ActiveRecord::Base.transaction do
       create_availability if status == 'accepted'
-      mailer_client
-      mailer_vendor
+      mailer_customer
+      mailer_seller
       update(status: 0) if status.nil?
     end
   end
@@ -59,16 +59,16 @@ class Appointment < ApplicationRecord
     saved_change_to_price? || destroyed?
   end
 
-  def determine_template_vars_vendor(from_controller, params)
-    @template_vars_vendor = {
-      firstname: vendor.firstname,
-      lastname: vendor.lastname,
-      message: vendor_comment || '',
+  def determine_template_vars_seller(from_controller, params)
+    @template_vars_seller = {
+      firstname: seller.firstname,
+      lastname: seller.lastname,
+      message: seller_comment || '',
       comment: comment || '',
       start_date: transform_date(start_date),
       end_date: transform_date(end_date),
       created_at: transform_date(created_at),
-      client: "#{client.firstname.capitalize} #{client.lastname.capitalize}",
+      customer: "#{customer.firstname.capitalize} #{customer.lastname.capitalize}",
       link: 'test.fr/dashboard'
     }
     if from_controller && params[:update].present?
@@ -76,15 +76,15 @@ class Appointment < ApplicationRecord
         template_vars[key] = transform_date(value)
       end
     end
-    @template_vars_vendor
+    @template_vars_seller
   end
 
-  def determine_template_vars_client(from_controller, params)
-    @template_vars_client = {
-      firstname: client.firstname,
-      lastname: client.lastname,
-      vendor: "#{vendor.firstname.capitalize} #{vendor.lastname.capitalize}",
-      message: vendor_comment || '',
+  def determine_template_vars_customer(from_controller, params)
+    @template_vars_customer = {
+      firstname: customer.firstname,
+      lastname: customer.lastname,
+      seller: "#{seller.firstname.capitalize} #{seller.lastname.capitalize}",
+      message: seller_comment || '',
       comment: comment || '',
       start_date: transform_date(start_date),
       end_date: transform_date(end_date),
@@ -96,11 +96,11 @@ class Appointment < ApplicationRecord
         template_vars[key] = transform_date(value)
       end
     end
-    @template_vars_client
+    @template_vars_customer
   end
 
-  #### Determine Mailtrap template UUID for Client email ####
-  def determine_client_template_uuid
+  #### Determine Mailtrap template UUID for customer email ####
+  def determine_customer_template_uuid
     if status.nil?
       '3e4c9e12-c352-491a-a6ee-5f967263b92c'
     else
@@ -113,8 +113,8 @@ class Appointment < ApplicationRecord
     end
   end
 
-  #### Determine Mailtrap template UUID for Vendor email ####
-  def determine_vendor_template_uuid
+  #### Determine Mailtrap template UUID for seller email ####
+  def determine_seller_template_uuid
     if status.nil?
       '7532b4fe-6346-41cc-9edb-e5f7ec75fa29'
     else
@@ -144,6 +144,6 @@ class Appointment < ApplicationRecord
   end
 
   def create_availability
-    Availability.create!(start_date: start_date, end_date: end_date, available: false, user: vendor) if status == 'accepted'
+    Availability.create!(start_date: start_date, end_date: end_date, available: false, user: seller) if status == 'accepted'
   end
 end

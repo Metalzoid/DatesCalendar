@@ -1,6 +1,6 @@
-class ServicesController < ApplicationController
+class ServicesController < ApiController
   before_action :authenticate_user!
-  before_action :authorize_admin!, only: %i[create update destroy]
+  before_action :authorization!, only: %i[create update destroy]
   before_action :set_service, only: %i[update destroy]
 
   def index
@@ -11,7 +11,7 @@ class ServicesController < ApplicationController
     @service = Service.new(service_params)
     @service.user = current_user
     if @service.save
-      render json: { message: "Service created." }
+      render json: { message: 'Service created.' }, status: :created
     else
       render json: { errors: @service.errors.messages }
     end
@@ -19,7 +19,7 @@ class ServicesController < ApplicationController
 
   def update
     if @service.update(service_params)
-      render json: { message: "Service updated." }
+      render json: { message: 'Service updated.' }, status: :ok
     else
       render json: { errors: @service.errors.message }
     end
@@ -27,7 +27,7 @@ class ServicesController < ApplicationController
 
   def destroy
     if @service.destroy
-      render json: { message: "Service #{@service.id} has been deleted"}
+      render json: { message: "Service #{@service.id} has been deleted" }, status: :ok
     else
       render json: { errors: @service.errors.messages }
     end
@@ -41,16 +41,12 @@ class ServicesController < ApplicationController
 
   def set_service
     @service = Service.find_by(id: params[:id])
-    unless @service
-      render json: { message: "Service #{params[:id]} could not be found." }, status: :not_found
-    end
+    render json: { message: "Service #{params[:id]} could not be found." }, status: :not_found unless @service
   end
 
-  def authorize_admin!
-    return if current_user.role == "admin" || current_user.role == "vendor"
+  def authorization!
+    return if !current_admin.nil? || current_user.role == 'seller'
 
-    render json: { message: "You need to be Vendor to perform this action." }, status: :forbidden
-
+    render json: { message: 'You need to be Vendor or Admin to perform this action.' }, status: :forbidden
   end
-
 end

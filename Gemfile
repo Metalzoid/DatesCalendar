@@ -39,6 +39,8 @@ gem 'devise'
 
 gem 'devise-jwt'
 
+gem 'devise-i18n'
+
 gem 'turbo-rails'
 
 gem "importmap-rails"

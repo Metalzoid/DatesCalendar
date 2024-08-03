@@ -5,7 +5,7 @@ class MailtrapJob < ApplicationJob
     I18n.locale = :fr
     template_uuid = params[:template_uuid]
     return if template_uuid.nil?
-    
+
     mail = build_mail(params, template_uuid)
     send_mail(mail)
   end

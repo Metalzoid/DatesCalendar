@@ -1,26 +1,32 @@
 Rails.application.routes.draw do
   require 'sidekiq/web'
 
+  root 'admin#index'
+
   devise_for :users,
-    path: '',
-    path_names: {
-      sign_in: 'login',
-      sign_out: 'logout',
-      registration: 'signup'
-    },
-    controllers: {
-      sessions: 'users/sessions',
-      registrations: 'users/registrations',
-      confirmations: 'confirmations'
-    },
-    defaults: {
-      format: :json
-    }
+  path: '',
+  path_names: {
+    sign_in: 'login',
+    sign_out: 'logout',
+    registration: 'signup'
+  },
+  controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  },
+  defaults: {
+    format: :json
+  }
+
+  devise_scope :user do
+    resources :confirmations, controller: 'users/confirmations', only: [:show, :new, :create], defaults: { format: :html }
+    get 'confirmation_success', to: 'users/confirmations#success', as: :confirmation_success
+  end
 
   defaults format: :json do
     resources :appointments, only: %i[index show create update]
     resources :availabilities, only: %i[index create update destroy]
-    get '/vendors', to: 'availabilities#index_vendors'
+    get '/sellers', to: 'availabilities#index_sellers'
     resources :services, only: %i[index create update destroy]
   end
 

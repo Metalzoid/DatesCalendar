@@ -1,4 +1,4 @@
-class AvailabilitiesController < ApplicationController
+class AvailabilitiesController < ApiController
   before_action :authenticate_user!
   before_action :set_availability, only: %i[update destroy]
   before_action :authorize_admin!, only: %i[create update destroy]
@@ -13,10 +13,11 @@ class AvailabilitiesController < ApplicationController
     render json: { availabilities: @availabilities, dates: @dates }
   end
 
-  def index_vendors
-    @vendors = User.where(role: 'vendor')
-    render json: { vendors: @vendors }
+  def index_sellers
+    @sellers = User.where(role: 'seller')
+    render json: { sellers: @sellers }
   end
+
   def create
     @availability = Availability.new(availability_params)
     @availability.user = current_user
@@ -57,7 +58,7 @@ class AvailabilitiesController < ApplicationController
   end
 
   def authorize_admin!
-    return if current_user.role == 'admin' || current_user.role == 'vendor'
+    return if !current_admin.nil? || current_user.role == 'seller'
 
     render json: { message: "You need to be Vendor to perform this action." }, status: :forbidden
   end

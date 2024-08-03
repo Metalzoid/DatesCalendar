@@ -11,17 +11,11 @@ class User < ApplicationRecord
 
   validates :firstname, presence: true
   validates :lastname, presence: true
-  validates :entreprise, presence: true
+  validates :company, presence: true
 
   enum role: {
-    client: 0,
+    customer: 0,
     enterprise: 1,
-    vendor: 2,
-    admin: 3
+    seller: 2
   }
-
-  def admin?
-    return true if role == 'admin'
-    false
-  end
 end

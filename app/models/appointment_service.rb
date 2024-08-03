@@ -7,6 +7,6 @@ class AppointmentService < ApplicationRecord
   private
 
   def update_price
-    Appointment.all.each { |appointment| appointment.update_price }
+    Appointment.all.each(&:update_price)
   end
 end

@@ -1,10 +1,10 @@
-class AppointmentsController < ApplicationController
+class AppointmentsController < ApiController
   before_action :authenticate_user!
   before_action :set_appointment, only: %i[show update]
   before_action :set_services_list, only: %i[create update]
 
   def index
-    @appointments = Appointment.where(client_id: current_user.id).or(Appointment.where(vendor_id: current_user.id))
+    @appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
     render json: @appointments
   end
 
@@ -14,8 +14,8 @@ class AppointmentsController < ApplicationController
 
   def create
     @appointment = Appointment.new(appointment_params)
-    @appointment.client = current_user
-    @appointment.vendor = Service.find(@services.first).user
+    @appointment.customer = current_user
+    @appointment.seller = Service.find(@services.first).user
     if @appointment.save
       create_appointment_service_and_price(services: @services)
       render json: { message: 'Appointment created.' }
@@ -27,18 +27,16 @@ class AppointmentsController < ApplicationController
   def update
     @old_start_date = @appointment.start_date
     @old_end_date = @appointment.end_date
-    if @appointment.status == 'hold' && @appointment.client == current_user
+    if @appointment.status == 'hold' && @appointment.customer == current_user
       if @appointment.update(appointment_params)
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        @appointment.mailer_admin({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date }, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", from_controller: true })
+        @appointment.mailer_seller({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date }, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", from_controller: true })
         render json: { message: 'Appointment updated.' }
-        # @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "433f7b20-99e4-42e2-a502-21a37867cdf6", firstname: @appointment.client.firstname, lastname: @appointment.client.lastname, user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
-        # @appointment.mailer_update(old_start_date: @old_start_date, old_end_date: @old_end_date, new_start_date: @appointment.start_date, new_end_date: @appointment.end_date, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", firstname: "Valou", lastname: "Capdeboscq", user_firstname: @appointment.client.firstname, user_lastname: @appointment.client.lastname)
       else
         render json: { errors: @appointment.errors.messages }
       end
-    elsif current_user.role == 'vendor'
-      if @appointment.update(appointment_params_admin)
+    elsif current_user.role == 'seller'
+      if @appointment.update(appointment_params_seller)
         render json: { message: 'Appointment updated.' }
         create_appointment_service_and_price(services: @services) unless @services.nil?
       else
@@ -52,11 +50,11 @@ class AppointmentsController < ApplicationController
   private
 
   def appointment_params
-    params.require(:appointment).permit(:start_date, :end_date, :comment, :status, :vendor_id)
+    params.require(:appointment).permit(:start_date, :end_date, :comment, :status, :seller_id)
   end
 
-  def appointment_params_admin
-    params.require(:appointment).permit(:status, :vendor_comment)
+  def appointment_params_seller
+    params.require(:appointment).permit(:status, :seller_comment)
   end
 
   def set_appointment
