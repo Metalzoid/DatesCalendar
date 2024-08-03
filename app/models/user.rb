@@ -19,4 +19,9 @@ class User < ApplicationRecord
     vendor: 2,
     admin: 3
   }
+
+  def admin?
+    return true if role == 'admin'
+    false
+  end
 end

@@ -1,4 +1,5 @@
-class ApplicationController < ActionController::Base
+# Controller for API USE RENDER JSON ##
+class ApiController < ApplicationController::API
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   protected

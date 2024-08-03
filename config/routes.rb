@@ -17,10 +17,19 @@ Rails.application.routes.draw do
       format: :json
     }
 
-  resources :appointments, only: %i[index show create update]
-  resources :availabilities, only: %i[index create update destroy]
-  get "/vendors", to: "availabilities#index_vendors"
-  resources :services, only: %i[index create update destroy]
+  defaults format: :json do
+    resources :appointments, only: %i[index show create update]
+    resources :availabilities, only: %i[index create update destroy]
+    get '/vendors', to: 'availabilities#index_vendors'
+    resources :services, only: %i[index create update destroy]
+  end
+
+  devise_for :admins, path: 'admin', controllers: {
+    sessions: 'admins/sessions'
+  }
+
+  resources :admin, only: %i[index]
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
