@@ -43,6 +43,7 @@ module ValouApi
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use config.session_store, config.session_options
     config.middleware.use ActionDispatch::Flash
+    config.middleware.use ::Rack::MethodOverride
 
     config.active_job.queue_adapter = :sidekiq
     config.api_only = false

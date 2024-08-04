@@ -59,6 +59,10 @@ Rails.application.configure do
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 
+  # Suppress logger output for asset requests.
+  config.assets.debug = true
+  config.assets.quiet = true
+
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
 

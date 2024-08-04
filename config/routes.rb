@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
-  require 'sidekiq/web'
+  mount Avo::Engine, at: Avo.configuration.root_path
 
-  root 'admin#index'
+  require 'sidekiq/web'
+  
+  root 'adminsession#avo'
 
   devise_for :users,
   path: '',
@@ -32,9 +34,9 @@ Rails.application.routes.draw do
 
   devise_for :admins, path: 'admin', controllers: {
     sessions: 'admins/sessions'
-  }
+  }, skip: :registration
 
-  resources :admin, only: %i[index]
+  # resources :admin, only: %i[index]
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -5,7 +5,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :validatable,
          :jwt_authenticatable, :confirmable, :lockable, jwt_revocation_strategy: self
 
-  has_many :apointments
+  has_many :appointments
   has_many :services, dependent: :destroy
   has_many :availability
 
@@ -15,7 +15,10 @@ class User < ApplicationRecord
 
   enum role: {
     customer: 0,
-    enterprise: 1,
-    seller: 2
+    seller: 1
   }
+
+  def appointments
+    role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
+  end
 end
