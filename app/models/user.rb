@@ -5,7 +5,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :validatable,
          :jwt_authenticatable, :confirmable, :lockable, jwt_revocation_strategy: self
 
-  has_many :appointments, dependent: :destroy
+  has_many :customer_appointments, class_name: 'Appointment', foreign_key: 'customer_id', dependent: :destroy
+  has_many :seller_appointments, class_name: 'Appointment', foreign_key: 'seller_id', dependent: :destroy
   has_many :services, dependent: :destroy
   has_many :availability, dependent: :destroy
 
