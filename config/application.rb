@@ -20,6 +20,8 @@ Bundler.require(*Rails.groups)
 
 module ValouApi
   class Application < Rails::Application
+    # Using Mailtrap.
+    config.useMailtrap = true
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 
@@ -52,5 +54,8 @@ module ValouApi
 
     config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
     config.i18n.default_locale = :fr
+
+
+
   end
 end

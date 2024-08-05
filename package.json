@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "@hotwired/turbo-rails": "^8.0.5"
+    "@hotwired/turbo-rails": "^8.0.5",
+    "redis": "^4.7.0",
+    "redis-server": "^1.2.2"
   }
 }

@@ -21,4 +21,8 @@ class User < ApplicationRecord
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
   end
+
+  def send_devise_notification(notification, *args)
+    devise_mailer.send(notification, self, *args).deliver_later
+  end
 end

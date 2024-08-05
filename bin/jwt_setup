@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+require 'rails/all'
+
+# Path to your application root.
+APP_ROOT = File.expand_path('..', __dir__)
+
+FileUtils.chdir APP_ROOT do
+  env_vars = {
+    'DEVISE_JWT_SECRET_KEY' => `bin/rails secret`.strip
+  }
+
+  def update_env_file(env_vars)
+    env_file_path = './.env'
+    lines = File.exist?(env_file_path) ? File.readlines(env_file_path) : []
+
+    # Remove existing DEVISE_JWT_SECRET_KEY lines
+    lines.reject! { |line| line.start_with?('DEVISE_JWT_SECRET_KEY=') }
+
+    # Add the new DEVISE_JWT_SECRET_KEY line
+    env_vars.each { |key, value| lines << "#{key}=#{value}\n" }
+
+    # Write back the lines to the .env file
+    File.open(env_file_path, 'w') { |file| file.puts(lines) }
+  end
+
+  if Rails.env.development?
+    update_env_file(env_vars)
+  else
+    puts "\n== Deployed on Heroku? (y/n) =="
+    answer = gets.chomp.upcase
+    if answer == 'Y'
+      env_vars.each_key { |key| system("heroku config:unset #{key}") }
+      env_vars.each { |key, value| system("heroku config:set #{key}=#{value}") }
+    end
+  end
+
+  puts "\n== JWT secret defined =="
+end

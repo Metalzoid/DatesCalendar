@@ -76,20 +76,25 @@ Rails.application.configure do
 
   config.action_mailer.raise_delivery_errors = true
 
+  # config.action_mailer.delivery_method = :postmark
+  # config.action_mailer.postmark_settings = { api_token: ENV.fetch('POSTMARK_API_KEY') }
+
   # config.action_mailer.delivery_method = :mailtrap
   # config.action_mailer.mailtrap_settings = {
   #   api_key: ENV.fetch('MAILTRAP_API_KEY'),
   #   api_host: 'sandbox.api.mailtrap.io',
   #   enable_starttls_auto: true
   # }
+  if ENV.fetch('USE_MAILTRAP') == 'true'
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      user_name: 'api',
+      password: ENV.fetch('MAILTRAP_PASSWORD'),
+      address: 'live.smtp.mailtrap.io',
+      host: 'live.smtp.mailtrap.io',
+      port: '587',
+      authentication: :login
+    }
+  end
 
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    user_name: ENV.fetch('MAILTRAP_USERNAME'),
-    password: ENV.fetch('MAILTRAP_PASSWORD'),
-    address: 'sandbox.smtp.mailtrap.io',
-    host: 'sandbox.smtp.mailtrap.io',
-    port: '2525',
-    authentication: :login
-  }
 end

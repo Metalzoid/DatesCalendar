@@ -49,8 +49,10 @@ class Appointment < ApplicationRecord
 
     ActiveRecord::Base.transaction do
       create_availability if status == 'accepted'
-      mailer_customer
-      mailer_seller
+      if ENV.fetch('USE_MAILTRAP') == 'true'
+        mailer_customer
+        mailer_seller
+      end
       update(status: 0) if status.nil?
     end
   end

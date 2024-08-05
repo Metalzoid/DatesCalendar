@@ -30,7 +30,12 @@ class AppointmentsController < ApiController
     if @appointment.status == 'hold' && @appointment.customer == current_user
       if @appointment.update(appointment_params)
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        @appointment.mailer_seller({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date }, template_uuid: "abaea168-a2fd-4d7c-8530-5637149234a1", from_controller: true })
+        if ENV.fetch('USE_MAILTRAP') == 'true'
+          @appointment.mailer_seller({ update: { old_start_date: @old_start_date,
+                                                 old_end_date: @old_end_date },
+                                       template_uuid: 'abaea168-a2fd-4d7c-8530-5637149234a1',
+                                       from_controller: true })
+        end
         render json: { message: 'Appointment updated.' }
       else
         render json: { errors: @appointment.errors.messages }
