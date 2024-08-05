@@ -89,7 +89,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
     t.string "company"
     t.string "firstname"
     t.string "lastname"
-    t.integer "role", default: 0
+    t.integer "role"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true

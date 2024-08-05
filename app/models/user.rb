@@ -10,14 +10,16 @@ class User < ApplicationRecord
   has_many :services, dependent: :destroy
   has_many :availability, dependent: :destroy
 
-  validates :firstname, presence: true
-  validates :lastname, presence: true
-  validates :company, presence: true
-
   enum role: {
     customer: 0,
     seller: 1
   }
+
+  validates :firstname, presence: true
+  validates :lastname, presence: true
+  validates :company, presence: true
+  validates :role, presence: true, inclusion: { in: roles.keys }
+
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
