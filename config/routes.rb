@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   mount Avo::Engine, at: Avo.configuration.root_path
 
   require 'sidekiq/web'
-  
+
   root 'adminsession#avo'
 
   devise_for :users,
@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     resources :services, only: %i[index create update destroy]
   end
 
-  devise_for :admins, path: 'admin', controllers: {
+  devise_for :admins, path: '', controllers: {
     sessions: 'admins/sessions'
   }, skip: :registration
 
