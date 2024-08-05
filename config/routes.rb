@@ -6,37 +6,39 @@ Rails.application.routes.draw do
   root 'adminsession#avo'
 
   devise_for :users,
-  path: '',
-  path_names: {
-    sign_in: 'login',
-    sign_out: 'logout',
-    registration: 'signup'
-  },
-  controllers: {
-    sessions: 'users/sessions',
-    registrations: 'users/registrations'
-  },
-  defaults: {
-    format: :json
-  }
+    path: 'api/v1/',
+    path_names: {
+      sign_in: 'login',
+      sign_out: 'logout',
+      registration: 'signup'
+    },
+    controllers: {
+      sessions: 'users/sessions',
+      registrations: 'users/registrations',
+      confirmations: 'users/confirmations'
+    },
+    defaults: {
+      format: :json
+    }
 
   devise_scope :user do
-    resources :confirmations, controller: 'users/confirmations', only: [:show, :new, :create], defaults: { format: :html }
-    get 'confirmation_success', to: 'users/confirmations#success', as: :confirmation_success
+    get 'api/v1/confirmation_success', to: 'users/confirmations#success', as: :confirmation_success
   end
 
-  defaults format: :json do
-    resources :appointments, only: %i[index show create update]
-    resources :availabilities, only: %i[index create update destroy]
-    get '/sellers', to: 'availabilities#index_sellers'
-    resources :services, only: %i[index create update destroy]
+  namespace :api do
+    namespace :v1 do
+      defaults format: :json do
+        resources :appointments, only: %i[index show create update]
+        resources :availabilities, only: %i[index create update destroy]
+        get '/sellers', to: 'availabilities#index_sellers'
+        resources :services, only: %i[index create update destroy]
+      end
+    end
   end
 
-  devise_for :admins, path: '', controllers: {
+  devise_for :admins, path: 'api/v1/', controllers: {
     sessions: 'admins/sessions'
   }, skip: :registration
-
-  # resources :admin, only: %i[index]
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

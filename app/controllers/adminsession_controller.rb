@@ -1,7 +1,8 @@
 class AdminsessionController < ApplicationController
   before_action :authenticate_admin!
+
   def avo
-    redirect_to "/avo"
+    redirect_to '/avo'
   end
 
   private
