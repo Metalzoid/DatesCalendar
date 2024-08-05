@@ -44,7 +44,7 @@ FileUtils.chdir APP_ROOT do
   answer2 = gets.chomp.upcase
   if answer2 == 'Y'
     puts "\n== Preparing database =="
-    system! 'heroku run rails db:prepare'
+    system! 'heroku run rails db:migrate'
   end
 
   puts "\n== Removing old logs and tempfiles =="
