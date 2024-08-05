@@ -76,15 +76,6 @@ Rails.application.configure do
 
   config.action_mailer.raise_delivery_errors = true
 
-  # config.action_mailer.delivery_method = :postmark
-  # config.action_mailer.postmark_settings = { api_token: ENV.fetch('POSTMARK_API_KEY') }
-
-  # config.action_mailer.delivery_method = :mailtrap
-  # config.action_mailer.mailtrap_settings = {
-  #   api_key: ENV.fetch('MAILTRAP_API_KEY'),
-  #   api_host: 'sandbox.api.mailtrap.io',
-  #   enable_starttls_auto: true
-  # }
   if ENV.fetch('USE_MAILTRAP') == 'true'
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {

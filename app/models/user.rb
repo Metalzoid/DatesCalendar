@@ -5,9 +5,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :recoverable, :validatable,
          :jwt_authenticatable, :confirmable, :lockable, jwt_revocation_strategy: self
 
-  has_many :appointments
+  has_many :appointments, dependent: :destroy
   has_many :services, dependent: :destroy
-  has_many :availability
+  has_many :availability, dependent: :destroy
 
   validates :firstname, presence: true
   validates :lastname, presence: true

@@ -2,6 +2,8 @@ class MailtrapJob < ApplicationJob
   queue_as :default
 
   def perform(params = {})
+    return if ENV.fetch('USE_MAILTRAP') == 'false'
+
     I18n.locale = :fr
     template_uuid = params[:template_uuid]
     return if template_uuid.nil?
