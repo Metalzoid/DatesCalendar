@@ -90,15 +90,17 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   # MAILING WITH MAILTRAP
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    user_name: ENV.fetch('MAILTRAP_USERNAME'),
-    password: ENV.fetch('MAILTRAP_PASSWORD'),
-    address: 'sandbox.smtp.mailtrap.io',
-    host: 'sandbox.smtp.mailtrap.io',
-    port: '2525',
-    authentication: :login
-  }
+  if ENV.fetch('USE_MAILTRAP') == 'true'
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      user_name: ENV.fetch('MAILTRAP_USERNAME'),
+      password: ENV.fetch('MAILTRAP_PASSWORD'),
+      address: 'sandbox.smtp.mailtrap.io',
+      host: 'sandbox.smtp.mailtrap.io',
+      port: '2525',
+      authentication: :login
+    }
+  end
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
 

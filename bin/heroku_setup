@@ -44,9 +44,7 @@ FileUtils.chdir APP_ROOT do
   answer2 = gets.chomp.upcase
   if answer2 == 'Y'
     puts "\n== Preparing database =="
-    system! 'heroku config:set DISABLE_DATABASE_ENVIRONMENT_CHECK=1'
-    system! 'heroku run rails db:drop && rails db:create && rails db:migrate'
-    system! 'heroku config:unset DISABLE_DATABASE_ENVIRONMENT_CHECK'
+    system! 'heroku run rails db:prepare'
   end
 
   puts "\n== Removing old logs and tempfiles =="
