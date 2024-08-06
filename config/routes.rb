@@ -1,9 +1,5 @@
 Rails.application.routes.draw do
-  mount Avo::Engine, at: Avo.configuration.root_path
-
   require 'sidekiq/web'
-
-  root 'adminsession#avo'
 
   devise_for :users,
     path: 'api/v1/',
@@ -25,8 +21,15 @@ Rails.application.routes.draw do
     get 'api/v1/confirmation_success', to: 'users/confirmations#success', as: :confirmation_success
   end
 
+  # Root route redirection to adminsession#index
+  root to: redirect('/api/v1')
+
   namespace :api do
     namespace :v1 do
+      # Root within namespace api/v1
+      root to: 'adminsession#index'
+
+      resources :adminsession, path: '', only: %i[index]
       defaults format: :json do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
@@ -40,12 +43,5 @@ Rails.application.routes.draw do
     sessions: 'admins/sessions'
   }, skip: :registration
 
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Defines the root path route ("/")
-  # root "posts#index"
 end
