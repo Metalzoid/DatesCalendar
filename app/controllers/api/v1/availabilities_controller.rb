@@ -25,7 +25,7 @@ module Api
         @availability = Availability.new(availability_params)
         @availability.user = current_user
         if @availability.save
-          render json: { message: 'Availability created.' }, status: :created
+          render json: { message: 'Availability created.', data: @availability }, status: :created
         else
           render json: { errors: @availability.errors.messages }
         end
@@ -33,7 +33,7 @@ module Api
 
       def update
         if @availability.update(availability_params)
-          render json: { message: 'Availability updated.' }, status: :ok
+          render json: { message: 'Availability updated.', data: @availability }, status: :ok
         else
           render json: { errors: @availability.errors.messages }
         end
