@@ -21,8 +21,8 @@ module Api
         @availability = Availability.new(availability_params)
         @availability.user = current_user
         if params[:time] && @availability.available
-          DateManagerService.new(@availability, params[:time], current_user).call
-          render json: { message: 'Availabilities created with min and max time.' }, status: :created
+          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
+          render json: { message: 'Availabilities created with min and max time.', data: @availabilities }, status: :created
         elsif @availability.save
           render json: { message: 'Availability created.', data: @availability }, status: :created
         else
