@@ -5,10 +5,6 @@ module Api
       before_action :set_availability, only: %i[update destroy]
       before_action :authorize_admin!, only: %i[create update destroy]
 
-      ## Get Availabilities
-      # URL = url/availabilities?user={USER_ID} for custom seller
-      # URL = url/availabilities for all sellers
-      # URL = url/availabilities?time=30 for split dates with interval (minutes)
       def index
         @availabilities = fetch_availabilities
         @dates = generate_dates(@availabilities, params[:time])
@@ -24,7 +20,10 @@ module Api
       def create
         @availability = Availability.new(availability_params)
         @availability.user = current_user
-        if @availability.save
+        if params[:time] && @availability.available
+          DateManagerService.new(@availability, params[:time], current_user).call
+          render json: { message: 'Availabilities created with min and max time.' }, status: :created
+        elsif @availability.save
           render json: { message: 'Availability created.', data: @availability }, status: :created
         else
           render json: { errors: @availability.errors.messages }
@@ -73,7 +72,7 @@ module Api
       def generate_dates(availabilities, interval)
         if interval
           availabilities.where(available: true).flat_map do |availability|
-            split_availability(availability.start_date, availability.end_date, interval.to_i)
+            split_get_availability(availability.start_date, availability.end_date, interval.to_i)
           end
         else
           availabilities.where(available: true).map do |availability|
@@ -82,7 +81,7 @@ module Api
         end
       end
 
-      def split_availability(start_date, end_date, interval)
+      def split_get_availability(start_date, end_date, interval)
         intervals = []
         while start_date < end_date
           interval_end = [start_date + interval.minutes, end_date].min
