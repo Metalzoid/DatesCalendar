@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       defaults format: :json do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
+        get 'unavailabilities', to: 'availabilities#index'
         get '/sellers', to: 'availabilities#index_sellers'
         resources :services, only: %i[index create update destroy]
       end

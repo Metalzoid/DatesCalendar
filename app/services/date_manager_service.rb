@@ -30,7 +30,7 @@ class DateManagerService
     while start_date < end_date
       current_day_end = calculate_current_day_end(start_date, end_date)
       new_start_date = calculate_new_start_date(start_date)
-      temp = Availability.create!(user: @user, available: true, start_date: new_start_date, end_date: current_day_end)
+      temp = Availability.create!(user: @user, available: @availability.available, start_date: new_start_date, end_date: current_day_end)
       @availabilities << temp
       start_date = advance_to_next_day(start_date)
     end

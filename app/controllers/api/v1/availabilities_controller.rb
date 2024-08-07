@@ -7,7 +7,7 @@ module Api
 
       def index
         @availabilities = fetch_availabilities
-        @dates = generate_dates(@availabilities, params[:time])
+        @dates = generate_dates(@availabilities, params[:time]) if @availabilities
 
         render json: { availabilities: @availabilities, dates: @dates }, status: :ok
       end
@@ -20,7 +20,7 @@ module Api
       def create
         @availability = Availability.new(availability_params)
         @availability.user = current_user
-        if params[:time] && @availability.available
+        if params[:time]
           @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
           render json: { message: 'Availabilities created with min and max time.', data: @availabilities }, status: :created
         elsif @availability.save
@@ -64,18 +64,18 @@ module Api
       end
 
       def fetch_availabilities
-        availabilities = Availability.all
+        availabilities = Availability.where(available: check_route_path)
         availabilities = availabilities.where(user_id: params[:user]) if params[:user]
         availabilities
       end
 
       def generate_dates(availabilities, interval)
         if interval
-          availabilities.where(available: true).flat_map do |availability|
+          availabilities.where(available: check_route_path).flat_map do |availability|
             split_get_availability(availability.start_date, availability.end_date, interval.to_i)
           end
         else
-          availabilities.where(available: true).map do |availability|
+          availabilities.where(available: check_route_path).map do |availability|
             { from: availability.start_date, to: availability.end_date }
           end
         end
@@ -89,6 +89,14 @@ module Api
           start_date = interval_end
         end
         intervals
+      end
+
+      def check_route_path
+        if request.fullpath.include?('unavailabilities')
+          false
+        elsif request.fullpath.include?('availabilities')
+          true
+        end
       end
     end
   end
