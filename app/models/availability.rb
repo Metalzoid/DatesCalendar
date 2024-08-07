@@ -5,6 +5,7 @@ class Availability < ApplicationRecord
   validates :available, inclusion: [true, false]
   validates :start_date, presence: true
   validates :end_date, comparison: { greater_than: :start_date }, presence: true
+  validate :no_overlapping_dates
 
   attr_accessor :skip_before_create
 
@@ -20,5 +21,14 @@ class Availability < ApplicationRecord
       new_availability.save!
       cur.update(end_date: start_date)
     end
+  end
+
+  def no_overlapping_dates
+    overlapping_availability = Availability
+                               .where(user_id: user_id)
+                               .where.not(id: id)
+                               .where('start_date < ? AND end_date > ?', end_date, start_date)
+
+    errors.add(:base, 'Les dates se chevauchent avec une disponibilité existante.') if overlapping_availability.exists?
   end
 end
