@@ -18,7 +18,7 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module ValouApi
+module DatesCalendar
   class Application < Rails::Application
     # Using Mailtrap.
     config.useMailtrap = true
