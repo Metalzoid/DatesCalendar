@@ -3,8 +3,9 @@ module Api
     class AdminsessionController < ApplicationController
       before_action :authenticate_admin!
       def index
+        api_version = Rails.configuration.x.api.version
         respond_to do |format|
-          format.html { render 'api/v1/adminsession/index' }
+          format.html { render "api/#{api_version}/adminsession/index" }
         end
       end
 

@@ -54,6 +54,6 @@ module ValouApi
 
     config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
     config.i18n.default_locale = :fr
-
+    config.x.api.version = 'v1'
   end
 end

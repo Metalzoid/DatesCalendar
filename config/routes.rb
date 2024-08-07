@@ -1,32 +1,30 @@
 Rails.application.routes.draw do
   require 'sidekiq/web'
-
+  api_version = Rails.configuration.x.api.version
   devise_for :users,
-    path: 'api/v1/',
-    path_names: {
-      sign_in: 'login',
-      sign_out: 'logout',
-      registration: 'signup'
-    },
-    controllers: {
-      sessions: 'users/sessions',
-      registrations: 'users/registrations',
-      confirmations: 'users/confirmations'
-    },
-    defaults: {
-      format: :json
-    }
+             path: "api/#{api_version}/",
+             path_names: {
+               sign_in: 'login',
+               sign_out: 'logout',
+               registration: 'signup'
+             },
+             controllers: {
+               sessions: 'users/sessions',
+               registrations: 'users/registrations',
+               confirmations: 'users/confirmations'
+             },
+             defaults: {
+               format: :json
+             }
 
   devise_scope :user do
-    get 'api/v1/confirmation_success', to: 'users/confirmations#success', as: :confirmation_success
+    get "api/#{api_version}/confirmation_success", to: 'users/confirmations#success', as: :confirmation_success
   end
 
-  # Root route redirection to adminsession#index
-  root to: redirect('/api/v1')
+  root to: redirect("/api/#{api_version}")
 
   namespace :api do
     namespace :v1 do
-      # Root within namespace api/v1
       root to: 'adminsession#index'
 
       resources :adminsession, path: '', only: %i[index]
@@ -40,9 +38,9 @@ Rails.application.routes.draw do
     end
   end
 
-  devise_for :admins, path: 'api/v1/', controllers: {
+  devise_for :admins, path: "api/#{api_version}/", controllers: {
     sessions: 'admins/sessions'
   }, skip: :registration
 
-  get "up" => "rails/health#show", as: :rails_health_check
+  get 'up' => 'rails/health#show', as: :rails_health_check
 end
