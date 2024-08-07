@@ -15,7 +15,7 @@ module Api
         if @service.save
           render json: { message: 'Service created.' }, status: :created
         else
-          render json: { errors: @service.errors.messages }
+          render json: { errors: @service.errors.messages }, status: :unprocessable_entity
         end
       end
 
@@ -23,7 +23,7 @@ module Api
         if @service.update(service_params)
           render json: { message: 'Service updated.' }, status: :ok
         else
-          render json: { errors: @service.errors.message }
+          render json: { errors: @service.errors.message }, status: :unprocessable_entity
         end
       end
 
@@ -31,7 +31,7 @@ module Api
         if @service.destroy
           render json: { message: "Service #{@service.id} has been deleted" }, status: :ok
         else
-          render json: { errors: @service.errors.messages }
+          render json: { errors: @service.errors.messages }, status: :unprocessable_entity
         end
       end
 
