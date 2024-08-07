@@ -20,13 +20,13 @@ module Api
       def create
         @availability = Availability.new(availability_params)
         @availability.user = current_user
-        if params[:time]
+        if params[:time] && @availability.valid?
           @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
           render json: { message: 'Availabilities created with min and max time.', data: @availabilities }, status: :created
         elsif @availability.save
           render json: { message: 'Availability created.', data: @availability }, status: :created
         else
-          render json: { errors: @availability.errors.messages }
+          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
         end
       end
 
@@ -34,7 +34,7 @@ module Api
         if @availability.update(availability_params)
           render json: { message: 'Availability updated.', data: @availability }, status: :ok
         else
-          render json: { errors: @availability.errors.messages }
+          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
         end
       end
 
@@ -42,7 +42,7 @@ module Api
         if @availability.destroy
           render json: { message: 'Availability destroyed.' }, status: :ok
         else
-          render json: { errors: @availability.errors.messages }
+          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
         end
       end
 
@@ -60,7 +60,7 @@ module Api
       def authorize_admin!
         return if !current_admin.nil? || current_user.role == 'seller'
 
-        render json: { message: 'You need to be Vendor to perform this action.' }, status: :forbidden
+        render json: { message: 'You need to be Vendor to perform this action.' }, status: :unauthorized
       end
 
       def fetch_availabilities

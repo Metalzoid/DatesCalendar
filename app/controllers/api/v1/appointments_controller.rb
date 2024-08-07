@@ -20,9 +20,9 @@ module Api
         @appointment.seller = Service.find(@services.first).user
         if @appointment.save
           create_appointment_service_and_price(services: @services)
-          render json: { message: 'Appointment created.' }
+          render json: { message: 'Appointment created.' }, status: :created
         else
-          render json: { errors: @appointment.errors.messages }
+          render json: { errors: @appointment.errors.messages }, status: :unprocessable_entity
         end
       end
 
@@ -33,10 +33,10 @@ module Api
           if @appointment.update(update_params)
             handle_successful_update
           else
-            render json: { errors: @appointment.errors.messages }
+            render json: { errors: @appointment.errors.messages }, status: :ok
           end
         else
-          render json: { errors: unauthorized_error_message }
+          render json: { errors: unauthorized_error_message }, status: :unprocessable_entity
         end
       end
 
