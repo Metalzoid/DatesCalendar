@@ -8,7 +8,6 @@ module Api
       def index
         @availabilities = fetch_availabilities
         @dates = generate_dates(@availabilities, params[:time]) if @availabilities
-
         render json: { availabilities: @availabilities, dates: @dates }, status: :ok
       end
 
