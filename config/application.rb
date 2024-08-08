@@ -53,7 +53,7 @@ module DatesCalendar
     config.active_record.default_timezone = :local
 
     config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
-    config.i18n.default_locale = :fr
+    config.i18n.default_locale = :en
     config.x.api.version = 'v1'
   end
 end
