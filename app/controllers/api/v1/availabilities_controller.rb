@@ -6,46 +6,42 @@ module Api
       before_action :authorize_admin!, only: %i[create update destroy]
 
       def index
-        @availabilities = fetch_availabilities
-        @dates = generate_dates(@availabilities, params[:interval]) if @availabilities && params[:interval]
-        render json: { availabilities: @availabilities, dates: @dates }, status: :ok
-      end
+        @availabilities = fetch_availabilities(params[:seller_id])
+        return render_error('Seller id required') if params[:seller_id].nil?
+        return render_error('Seller not found') unless User.find_by(id: params[:seller_id])
+        return render_error('Availabilities not found') if @availabilities.count.zero?
 
-      def index_sellers
-        @sellers = User.where(role: 'seller')
-        if @sellers.length.positive?
-          render json: { data: @sellers }, status: :ok
-        else
-          render json: { message: 'Not found sellers in the Database.' }, status: :not_found
-        end
+        @dates = generate_dates(@availabilities, params[:interval]) if @availabilities && params[:interval]
+        render_success('Availabilities founded.', { availabilities: @availabilities, dates: @dates }, :ok)
       end
 
       def create
         @availability = Availability.new(availability_params)
         @availability.user = current_user
+
         if params[:time] && @availability.valid?
-          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
-          render json: { message: 'Availabilities created with min and max time.', data: @availabilities }, status: :created
+          handle_time_params
         elsif @availability.save
-          render json: { message: 'Availability created.', data: @availability }, status: :created
+          render_success('Availability created.', @availability, :created)
         else
-          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
+          render_error(@availability.errors.messages)
         end
       end
 
       def update
         if @availability.update(availability_params)
-          render json: { message: 'Availability updated.', data: @availability }, status: :ok
+          render_success('Availability updated.', @availability, :ok)
         else
-          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
+          render_error(@availability.errors.messages)
         end
       end
 
       def destroy
         if @availability.destroy
-          render json: { message: 'Availability destroyed.' }, status: :ok
+          # render json: { message: 'Availability destroyed.' }, status: :ok
+          render_success('Availability destroyed.', @availability, :ok)
         else
-          render json: { errors: @availability.errors.messages }, status: :unprocessable_entity
+          render_error(@availability.errors.messages)
         end
       end
 
@@ -61,13 +57,13 @@ module Api
       end
 
       def authorize_admin!
-        return if !current_admin.nil? || current_user.role == 'seller'
+        return if current_admin || current_user.role == 'seller'
 
         render json: { message: 'You need to be Vendor to perform this action.' }, status: :unauthorized
       end
 
-      def fetch_availabilities
-        availabilities = Availability.where(available: check_route_path)
+      def fetch_availabilities(seller_id)
+        availabilities = Availability.where(available: check_route_path, user_id: seller_id)
         availabilities = availabilities.where(user_id: params[:user]) if params[:user]
         availabilities
       end
@@ -95,10 +91,18 @@ module Api
       end
 
       def check_route_path
-        if request.fullpath.include?('unavailabilities')
-          false
-        elsif request.fullpath.include?('availabilities')
-          true
+        request.fullpath.include?('unavailabilities') ? false : true
+      end
+
+      def handle_time_params
+        min_hour = params[:time][:min_hour]
+        max_hour = params[:time][:max_hour]
+
+        if (min_hour..max_hour).include?(@availability.start_date.hour)
+          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
+          render_success('Availabilities created with min and max time.', @availabilities, :created)
+        else
+          render_error('Start time is not included in the params time')
         end
       end
     end

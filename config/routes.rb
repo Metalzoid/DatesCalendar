@@ -22,11 +22,11 @@ Rails.application.routes.draw do
   end
 
   root to: redirect("/api/#{api_version}")
+  get "/api/#{api_version}/user_search", to: 'api#user_search'
 
   namespace :api do
     namespace :v1 do
       root to: 'pages#index'
-
       namespace :admin do
         root to: 'admin_pages#index'
         get '', to: 'admin_pages#index'
@@ -36,7 +36,6 @@ Rails.application.routes.draw do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
         get 'unavailabilities', to: 'availabilities#index'
-        get 'sellers', to: 'availabilities#index_sellers'
         resources :services, only: %i[index create update destroy]
       end
     end

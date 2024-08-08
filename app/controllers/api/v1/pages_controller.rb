@@ -7,6 +7,8 @@ module Api
           format.html { render "api/#{api_version}/pages/index" }
         end
       end
+
+      
     end
   end
 end
