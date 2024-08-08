@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'pages/index'
   require 'sidekiq/web'
   api_version = Rails.configuration.x.api.version
   devise_for :users,
@@ -25,9 +26,12 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      root to: 'adminsession#index'
+      root to: 'pages#index'
+      namespace :admin do
+        root to: 'adminsession#index'
+        resources :adminsession, path: '', only: %i[index]
+      end
 
-      resources :adminsession, path: '', only: %i[index]
       defaults format: :json do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
@@ -38,7 +42,7 @@ Rails.application.routes.draw do
     end
   end
 
-  devise_for :admins, path: "api/#{api_version}/", controllers: {
+  devise_for :admins, path: "api/#{api_version}/admin", controllers: {
     sessions: 'admins/sessions'
   }, skip: :registration
 

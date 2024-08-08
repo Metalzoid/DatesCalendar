@@ -13,7 +13,11 @@ module Api
 
       def index_sellers
         @sellers = User.where(role: 'seller')
-        render json: { sellers: @sellers }, status: :ok
+        if @sellers.length.positive?
+          render json: { data: @sellers }, status: :ok
+        else
+          render json: { message: 'Not found sellers in the Database.' }, status: :not_found
+        end
       end
 
       def create
