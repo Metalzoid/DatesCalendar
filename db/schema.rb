@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_09_090413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -90,6 +90,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
     t.string "firstname"
     t.string "lastname"
     t.integer "role"
+    t.bigint "admin_id", null: false
+    t.index ["admin_id"], name: "index_users_on_admin_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true
@@ -103,4 +105,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_03_075631) do
   add_foreign_key "appointments", "users", column: "seller_id"
   add_foreign_key "availabilities", "users"
   add_foreign_key "services", "users"
+  add_foreign_key "users", "admins"
 end

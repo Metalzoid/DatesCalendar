@@ -10,15 +10,14 @@ class User < ApplicationRecord
   has_many :seller_appointments, class_name: 'Appointment', foreign_key: 'seller_id', dependent: :destroy
   has_many :services, dependent: :destroy
   has_many :availability, dependent: :destroy
+  belongs_to :admin
 
   enum role: {
     customer: 0,
     seller: 1
   }
 
-  validates :firstname, presence: true
-  validates :lastname, presence: true
-  validates :company, presence: true
+  validates :firstname, :lastname, :company, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
 
   def appointments
