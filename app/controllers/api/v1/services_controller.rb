@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module Api
   module V1
+    # Services controller
     class ServicesController < ApiController
       before_action :authenticate_user!
       before_action :authorization!, only: %i[create update destroy]

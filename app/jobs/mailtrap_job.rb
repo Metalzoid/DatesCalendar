@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MailtrapJob < ApplicationJob
   queue_as :default
 
@@ -18,7 +20,7 @@ class MailtrapJob < ApplicationJob
     Mailtrap::Mail::FromTemplate.new(
       from: { email: 'from@demomailtrap.com', name: 'Valou Coiffure' },
       to: [{ email: params[:to_email] }],
-      template_uuid: template_uuid,
+      template_uuid:,
       template_variables: params[:template_variables]
     )
   end

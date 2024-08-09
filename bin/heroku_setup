@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'fileutils'
 
 # path to your application root.
@@ -36,7 +38,7 @@ FileUtils.chdir APP_ROOT do
     }
   end
   puts 'Adding heroku vars'
-  env_vars.each_key { |key| system! "heroku config:unset #{key}"}
+  env_vars.each_key { |key| system! "heroku config:unset #{key}" }
   env_vars.each { |key, value| system! "heroku config:set #{key}=#{value}" }
   system! 'heroku run bin/jwt_setup'
 

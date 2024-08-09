@@ -1,17 +1,22 @@
+# frozen_string_literal: true
+
 module Api
   module V1
+    # Appointment controller
     class AppointmentsController < ApiController
       before_action :authenticate_user!
       before_action :set_appointment, only: %i[show update]
       before_action :set_services_list, only: %i[create update]
 
       def index
-        @appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
-        render json: @appointments
+        @appointments = Appointment.where('customer_id = ? OR seller_id = ?', current_user.id, current_user.id)
+        return render_success('Appointment(s) founded.', @appointments, :ok) unless @appointments.empty?
+
+        render_error('Appointment(s) not founded.', :not_found)
       end
 
       def show
-        render json: @appointment
+        render_success('Appointment founded.', @appointment, :ok)
       end
 
       def create
@@ -20,9 +25,9 @@ module Api
         @appointment.seller = Service.find(@services.first).user
         if @appointment.save
           create_appointment_service_and_price(services: @services)
-          render json: { message: 'Appointment created.' }, status: :created
+          render_success('Appointment(s) created.', @appointment, :created)
         else
-          render json: { errors: @appointment.errors.messages }, status: :unprocessable_entity
+          render_error("Error. #{@appointment.errors.messages}", :unprocessable_entity)
         end
       end
 
@@ -30,13 +35,11 @@ module Api
         @old_start_date = @appointment.start_date
         @old_end_date = @appointment.end_date
         if authorized_to_update?
-          if @appointment.update(update_params)
-            handle_successful_update
-          else
-            render json: { errors: @appointment.errors.messages }, status: :ok
-          end
+          return handle_successful_update if @appointment.update(update_params)
+
+          render_error("Error. #{@appointment.errors.messages}", :unprocessable_entity)
         else
-          render json: { errors: unauthorized_error_message }, status: :unprocessable_entity
+          render_error("Error. #{unauthorized_error_message}", :unprocessable_entity)
         end
       end
 
@@ -52,7 +55,10 @@ module Api
 
       def set_appointment
         @appointment = Appointment.find_by(id: params[:id])
-        render json: { errors: "Appointment #{params[:id]} could not be found." }, status: :not_found unless @appointment
+        return if @appointment
+
+        render json: { errors: "Appointment #{params[:id]} could not be found." },
+               status: :not_found
       end
 
       def set_services_list
@@ -78,7 +84,7 @@ module Api
       def handle_successful_update
         create_appointment_service_and_price(services: @services) unless @services.nil?
         send_update_notification if mailtrap_enabled? && current_user.role != 'seller'
-        render json: { message: 'Appointment updated.' }
+        render_success('Appointment(s) updated.', @appointment, :ok)
       end
 
       def mailtrap_enabled?
@@ -88,12 +94,13 @@ module Api
       def send_update_notification
         @appointment.mailer_seller({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date },
                                      template_uuid: 'abaea168-a2fd-4d7c-8530-5637149234a1',
-                                     from_controller: true
-        })
+                                     from_controller: true })
       end
 
       def unauthorized_error_message
-        "You can't modify this appointment, because you're not the creator of this appointment, or the appointment status is not hold."
+        "You can't modify this appointment,
+        because you're not the creator of this appointment,
+        or the appointment status is not hold."
       end
     end
   end

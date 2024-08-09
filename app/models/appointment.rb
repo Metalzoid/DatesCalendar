@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Appointment < ApplicationRecord
   after_commit :after_commit_actions, unless: :skip_after_commit_actions?
 
@@ -110,7 +112,6 @@ class Appointment < ApplicationRecord
       when 'accepted' then '49d126b2-d0a7-45a5-a237-ebc66a1cf503'
       when 'finished' then '363b50b7-0689-4e53-872f-04df9ffb2063'
       when 'canceled' then '0de9b64b-4d35-4a60-b9a9-b3b508d34e60'
-      else nil
       end
     end
   end
@@ -124,7 +125,6 @@ class Appointment < ApplicationRecord
       when 'accepted' then 'd986b954-3dc0-4f18-a3ba-4ea15f5a7778'
       when 'finished' then 'bb50996b-7744-4087-8657-345a8f8aa0d9'
       when 'canceled' then 'c6585d13-3c1f-44e5-bc76-665db9068772'
-      else nil
       end
     end
   end
@@ -140,12 +140,16 @@ class Appointment < ApplicationRecord
     overlapping_availability = availabilities.any? do |availability|
       start_date >= availability.start_date && end_date <= availability.end_date
     end
-    unless overlapping_availability
-      errors.add(:availability, 'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
-    end
+    return if overlapping_availability
+
+    errors.add(:availability,
+               'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
   end
 
   def create_availability
-    Availability.create!(start_date: start_date, end_date: end_date, available: false, user: seller) if status == 'accepted'
+    return unless status == 'accepted'
+
+    Availability.create!(start_date:, end_date:, available: false,
+                         user: seller)
   end
 end

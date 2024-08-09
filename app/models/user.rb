@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Model User
 class User < ApplicationRecord
   include PgSearch::Model
   include Devise::JWT::RevocationStrategies::JTIMatcher

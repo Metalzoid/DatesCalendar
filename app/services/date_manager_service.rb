@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DateManagerService
   def initialize(availability, params, user)
     @availability = availability
@@ -21,16 +23,17 @@ class DateManagerService
     required_params = %i[max_hour max_minutes min_hour min_minutes]
     missing_params = required_params.select { |param| @params[param].nil? }
 
-    unless missing_params.empty?
-      raise ArgumentError, "Paramètres requis manquants: #{missing_params.join(', ')}"
-    end
+    return if missing_params.empty?
+
+    raise ArgumentError, "Paramètres requis manquants: #{missing_params.join(', ')}"
   end
 
   def create_daily_availabilities(start_date, end_date)
     while start_date < end_date
       current_day_end = calculate_current_day_end(start_date, end_date)
       new_start_date = calculate_new_start_date(start_date)
-      temp = Availability.create!(user: @user, available: @availability.available, start_date: new_start_date, end_date: current_day_end)
+      temp = Availability.create!(user: @user, available: @availability.available, start_date: new_start_date,
+                                  end_date: current_day_end)
       @availabilities << temp
       start_date = advance_to_next_day(start_date)
     end

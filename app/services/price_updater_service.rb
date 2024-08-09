@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PriceUpdaterService
   def initialize(service)
     @service = service

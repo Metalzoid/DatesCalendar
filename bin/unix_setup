@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'fileutils'
 
 # path to your application root.
@@ -43,18 +45,18 @@ FileUtils.chdir APP_ROOT do
 
   puts "\n== Creating .ENV file =="
   system! 'rm .env && touch .env'
-  if answer == 'Y'
-    env_vars = {
-      'MAILTRAP_USERNAME' => prompt_for_env_var('Mailtrap username'),
-      'MAILTRAP_PASSWORD' => prompt_for_env_var('Mailtrap password'),
-      'MAILTRAP_API_KEY' => prompt_for_env_var('Mailtrap API Key'),
-      'USE_MAILTRAP' => 'true'
-    }
-  else
-    env_vars = {
-      'USE_MAILTRAP' => 'false'
-    }
-  end
+  env_vars = if answer == 'Y'
+               {
+                 'MAILTRAP_USERNAME' => prompt_for_env_var('Mailtrap username'),
+                 'MAILTRAP_PASSWORD' => prompt_for_env_var('Mailtrap password'),
+                 'MAILTRAP_API_KEY' => prompt_for_env_var('Mailtrap API Key'),
+                 'USE_MAILTRAP' => 'true'
+               }
+             else
+               {
+                 'USE_MAILTRAP' => 'false'
+               }
+             end
   write_in_env(env_vars)
   system! 'bin/jwt_setup'
 

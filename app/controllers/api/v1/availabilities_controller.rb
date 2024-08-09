@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 module Api
   module V1
+    # Availabilities controller
     class AvailabilitiesController < ApiController
       before_action :authenticate_user!
       before_action :set_availability, only: %i[update destroy]
@@ -53,7 +56,10 @@ module Api
 
       def set_availability
         @availability = Availability.find_by(id: params[:id])
-        render json: { errors: "Availability #{params[:id]} could not be found." }, status: :not_found unless @availability
+        return if @availability
+
+        render json: { errors: "Availability #{params[:id]} could not be found." },
+               status: :not_found
       end
 
       def authorize_admin!

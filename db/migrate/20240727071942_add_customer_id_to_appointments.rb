@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddCustomerIdToAppointments < ActiveRecord::Migration[7.1]
   def change
     add_column :appointments, :customer_id, :integer, null: false
