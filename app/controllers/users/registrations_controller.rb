@@ -6,9 +6,11 @@ module Users
     # before_action :configure_account_update_params, only: [:update]
 
     # GET /resource/sign_up
-    # def new
-    #   super
-    # end
+    def new
+      return render_error('You need to be authentificated admin account to perform this action', :unauthorized) unless current_admin
+      self.admin = current_admin
+      super
+    end
 
     # POST /resource
     # def create
