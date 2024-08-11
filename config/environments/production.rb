@@ -45,7 +45,7 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = false
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new($stdout)
@@ -106,7 +106,7 @@ Rails.application.configure do
   end
 
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_url_options = { host: 'valou-api-88755a92f10c.herokuapp.com', protocol: 'https' }
+  config.action_mailer.default_url_options = { host: 'http://pg8csckk04kg4s8c4c440ww4.51.158.62.64.sslip.io', protocol: 'https' }
 
   # This also configures session_options for use below
   config.session_store :cookie_store, key: '_interslice_session'

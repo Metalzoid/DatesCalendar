@@ -45,7 +45,7 @@ Rails.application.routes.draw do
 
   devise_for :admins, path: "api/#{api_version}/admin", controllers: {
     sessions: 'admins/sessions'
-  }, skip: :registration
+  }
 
   get 'up', to: 'rails/health#show', as: :rails_health_check
 end
