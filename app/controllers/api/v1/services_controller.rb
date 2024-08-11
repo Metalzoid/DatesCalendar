@@ -9,33 +9,30 @@ module Api
       before_action :set_service, only: %i[update destroy]
 
       def index
-        render json: Service.all
+        @services = Service.all
+        return render_success('Services founded.', { data: @services }, :ok) unless @services.empty?
+
+        render_error('Services not founded.', :not_found)
       end
 
       def create
         @service = Service.new(service_params)
         @service.user = current_user
-        if @service.save
-          render json: { message: 'Service created.' }, status: :created
-        else
-          render json: { errors: @service.errors.messages }, status: :unprocessable_entity
-        end
+        return render_success('Service created.', { data: @service }, :created) if @service.save
+
+        render_error("Can't create service. #{@service.errors.messages}", :unprocessable_entity)
       end
 
       def update
-        if @service.update(service_params)
-          render json: { message: 'Service updated.' }, status: :ok
-        else
-          render json: { errors: @service.errors.message }, status: :unprocessable_entity
-        end
+        return render_success('Service updated.', { data: @service }, :ok) if @service.update(service_params)
+
+        render_error("Can't update service. #{@service.errors.messages}", :unprocessable_entity)
       end
 
       def destroy
-        if @service.destroy
-          render json: { message: "Service #{@service.id} has been deleted" }, status: :ok
-        else
-          render json: { errors: @service.errors.messages }, status: :unprocessable_entity
-        end
+        return render_success('Service destroyed.', { data: @service }, :ok) if @service.destroy
+
+        render_error("Can't destroy service. #{@service.errors.messages}", :unprocessable_entity)
       end
 
       private
