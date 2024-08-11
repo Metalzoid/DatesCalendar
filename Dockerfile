@@ -1,4 +1,4 @@
-FROM ruby:3.3.4-slim-bookworm AS app
+FROM ruby:3.3 AS app
 LABEL maintainer="Florian GAGNAIRE <gagnaire.flo@gmail.com>"
 
 WORKDIR /app
