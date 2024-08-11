@@ -1,31 +1,58 @@
-FROM ruby:3.3 AS app
-LABEL maintainer="Florian GAGNAIRE <gagnaire.flo@gmail.com>"
+# syntax = docker/dockerfile:1
 
-WORKDIR /app
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
+FROM ruby:3.3
 
-ARG UID=1000
-ARG GID=1000
+# Rails app lives here
+WORKDIR /rails
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends build-essential curl libpq-dev \
-  && rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man \
-  && apt-get clean \
-  && groupadd -g "${GID}" ruby \
-  && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" ruby \
-  && chown ruby:ruby -R /app
+# Set production environment
+ENV RAILS_ENV="production" \
+    BUNDLE_DEPLOYMENT="1" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BUNDLE_WITHOUT="development"
 
-USER ruby
 
-COPY --chown=ruby:ruby bin/ ./bin
-RUN chmod 0755 bin/*
+# Throw-away build stage to reduce size of final image
+FROM base as build
 
-ARG RAILS_ENV="production"
-ENV RAILS_ENV="${RAILS_ENV}" \
-    PATH="${PATH}:/home/ruby/.local/bin" \
-    USER="ruby"
+# Install packages needed to build gems
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential git libvips pkg-config
 
-ENTRYPOINT ["/app/bin/docker-entrypoint-web"]
+# Install application gems
+COPY Gemfile Gemfile.lock ./
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    bundle exec bootsnap precompile --gemfile
 
+# Copy application code
+COPY . .
+
+# Precompile bootsnap code for faster boot times
+RUN bundle exec bootsnap precompile app/ lib/
+
+
+# Final stage for app image
+FROM base
+
+# Install packages needed for deployment
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Copy built artifacts: gems, application
+COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --from=build /rails /rails
+
+# Run and own only the runtime files as a non-root user for security
+RUN useradd rails --create-home --shell /bin/bash && \
+    chown -R rails:rails db log storage tmp
+USER rails:rails
+
+# Entrypoint prepares the database.
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+# Start the server by default, this can be overwritten at runtime
 EXPOSE 3001
-
-CMD ["rails", "s"]
+CMD ["./bin/rails", "server"]
