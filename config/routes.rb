@@ -44,7 +44,13 @@ Rails.application.routes.draw do
   end
 
   devise_for :admins, path: "api/#{api_version}/admin", controllers: {
-    sessions: 'admins/sessions'
+    sessions: 'admins/sessions',
+    registrations: 'admins/registrations',
+    confirmations: 'admins/confirmations'
+  }, path_names: {
+    sign_in: 'login',
+    sign_out: 'logout',
+    registration: 'signup'
   }
 
   get 'up', to: 'rails/health#show', as: :rails_health_check

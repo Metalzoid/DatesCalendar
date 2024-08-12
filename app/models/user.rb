@@ -3,7 +3,6 @@
 # Model User
 class User < ApplicationRecord
   include PgSearch::Model
-  include Devise::JWT::RevocationStrategies::JTIMatcher
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable, :recoverable, :validatable,
@@ -12,7 +11,7 @@ class User < ApplicationRecord
   has_many :customer_appointments, class_name: 'Appointment', foreign_key: 'customer_id', dependent: :destroy
   has_many :seller_appointments, class_name: 'Appointment', foreign_key: 'seller_id', dependent: :destroy
   has_many :services, dependent: :destroy
-  has_many :availability, dependent: :destroy
+  has_many :availabilities, dependent: :destroy
   belongs_to :admin
 
   enum role: {
