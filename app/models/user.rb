@@ -23,7 +23,7 @@ class User < ApplicationRecord
 
   validates :firstname, :lastname, :company, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
-  validates :admin_id, presence: true, inclusion: { in: Admin.ids }
+  validates :admin_id, presence: true
 
   def availabilities
     super.where(available: true)
