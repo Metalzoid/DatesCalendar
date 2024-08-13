@@ -4,30 +4,6 @@ module Users
   class SessionsController < Devise::SessionsController
     include RackSessionsFix
     respond_to :json
-
-    private
-
-    def respond_with(current_user, _opts = {})
-      render json: {
-        status: {
-          data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
-        }
-      }, status: :ok
-    end
-
-    def respond_to_on_destroy
-      if current_user
-        render json: {
-          status: 200,
-          message: 'Logged out successfully.'
-        }, status: :ok
-      else
-        render json: {
-          status: 401,
-          message: "Couldn't find an active session."
-        }, status: :unauthorized
-      end
-    end
     # before_action :configure_sign_in_params
 
     # GET /resource/sign_in
@@ -41,9 +17,21 @@ module Users
     # end
 
     # DELETE /resource/sign_out
-    # def destroy
-    #   super
-    # end
+    def destroy
+      user = current_user
+      signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
+      set_flash_message! :notice, :signed_out if signed_out
+      yield if block_given?
+      if request.headers['Authorization'].present?
+        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
+        current_api_user = User.find(jwt_payload['sub'])
+      end
+      if current_api_user && user
+        render json: { message: 'Logged out successfully.' }, status: :ok
+      else
+        render json: { message: "Couldn't find an active session." }, status: :unauthorized
+      end
+    end
 
     # protected
 
@@ -51,5 +39,15 @@ module Users
     # def configure_sign_in_params
     #   devise_parameter_sanitizer.permit(:sign_in, keys: [:role])
     # end
+
+    private
+
+    def respond_with(current_user, _opts = {})
+      render json: {
+        status: {
+          data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+        }
+      }, status: :ok
+    end
   end
 end
