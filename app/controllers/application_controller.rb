@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
 
   def after_sign_in_path_for(resource)
     if resource.persisted?
-      api_v1_admin_root_path
+      admin_index_path
     else
       super(resource)
     end

@@ -6,24 +6,40 @@ module Admins
     # before_action :configure_sign_in_params, only: [:create]
 
     # GET /resource/sign_in
-    # def new
-    #   super
-    # end
+    def new
+      respond_to do |format|
+        format.html { super }
+      end
+    end
 
     # POST /resource/sign_in
-    # def create
-    #   super do |resource|
-    #     if resource.persisted?
-    #       token = request.env['warden-jwt_auth.token']
-    #       response.headers['Authorization'] = "Bearer #{token}"
-    #     end
-    #   end
-    # end
+    def create
+      self.resource = warden.authenticate!(auth_options)
+      set_flash_message!(:notice, :signed_in)
+      sign_in(resource_name, resource)
+      yield resource if block_given?
+
+      respond_to do |format|
+        format.json do
+          render json: {
+            message: "Logged in successfully.",
+            data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
+          }, status: :ok
+        end
+
+        format.html do
+          redirect_to after_sign_in_path_for(resource)
+        end
+      end
+    end
 
     # DELETE /resource/sign_out
-    # def destroy
-    #   super
-    # end
+    def destroy
+      signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
+      set_flash_message! :notice, :signed_out if signed_out
+      yield if block_given?
+      respond_to_on_destroy
+    end
 
     # protected
 
@@ -33,38 +49,31 @@ module Admins
     # end
     # private
 
-    def respond_with(current_admin, _opts = {})
-      if current_admin
-        respond_to do |format|
-          format.json { render json: {
-            message: "Logged in successfully.",
-            data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
-          }, status: :ok }
-          format.html { super }
-        end
-      else
-        respond_to do |format|
-          format.json { render_error('Error. You need to be authentificated to perform this action.', :unauthorized) }
-          format.html { super }
-        end
-      end
-    end
+    # def respond_with(current_admin, _opts = {})
+    #   respond_to do |format|
+    #     # format.json { render json: { message: "Logged in successfully.",
+    #     #                 data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
+    #     #               }, status: :ok }
+    #     format.html
+    #   end
+    # end
+    #
 
     def respond_to_on_destroy
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
-        current_admin = Admin.find(jwt_payload['sub'])
+        current_api_admin = Admin.find(jwt_payload['sub'])
       end
-      if current_admin
+      if current_api_admin
         respond_to do |format|
-          format.json { render_success('Logged out successfully.', { data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes] }, :ok ) }
-          format.html { redirect_to api_v1_admin_root_path }
+          format.json { render json: { message: 'Logged out successfully.' }, status: :ok }
         end
       else
         respond_to do |format|
-          format.json { render_error("Couldn't find an active session.", :unauthorized) }
+          format.json { render json: { message: "Couldn't find an active session." }, status: :unauthorized }
           format.html { redirect_to new_admin_session_path }
         end
+
       end
     end
   end

@@ -3,6 +3,8 @@
 # Model User
 class User < ApplicationRecord
   include PgSearch::Model
+  include Devise::JWT::RevocationStrategies::JTIMatcher
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable, :recoverable, :validatable,
@@ -21,6 +23,15 @@ class User < ApplicationRecord
 
   validates :firstname, :lastname, :company, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
+  validates :admin_id, presence: true, inclusion: { in: Admin.ids }
+
+  def availabilities
+    super.where(available: true)
+  end
+
+  def unavailabilities
+    Availability.where(available: false, user: self)
+  end
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)

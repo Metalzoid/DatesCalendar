@@ -13,7 +13,7 @@ module Users
     # POST /resource
     def create
       return render json: { message: 'You need to be authentificated admin account to perform this action'}, status: :unauthorized unless current_admin
-      
+
       @user = build_resource(sign_up_params)
       @user.admin = current_admin
       @user.save
@@ -88,12 +88,12 @@ module Users
     def respond_with(current_user, _opts = {})
       if resource.persisted?
         render json: {
-          status: { code: 200, message: 'Signed up successfully.' },
+          message: 'Signed up successfully.',
           data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
-        }
+        }, status: :ok
       else
         render json: {
-          status: { message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}" }
+          message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}"
         }, status: :unprocessable_entity
       end
     end

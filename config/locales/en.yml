@@ -129,3 +129,11 @@ en:
       day: Jour
       month: Mois
       year: Année
+  time:
+    am: am
+    formats:
+      default: "%d %B %Y %Hh %Mmin %Ss"
+      long: "%A %d %B %Y %Hh%M"
+      short: "%d %b %Hh%M"
+      custom: "%d %B %Y à %H:%M"
+    pm: pm

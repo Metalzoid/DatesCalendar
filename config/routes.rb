@@ -23,21 +23,13 @@ Rails.application.routes.draw do
     get "api/#{api_version}/confirmation_success", to: 'users/confirmations#success', as: :confirmation_success
   end
 
-  root to: redirect("/api/#{api_version}")
-  get "/api/#{api_version}/user_search", to: 'api#user_search'
-
   namespace :api do
     namespace :v1 do
-      root to: 'pages#index'
-      namespace :admin do
-        root to: 'admin_pages#index'
-        get '', to: 'admin_pages#index'
-      end
-
       defaults format: :json do
+        get 'user_search', to: 'api#user_search'
+        get 'unavailabilities', to: 'availabilities#index'
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
-        get 'unavailabilities', to: 'availabilities#index'
         resources :services, only: %i[index create update destroy]
       end
     end
@@ -45,13 +37,14 @@ Rails.application.routes.draw do
 
   devise_for :admins, path: "api/#{api_version}/admin", controllers: {
     sessions: 'admins/sessions',
-    registrations: 'admins/registrations',
-    confirmations: 'admins/confirmations'
+    registrations: 'admins/registrations'
   }, path_names: {
     sign_in: 'login',
     sign_out: 'logout',
     registration: 'signup'
   }
+
+  get 'admin', to: 'admins/admins_pages#index', as: :admin_index
 
   get 'up', to: 'rails/health#show', as: :rails_health_check
 end
