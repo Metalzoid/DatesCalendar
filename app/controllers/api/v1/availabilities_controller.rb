@@ -13,7 +13,7 @@ module Api
         return render_error('Seller id required', :bad_request) if params[:seller_id].nil?
         return render_error('Seller not found', :not_found) unless User.find_by(id: params[:seller_id])
         return render_error('Availabilities not found', :not_found) if @availabilities.empty?
-
+        params_dates = {}
         params_dates[:availabilities] = @availabilities
         params_dates[:interval] = params[:interval] if params[:interval]
         @dates = generate_dates(params_dates) if @availabilities
