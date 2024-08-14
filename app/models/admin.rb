@@ -8,7 +8,7 @@ class Admin < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :omniauthable, :jwt_authenticatable,
-         jwt_revocation_strategy: self, omniauth_providers: [:github]
+         jwt_revocation_strategy: self, omniauth_providers: [:github, :google_oauth2]
   has_many :users, dependent: :destroy
   has_one :api_key, dependent: :destroy
   after_create :init_api_key

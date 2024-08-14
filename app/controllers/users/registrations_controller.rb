@@ -12,11 +12,12 @@ module Users
 
     # POST /resource
     def create
-      return render json: { message: 'You need to be authentificated admin account to perform this action'}, status: :unauthorized unless current_admin
       @user = build_resource(sign_up_params)
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_admin = Admin.find(jwt_payload['sub'])
+      elsif request.headers['APIKEY'].present?
+        current_api_admin = ApiKey.find_by(api_key: request.headers['APIKEY']).admin
       end
       @user.admin = current_api_admin
       @user.save
