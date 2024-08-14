@@ -77,17 +77,6 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
 
   config.action_mailer.raise_delivery_errors = true
-
-  if ENV['USE_MAILTRAP'] == 'true'
-    config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = {
-      user_name: ENV.fetch('MAILTRAP_USERNAME'),
-      password: ENV.fetch('MAILTRAP_PASSWORD'),
-      address: 'live.smtp.mailtrap.io',
-      host: 'live.smtp.mailtrap.io',
-      port: '587',
-      authentication: :login,
-      enable_starttls_auto: true # Enables STARTTLS for secure connection
-    }
-  end
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = false
 end

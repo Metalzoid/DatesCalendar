@@ -57,8 +57,7 @@ module Api
         @appointment = Appointment.find_by(id: params[:id])
         return if @appointment
 
-        render json: { errors: "Appointment #{params[:id]} could not be found." },
-               status: :not_found
+        render_error("Appointment #{params[:id]} could not be found.", :not_found)
       end
 
       def set_services_list
@@ -74,27 +73,16 @@ module Api
       end
 
       def authorized_to_update?
-        @appointment.status == 'hold' && @appointment.customer == current_user || current_user.role == 'seller'
+        @appointment.status == 'hold' && (@appointment.customer == current_user || @appointment.seller == current_user)
       end
 
       def update_params
-        current_user.role == 'seller' ? appointment_params_seller : appointment_params
+        @appointment.seller == current_user ? appointment_params_seller : appointment_params
       end
 
       def handle_successful_update
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        send_update_notification if mailtrap_enabled? && current_user.role != 'seller'
         render_success('Appointment(s) updated.', @appointment, :ok)
-      end
-
-      def mailtrap_enabled?
-        ENV.fetch('USE_MAILTRAP') == 'true'
-      end
-
-      def send_update_notification
-        @appointment.mailer_seller({ update: { old_start_date: @old_start_date, old_end_date: @old_end_date },
-                                     template_uuid: 'abaea168-a2fd-4d7c-8530-5637149234a1',
-                                     from_controller: true })
       end
 
       def unauthorized_error_message

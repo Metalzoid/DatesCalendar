@@ -160,7 +160,6 @@ GEM
       net-imap
       net-pop
       net-smtp
-    mailtrap (2.1.0)
     marcel (1.0.4)
     mini_mime (1.1.5)
     minitest (5.24.1)
@@ -321,7 +320,6 @@ DEPENDENCIES
   error_highlight (>= 0.4.0)
   importmap-rails
   jsonapi-serializer
-  mailtrap
   pg (~> 1.1)
   pg_search
   puma (>= 5.0)

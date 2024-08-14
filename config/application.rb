@@ -22,8 +22,6 @@ Bundler.require(*Rails.groups)
 
 module DatesCalendar
   class Application < Rails::Application
-    # Using Mailtrap.
-    config.useMailtrap = true
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 

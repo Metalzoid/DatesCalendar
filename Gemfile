@@ -51,8 +51,6 @@ gem 'stimulus-rails'
 
 gem 'jsonapi-serializer'
 
-gem 'mailtrap'
-
 gem 'sidekiq', '~> 7'
 
 gem 'sidekiq-failures'

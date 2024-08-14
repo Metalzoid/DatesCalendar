@@ -13,6 +13,7 @@ module Api
         return render_error('Seller id required', :bad_request) if params[:seller_id].nil?
         return render_error('Seller not found', :not_found) unless User.find_by(id: params[:seller_id])
         return render_error('Availabilities not found', :not_found) if @availabilities.empty?
+
         params_dates = {}
         params_dates[:availabilities] = @availabilities
         params_dates[:interval] = params[:interval] if params[:interval]
@@ -58,7 +59,7 @@ module Api
       end
 
       def authorize_seller!
-        return if current_admin || current_user.role == 'seller'
+        return if current_admin || ['seller', 'all'].include?(current_user.role)
 
         render_error('You need to be a Seller or Admin to perform this action.', :unauthorized)
       end

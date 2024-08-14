@@ -47,7 +47,7 @@ module Api
       end
 
       def authorization!
-        return if !current_admin.nil? || current_user.role == 'seller'
+        return if !current_admin.nil? || ['seller', 'all'].include?(current_user.role)
 
         render json: { message: 'You need to be Vendor or Admin to perform this action.' }, status: :forbidden
       end

@@ -18,20 +18,13 @@ class User < ApplicationRecord
 
   enum role: {
     customer: 0,
-    seller: 1
+    seller: 1,
+    all: 2
   }
 
   validates :firstname, :lastname, :company, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
-
-  def availabilities
-    super.where(available: true)
-  end
-
-  def unavailabilities
-    Availability.where(available: false, user: self)
-  end
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)

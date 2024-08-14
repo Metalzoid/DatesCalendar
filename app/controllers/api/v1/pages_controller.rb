@@ -5,9 +5,8 @@ module Api
     # Pages controller
     class PagesController < ApplicationController
       def index
-        api_version = Rails.configuration.x.api.version
         respond_to do |format|
-          format.html { render "api/#{api_version}/pages/index" }
+          format.html { render "api/v1/pages/index" }
         end
       end
     end
