@@ -12,7 +12,9 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
-    if resource.persisted?
+    if resource.class == String
+      redirect_to resource
+    elsif resource.persisted?
       admin_index_path
     else
       super(resource)

@@ -19,7 +19,7 @@ class User < ApplicationRecord
   enum role: {
     customer: 0,
     seller: 1,
-    all: 2
+    both: 2
   }
 
   validates :firstname, :lastname, :company, presence: true

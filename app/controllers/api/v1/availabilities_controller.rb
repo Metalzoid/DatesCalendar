@@ -59,7 +59,7 @@ module Api
       end
 
       def authorize_seller!
-        return if current_admin || ['seller', 'all'].include?(current_user.role)
+        return if current_admin || ['seller', 'both'].include?(current_user.role)
 
         render_error('You need to be a Seller or Admin to perform this action.', :unauthorized)
       end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_11_195512) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_14_100237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,9 +23,20 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_11_195512) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "jti"
+    t.string "provider", limit: 50, default: "", null: false
+    t.string "uid", limit: 50, default: "", null: false
     t.index ["email"], name: "index_admins_on_email", unique: true
     t.index ["jti"], name: "index_admins_on_jti"
     t.index ["reset_password_token"], name: "index_admins_on_reset_password_token", unique: true
+  end
+
+  create_table "api_keys", force: :cascade do |t|
+    t.string "api_key"
+    t.bigint "admin_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_api_keys_on_admin_id"
+    t.index ["api_key"], name: "index_api_keys_on_api_key", unique: true
   end
 
   create_table "appointment_services", force: :cascade do |t|
@@ -101,6 +112,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_11_195512) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "api_keys", "admins"
   add_foreign_key "appointment_services", "appointments"
   add_foreign_key "appointment_services", "services"
   add_foreign_key "appointments", "users", column: "customer_id"
