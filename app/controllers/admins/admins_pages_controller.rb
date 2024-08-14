@@ -5,7 +5,7 @@ module Admins
     before_action :authenticate_admin!
     def index
       @users = current_admin.users
-      @availabilities = @users.map(&:availabilities).flatten + @users.map(&:unavailabilities).flatten
+      @availabilities = @users.map(&:availabilities).flatten
       @appointments = @users.map(&:appointments).flatten
       @services = @users.map(&:services).flatten
       respond_to do |format|
