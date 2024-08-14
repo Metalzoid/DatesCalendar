@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   require 'sidekiq/web'
 
   api_version = Rails.configuration.x.api.version
-
+  root to: 'pages#index'
   devise_for :users,
              path: "api/#{api_version}",
              path_names: {
