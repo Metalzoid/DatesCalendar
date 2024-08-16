@@ -9,7 +9,7 @@ module Api
       before_action :set_service, only: %i[update destroy]
 
       def index
-        @services = Service.all
+        @services = Service.by_admin(current_user.admin)
         return render_success('Services founded.', { data: @services }, :ok) unless @services.empty?
 
         render_error('Services not founded.', :not_found)

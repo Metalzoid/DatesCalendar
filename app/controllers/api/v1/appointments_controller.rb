@@ -16,6 +16,7 @@ module Api
       end
 
       def show
+        return if authorization
         render_success('Appointment founded.', @appointment, :ok)
       end
 
@@ -25,6 +26,7 @@ module Api
         @appointment.seller = Service.find(@services.first).user
         if @appointment.save
           create_appointment_service_and_price(services: @services)
+          @appointment.update_price
           render_success('Appointment(s) created.', @appointment, :created)
         else
           render_error("Error. #{@appointment.errors.messages}", :unprocessable_entity)
@@ -32,8 +34,6 @@ module Api
       end
 
       def update
-        @old_start_date = @appointment.start_date
-        @old_end_date = @appointment.end_date
         if authorized_to_update?
           return handle_successful_update if @appointment.update(update_params)
 
@@ -45,8 +45,15 @@ module Api
 
       private
 
+      def authorization
+        return if [@appointment.seller_id, @appointment.customer_id].include?(current_user.id) if current_user
+        return if [@appointment.seller.admin_id, @appointment.customer.admin_id].include?(current_admin.id) if current_admin
+
+        render_error("You need to be the seller or the customer or Admin to perform this action.", :unauthorized)
+      end
+
       def appointment_params
-        params.require(:appointment).permit(:start_date, :end_date, :comment, :status, :seller_id)
+        params.require(:appointment).permit(:start_date, :end_date, :comment, :seller_id)
       end
 
       def appointment_params_seller
@@ -67,13 +74,21 @@ module Api
       def create_appointment_service_and_price(params = {})
         @services_list = params[:services]
         @services_list.each do |id|
-          AppointmentService.where(appointment: @appointment, service: Service.find(id)).destroy_all
+          @appointment.appointment_services.destroy_all
           AppointmentService.create(appointment: @appointment, service: Service.find(id))
         end
       end
 
       def authorized_to_update?
-        @appointment.status == 'hold' && (@appointment.customer == current_user || @appointment.seller == current_user)
+        if @appointment.status != 'hold' && (update_params[:start_date] || update_params[:end_date])
+          return false
+        elsif @appointment.status == 'hold' && @appointment.customer == current_user
+          return true
+        elsif @appointment.seller == current_user || @appointment.seller.admin == current_admin
+          return true
+        else
+          return false
+        end
       end
 
       def update_params
@@ -86,9 +101,7 @@ module Api
       end
 
       def unauthorized_error_message
-        "You can't modify this appointment,
-        because you're not the creator of this appointment,
-        or the appointment status is not hold."
+        "You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status."
       end
     end
   end

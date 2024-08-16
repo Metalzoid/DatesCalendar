@@ -13,8 +13,8 @@ class ApiController < ActionController::API
     return if verify_search(@query, @role)
 
     @users = find_user(@query, @role)
-    render_success("#{@role.capitalize}(s) founded.", @users, :ok) if @users.length.positive?
-    render_error("#{@role.capitalize}(s) not found.", :not_found) if @users.empty?
+    render_success("#{@role ? @role.capitalize : 'User' }(s) founded.", @users, :ok) if @users.length.positive?
+    render_error("#{@role ? @role.capitalize : 'User' }(s) not found.", :not_found) if @users.empty?
   end
 
   def render_success(message, data, status)
@@ -29,7 +29,7 @@ class ApiController < ActionController::API
 
   def verify_search(query, role)
     return render_error('Query required !', :unprocessable_entity) if query.nil? || query.empty?
-    return render_error('Role required !', :unprocessable_entity) if role.nil? || role.empty?
+    return if role.nil? || role.empty?
 
     render_error('Role not include in the users roles !', :unprocessable_entity) unless User.roles.keys.include?(role)
   end
@@ -40,7 +40,8 @@ class ApiController < ActionController::API
   end
 
   def find_user(query, role)
-    User.search_by_firstname_and_lastname(query).where(role:, admin: current_user.admin)
+    User.by_admin(current_user.admin).search_by_firstname_and_lastname(query)
+
   end
 
   protected

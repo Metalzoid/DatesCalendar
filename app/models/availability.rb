@@ -1,38 +1,62 @@
 # frozen_string_literal: true
+require "pry-byebug"
 
 class Availability < ApplicationRecord
   belongs_to :user
-  before_create :set_unavailable, unless: :skip_before_create
 
-  validates :available, inclusion: [true, false]
+  validates :available, inclusion: { in: [true, false] }
   validates :start_date, presence: true
-  validates :end_date, comparison: { greater_than: :start_date }, presence: true
-  validate :no_overlapping_dates
+  validates :end_date, presence: true, comparison: { greater_than: :start_date }
+  validate :no_overlapping_dates, unless: :skip_validation
 
-  attr_accessor :skip_before_create
+  attr_accessor :skip_validation
 
-  private
+  def self.by_admin(admin)
+    joins(:user).merge(User.by_admin(admin))
+  end
 
-  def set_unavailable
-    current_availability = Availability.where('start_date <= ? AND end_date >= ? AND available = ?', start_date,
-                                              end_date, true)
-    return if current_availability.empty? || available
+  def self.set_unavailability(start_date, end_date, user)
+    current_availability = Availability.find_by(
+      'start_date <= ? AND end_date >= ? AND available = ? AND user_id = ?',
+      start_date, end_date, true, user.id
+    )
+    return if current_availability.nil?
 
-    current_availability.each do |cur|
-      new_availability = Availability.new(start_date: end_date, end_date: cur.end_date, available: true,
-                                          user_id: cur.user_id)
-      new_availability.skip_before_create = true
-      new_availability.save!
-      cur.update(end_date: start_date)
+    new_end_availability = Availability.new(
+      start_date: end_date,
+      end_date: current_availability.end_date,
+      available: true,
+      user_id: current_availability.user_id
+    )
+    new_end_availability.skip_validation = true
+
+    new_unavailability = Availability.new(
+      start_date: start_date,
+      end_date: end_date,
+      available: false,
+      user_id: user.id
+    )
+    new_unavailability.skip_validation = true
+
+    ActiveRecord::Base.transaction do
+      new_end_availability.save!
+      new_unavailability.save!
+      current_availability.update!(end_date: start_date)
     end
   end
 
+  private
+
   def no_overlapping_dates
+    return if skip_validation || destroyed?
+
     overlapping_availability = Availability
-                               .where(user_id:)
-                               .where.not(id:)
+                               .where(user_id: user_id)
+                               .where.not(id: id)
                                .where('start_date < ? AND end_date > ?', end_date, start_date)
 
-    errors.add(:base, 'Les dates se chevauchent avec une disponibilité existante.') if overlapping_availability.exists?
+    if overlapping_availability.exists?
+      errors.add(:base, 'Dates overlap with existing availability.')
+    end
   end
 end

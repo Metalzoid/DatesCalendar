@@ -52,7 +52,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_08_14_100237) do
     t.datetime "start_date"
     t.datetime "end_date"
     t.text "comment"
-    t.integer "status"
+    t.integer "status", default: 0
     t.text "seller_comment"
     t.float "price"
     t.datetime "created_at", null: false

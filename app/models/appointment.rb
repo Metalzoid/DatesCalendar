@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-
+require "pry-byebug"
 class Appointment < ApplicationRecord
-  after_commit :after_commit_actions, unless: :skip_after_commit_actions?
+  after_save :create_availability, if: :saved_change_to_status?
+  after_save :restore_availabilities, if: :saved_change_to_status?
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'
@@ -13,51 +14,53 @@ class Appointment < ApplicationRecord
   validates :comment, presence: true, length: { maximum: 500 }
   validates :customer_id, presence: true
   validates :seller_id, presence: true
-  validate :check_availability
+  validate :check_availability, if: :new_record?
 
   enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
 
+  def self.by_admin(admin)
+    joins(:user).merge(User.by_admin(admin))
+  end
+
   def update_price
     new_price = services.sum(&:price)
-    update(price: new_price)
+    self.price = new_price
   end
 
   private
-
-  def after_commit_actions
-    return if destroyed?
-
-    ActiveRecord::Base.transaction do
-      create_availability if status == 'accepted'
-      update(status: 0) if status.nil?
-    end
-  end
-
-  def skip_after_commit_actions?
-    saved_change_to_price? || destroyed?
-  end
 
   def transform_date(date)
     I18n.l(date, format: :custom)
   end
 
   def check_availability
-    return unless status == 'hold' || status.nil?
-
-    availabilities = Availability.where(available: true)
+    availabilities = Availability.by_admin(seller.admin).where(available: true, user: seller)
     overlapping_availability = availabilities.any? do |availability|
       start_date >= availability.start_date && end_date <= availability.end_date
     end
     return if overlapping_availability
 
-    errors.add(:availability,
-               'Les dates de début et de fin doivent être incluses dans une plage de disponibilité valide.')
+    errors.add(:availability, 'Start_date and End_date necessary included in an availability range.')
   end
 
   def create_availability
-    return unless status == 'accepted'
+    return unless [saved_change_to_status&.last || status].include?('accepted')
+    @availability = Availability.set_unavailability(start_date, end_date, seller)
+  end
 
-    Availability.create!(start_date:, end_date:, available: false,
-                         user: seller)
+  def restore_availabilities
+    if [status, saved_change_to_status&.last].include?('canceled') && saved_change_to_status&.first == "accepted"
+      @before = Availability.find_by("start_date < ? AND end_date = ? AND user_id = ?", (saved_change_to_start_date&.first || start_date), (saved_change_to_start_date&.first || start_date), seller.id)
+      @availability = Availability.find_by(start_date: saved_change_to_start_date&.first || start_date,
+                                          end_date: saved_change_to_end_date&.first || end_date,
+                                          user: seller)
+      @after = Availability.find_by("start_date = ? AND end_date > ? AND user_id = ?", (saved_change_to_end_date&.first || end_date), (saved_change_to_end_date&.first || end_date), seller.id)
+
+      ActiveRecord::Base.transaction do
+        @after.update!(start_date: @before.start_date, skip_validation: true)
+        @availability.destroy!
+        @before.destroy!
+      end
+    end
   end
 end

@@ -23,10 +23,10 @@ Rails.application.routes.draw do
     get "api/#{api_version}/confirmation_success", to: 'users/confirmations#success', as: :confirmation_success
   end
 
+  get "api/#{api_version}/user_search", to: 'api#user_search'
   namespace :api do
     namespace :v1 do
       defaults format: :json do
-        get 'user_search', to: 'api#user_search'
         get 'unavailabilities', to: 'availabilities#index'
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]

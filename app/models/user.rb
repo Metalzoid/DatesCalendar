@@ -16,6 +16,8 @@ class User < ApplicationRecord
   has_many :availabilities, dependent: :destroy
   belongs_to :admin
 
+  scope :by_admin, ->(admin) { where(admin: admin) }
+
   enum role: {
     customer: 0,
     seller: 1,

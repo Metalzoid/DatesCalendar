@@ -6,7 +6,7 @@ class CreateAppointments < ActiveRecord::Migration[7.1]
       t.datetime :start_date
       t.datetime :end_date
       t.text :comment
-      t.integer :status
+      t.integer :status, default: 0
       t.text :seller_comment
       t.float :price
 
