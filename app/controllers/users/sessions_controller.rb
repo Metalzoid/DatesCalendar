@@ -4,19 +4,20 @@ module Users
   class SessionsController < Devise::SessionsController
     include RackSessionsFix
     respond_to :json
-    # before_action :configure_sign_in_params
 
-    # GET /resource/sign_in
-    # def new
-    #   super
-    # end
+    def new
+      super
+    end
 
-    # POST /resource/sign_in
-    # def create
-    #   super
-    # end
+    # @summary Login as User
+    # @no_auth
+    #
+    # @request_body The user to be created. At least include an `email`. [User!]
+    # @request_body_example basic user [Hash] {user: {email: "test@gmail.com", password: "azerty"}}
+    def create
+      super
+    end
 
-    # DELETE /resource/sign_out
     def destroy
       user = current_user
       signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
