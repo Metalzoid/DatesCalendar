@@ -7,10 +7,14 @@ module Api
       before_action :authenticate_user!
       before_action :authorization!, only: %i[create update destroy]
       before_action :set_service, only: %i[update destroy]
+      # @summary Returns a list of Services.
+      #
+      # @parameter offset(query) [Integer]  Used for pagination of response data (default: 25 items per response). Specifies the offset of the next block of data to receive.
+      # @parameter X-front(header) [String] Header for identify the front.
 
       def index
         @services = Service.by_admin(current_user.admin)
-        return render_success('Services founded.', { data: @services }, :ok) unless @services.empty?
+        return render_success('Services founded.', @services, :ok) unless @services.empty?
 
         render_error('Services not founded.', :not_found)
       end

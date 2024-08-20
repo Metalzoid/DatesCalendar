@@ -2,8 +2,9 @@
 
 Rails.application.routes.draw do
   require 'sidekiq/web'
-
   api_version = Rails.configuration.x.api.version
+
+
   root to: 'pages#index'
   devise_for :users,
              path: "api/#{api_version}",
@@ -26,6 +27,7 @@ Rails.application.routes.draw do
   get "api/#{api_version}/user_search", to: 'api#user_search'
   namespace :api do
     namespace :v1 do
+
       defaults format: :json do
         get 'unavailabilities', to: 'availabilities#index'
         resources :appointments, only: %i[index show create update]
@@ -45,6 +47,10 @@ Rails.application.routes.draw do
     registration: 'signup'
   }
 
+  authenticate :admin do
+    mount OasRails::Engine, at: '/docs'
+  end
+  
   get 'admin', to: 'admins/admins_pages#index', as: :admin_index
 
   get 'up', to: 'rails/health#show', as: :rails_health_check

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require "pry-byebug"
 
 class Availability < ApplicationRecord
   belongs_to :user
