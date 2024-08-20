@@ -63,6 +63,8 @@ gem 'simple_form', github: 'heartcombo/simple_form'
 
 gem 'sassc-rails'
 
+gem "bootstrap", '~> 5.3.3'
+
 gem 'pg_search'
 
 gem 'omniauth-rails_csrf_protection'

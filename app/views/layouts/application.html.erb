@@ -4,10 +4,13 @@
   <title>API</title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-  <%= stylesheet_link_tag "application", media: 'both', "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 </head>
 <body>
-  <%= yield %>
+  <div class="d-flex">
+    <%= render "shared/navbar" %>
+    <%= yield %>
+  </div>
 </body>
 </html>

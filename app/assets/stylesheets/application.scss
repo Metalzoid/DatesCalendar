@@ -1,1 +1,10 @@
+// Import Bootstrap
+@import "bootstrap";
+// Import external configuration bootstrap
+@import "config/fonts";
+@import "config/colors";
+@import "config/bootstrap_variables";
+// Import custom style
 @import "admin/index";
+@import "pages/index";
+@import "components/index";
