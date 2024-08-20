@@ -24,7 +24,7 @@ class User < ApplicationRecord
     both: 2
   }
 
-  validates :firstname, :lastname, :company, presence: true
+  validates :firstname, :lastname, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
 

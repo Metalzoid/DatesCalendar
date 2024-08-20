@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 module Api
   module V1
     # Appointment controller
@@ -22,6 +21,7 @@ module Api
 
       def create
         @appointment = Appointment.new(appointment_params)
+        calculate_end_date unless params[:appointment][:end_date]
         @appointment.customer = current_user
         @appointment.seller = Service.find(@services.first).user
         if @appointment.save
@@ -44,6 +44,14 @@ module Api
       end
 
       private
+
+      def calculate_end_date
+        time = 0
+        @services.each do |id|
+          time += Service.find(id).time
+        end
+        @appointment.end_date = @appointment.start_date.to_datetime + time.minutes
+      end
 
       def authorization
         return if [@appointment.seller_id, @appointment.customer_id].include?(current_user.id) if current_user

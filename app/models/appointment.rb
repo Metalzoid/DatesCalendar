@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require "pry-byebug"
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
@@ -10,7 +9,7 @@ class Appointment < ApplicationRecord
   has_many :services, through: :appointment_services
 
   validates :start_date, presence: true, comparison: { greater_than: Time.now }
-  validates :end_date, comparison: { greater_than: :start_date }, presence: true
+  validates :end_date, comparison: { greater_than: :start_date }
   validates :comment, presence: true, length: { maximum: 500 }
   validates :customer_id, presence: true
   validates :seller_id, presence: true
