@@ -24,7 +24,7 @@ class Rack::Attack
   # Throttle all requests by IP (60rpm)
   #
   # Key: "rack::attack:#{Time.now.to_i/:period}:req/ip:#{req.ip}"
-  throttle('req/ip', limit: 2, period: 5.minutes) do |req|
+  throttle('req/ip', limit: 300, period: 24.hours) do |req|
     req.ip # unless req.path.start_with?('/assets')
   end
 
@@ -41,7 +41,7 @@ class Rack::Attack
   #
   # Key: "rack::attack:#{Time.now.to_i/:period}:logins/ip:#{req.ip}"
   throttle('logins/ip', limit: 5, period: 20.seconds) do |req|
-    if req.path == ['/login', '/a'] && req.post?
+    if req.path == '/api/v1/login' && req.post?
       req.ip
     end
   end
