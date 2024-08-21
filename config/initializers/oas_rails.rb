@@ -12,7 +12,7 @@ OasRails.configure do |config|
   config.servers = [{ url: 'http://localhost:3001', description: 'Local' }]
 
   # Tag Information. For more details follow: https://spec.openapis.org/oas/latest.html#tag-object
-  config.tags = [{ name: "Services", description: "Manage the `amazing` Services table." }]
+  config.tags = [{ name: "services", description: "Manage the `amazing` Services." }]
 
   # Optional Settings (Uncomment to use)
 
@@ -36,7 +36,7 @@ OasRails.configure do |config|
 
   # Whether to authenticate all routes by default
   # Default is true; set to false if you don't want all routes to include secutrity schemas by default
-  # config.authenticate_all_routes_by_default = true
+  config.authenticate_all_routes_by_default = false
 
   # Default security schema used for authentication
   # Choose a predefined security schema
@@ -62,7 +62,7 @@ OasRails.configure do |config|
   # The default responses errors are setted only if the action allow it.
   # Example, if you add forbidden then it will be added only if the endpoint requires authentication.
   # Example: not_found will be setted to the endpoint only if the operation is a show/update/destroy action.
-  # config.set_default_responses = true
+  # config.set_default_responses = false
   # config.possible_default_responses = [:not_found, :unauthorized, :forbidden]
   # config.response_body_of_default = { message: String }
 end

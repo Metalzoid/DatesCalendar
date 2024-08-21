@@ -8,17 +8,30 @@ module Api
       before_action :set_availability, only: %i[update destroy]
       before_action :authorize_seller!, only: %i[update destroy]
 
+      # @summary Returns the list of Availabilities or Unavailabilities.
+      # - Filtered by Admin.
+      # - Required: Seller ID.
+      # - Optionnal: Format Availabilities by interval of minutes.
+      # - URL exemple: /api/v1/availabilities?seller_id=1&interval=30
+
+      # @response Availabilities founded.(200) [Hash] {message: String, data: Hash, data[availabilities]: Hash, data[dates]: Hash}
+      # @response Availabilities not founded.(404) [Hash] {message: String}
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Seller_id required.(400) [Hash] {message: String}
+      # @response Seller not found.(404) [Hash] {message: String}
+      # @tags availabilities
+      # @auth [bearer_jwt]
       def index
         @availabilities = fetch_availabilities(params[:seller_id])
-        return render_error('Seller id required', :bad_request) if params[:seller_id].nil?
-        return render_error('Seller not found', :not_found) unless User.find_by(id: params[:seller_id])
-        return render_error("#{check_route_path? ? 'Availabilities' : 'Unavailabilities' } not found", :not_found) if @availabilities.empty?
+        return render_error('Seller id required.', :bad_request) if params[:seller_id].nil?
+        return render_error('Seller not found.', :not_found) unless User.find_by(id: params[:seller_id])
+        return render_error("#{check_route_path? ? 'Availabilities' : 'Unavailabilities' } not founded.", :not_found) if @availabilities.empty?
 
         params_dates = {}
         params_dates[:availabilities] = @availabilities
         params_dates[:interval] = params[:interval] if params[:interval]
         @dates = generate_dates(params_dates) if @availabilities
-        render_success('Availabilities founded.', { data: { availabilities: @availabilities, dates: @dates } }, :ok)
+        render_success('Availabilities founded.', { availabilities: @availabilities, dates: @dates }, :ok)
       end
 
       def create
@@ -68,9 +81,7 @@ module Api
       end
 
       def fetch_availabilities(seller_id)
-        availabilities = Availability.where(available: check_route_path?, user_id: seller_id)
-        availabilities = availabilities.where(user_id: params[:user]) if params[:user]
-        availabilities
+        Availability.by_admin(User.find(seller_id).admin).where(available: check_route_path?, user_id: seller_id)
       end
 
       def generate_dates(params = {})
