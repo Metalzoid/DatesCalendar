@@ -73,7 +73,7 @@ gem 'omniauth-github'
 
 gem 'omniauth-google-oauth2'
 
-gem 'oas_rails', '~> 0.4.4'
+gem 'oas_rails', '~> 0.4.5'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

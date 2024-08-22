@@ -8,12 +8,14 @@ module Api
       before_action :set_availability, only: %i[update destroy]
       before_action :authorize_seller!, only: %i[update destroy]
 
-      # @summary Returns the list of Availabilities or Unavailabilities.
-      # - Filtered by Admin.
+      # @summary Returns the list of Availabilities.
       # - Required: Seller ID.
+      # - Optionnal: Available status (true || false). Default: true
       # - Optionnal: Format Availabilities by interval of minutes.
-      # - URL exemple: /api/v1/availabilities?seller_id=1&interval=30
-
+      # - URL exemple: /api/v1/availabilities?seller_id=1&interval=30&available=false
+      # @parameter seller_id(query) [Integer] The seller ID.
+      # @parameter available(query) [Boolean] The available status.
+      # @parameter interval(query) [Integer] The interval expressed in minutes for split dates.
       # @response Availabilities founded.(200) [Hash] {message: String, data: Hash, data[availabilities]: Hash, data[dates]: Hash}
       # @response Availabilities not founded.(404) [Hash] {message: String}
       # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
@@ -22,10 +24,11 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def index
-        @availabilities = fetch_availabilities(params[:seller_id])
+        params[:available] ? @available = params[:available] : @available = true
         return render_error('Seller id required.', :bad_request) if params[:seller_id].nil?
         return render_error('Seller not found.', :not_found) unless User.find_by(id: params[:seller_id])
-        return render_error("#{check_route_path? ? 'Availabilities' : 'Unavailabilities' } not founded.", :not_found) if @availabilities.empty?
+        @availabilities = fetch_availabilities(params[:seller_id])
+        return render_error("Availabilities or Unavailabilities not founded.", :not_found) if @availabilities.empty?
 
         params_dates = {}
         params_dates[:availabilities] = @availabilities
@@ -34,6 +37,15 @@ module Api
         render_success('Availabilities founded.', { availabilities: @availabilities, dates: @dates }, :ok)
       end
 
+      # @summary Create an Availability.
+      # - Optionnal: Min and Max time for split Availabilities.
+      # @request_body The availability to be created [Hash] {availability: {start_date: String, end_date: String, available: String}, time: { min_hour: Integer, min_minutes: Integer, max_hour: Integer, max_minutes: Integer }}
+      # @request_body_example A complete availability. [Hash] {availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}, time: {min_hour: 7, min_minutes: 30, max_hour: 19, max_minutes: 0}}
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Availability created.(201) [Hash] {message: String, data: Hash}
+      # @response Can't create availability.(422) [Hash] {message: String}
+      # @tags availabilities
+      # @auth [bearer_jwt]
       def create
         return render_error('You need to be the Seller or Admin to perform this action.', :unauthorized) unless current_admin || ['seller', 'both'].include?(current_user.role)
 
@@ -42,21 +54,34 @@ module Api
         if params[:time] && @availability.valid?
           handle_time_params
         elsif @availability.save
-          render_success('Availability created.', { data: @availability }, :created)
+          render_success('Availability created.', @availability, :created)
         else
           render_error("Can't create availability. #{@availability.errors.messages}", :unprocessable_entity)
         end
       end
 
+      # @summary Update an Availability.
+      # @request_body The availability to be updated [Hash] {availability: {start_date: String, end_date: String, available: String}}
+      # @request_body_example A complete availability. [Hash] {availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}}
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Availability {{id}} could not be found.(404) [Hash] {message: String}
+      # @tags availabilities
+      # @auth [bearer_jwt]
       def update
-
-        return render_success('Availability updated.', { data: @availability }, :ok) if @availability.update(availability_params)
+        return render_success('Availability updated.', @availability, :ok) if @availability.update(availability_params)
 
         render_error("Can't update availability. #{@availability.errors.messages}", :unprocessable_entity)
       end
 
+      # @summary Destroy an Availability.
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Availability {{id}} could not be found.(404) [Hash] {message: String}
+      # @response Availability destroyed.(200) [Hash] {message: String, data: Hash}
+      # @response Can't destroy availability.(422) [Hash] {message: String}
+      # @tags availabilities
+      # @auth [bearer_jwt]
       def destroy
-        return render_success('Availability destroyed.', { data: @availability }, :ok) if @availability.destroy
+        return render_success('Availability destroyed.', @availability, :ok) if @availability.destroy
 
         render_error("Can't destroy availability. #{@availability.errors.messages}", :unprocessable_entity)
       end
@@ -81,16 +106,16 @@ module Api
       end
 
       def fetch_availabilities(seller_id)
-        Availability.by_admin(User.find(seller_id).admin).where(available: check_route_path?, user_id: seller_id)
+        Availability.by_admin(User.find(seller_id).admin).where(available: @available, user_id: seller_id)
       end
 
       def generate_dates(params = {})
         if params[:interval]
-          params[:availabilities].where(available: check_route_path?).flat_map do |availability|
+          params[:availabilities].where(available: @available).flat_map do |availability|
             split_get_availability(availability.start_date, availability.end_date, params[:interval].to_i)
           end
         else
-          params[:availabilities].where(available: check_route_path?).map do |availability|
+          params[:availabilities].where(available: @available).map do |availability|
             { from: availability.start_date, to: availability.end_date }
           end
         end
@@ -104,10 +129,6 @@ module Api
           start_date = interval_end
         end
         intervals
-      end
-
-      def check_route_path?
-        request.fullpath.include?('unavailabilities') ? false : true
       end
 
       def handle_time_params

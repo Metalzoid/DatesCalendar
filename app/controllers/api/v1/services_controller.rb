@@ -9,7 +9,6 @@ module Api
       before_action :set_service, only: %i[update destroy]
 
       # @summary Returns the list of Services.
-      # - Filtered by Admin.
       # - Optionnal: Filter by seller ID.
       # - URL exemple: /api/v1/services?seller_id=1
       # @response Services founded.(200) [Hash] {message: String, data: Hash}
@@ -44,7 +43,6 @@ module Api
       end
 
       # @summary Update a service.
-      # - Update possible only by the creator or the admin.
       # - Time is minutes only.
       # @request_body The service to be created. [Hash] {service: {title: String, price: Float, time: Integer}}
       # @request_body_example A complete Service. [Hash] {service: {title: 'Massage', price: 44.99, time: 30}}
@@ -61,7 +59,6 @@ module Api
       end
 
       # @summary Destroy a service.
-      # - Destroy possible only by the creator or the admin.
       # @response Service destroyed.(200) [Hash] {message: String, data: Hash}
       # @response Can't destroy service.(422) [Hash] {message: String}
       # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}

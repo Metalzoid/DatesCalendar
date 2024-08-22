@@ -7,6 +7,12 @@ module Api
       before_action :set_appointment, only: %i[show update]
       before_action :set_services_list, only: %i[create update]
 
+      # @summary Returns the list of Appointment.
+      # @response Appointments founded.(200) [Hash] {message: String, data: Hash}
+      # @response Appointments not founded.(404) [Hash] {message: String}
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # @tags appointments
+      # @auth [bearer_jwt]
       def index
         @appointments = Appointment.where('customer_id = ? OR seller_id = ?', current_user.id, current_user.id)
         return render_success('Appointment(s) founded.', @appointments, :ok) unless @appointments.empty?
@@ -14,11 +20,29 @@ module Api
         render_error('Appointment(s) not founded.', :not_found)
       end
 
+      # @summary Returns an Appointment.
+      # @response Appointment founded.(200) [Hash] {message: String, data: Hash}
+      # @response Appointment {{id}} could not be found.(404) [Hash] {message: String}
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # @tags appointments
+      # @auth [bearer_jwt]
       def show
         return if authorization
+
         render_success('Appointment founded.', @appointment, :ok)
       end
 
+      # @summary Create an Appointment.
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # - end_date it's autocalculated by services list by default.
+      # -Optional: End_date can be overrided.
+      # @request_body The Appointment to be created [Hash] {appointment: {start_date: String, end_date: String, comment: String}, appointment_services: Integer }
+      # @request_body_example A complete availability. [Hash] {appointment: {start_date: '14/07/2024 10:00', comment: 'For my son.'}, appointment_services: [1, 2]}
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Appointment created.(201) [Hash] {message: String, data: Hash}
+      # @response Can't create appointment.(422) [Hash] {message: String}
+      # @tags appointments
+      # @auth [bearer_jwt]
       def create
         @appointment = Appointment.new(appointment_params)
         calculate_end_date unless params[:appointment][:end_date]
@@ -27,9 +51,9 @@ module Api
         if @appointment.save
           create_appointment_service_and_price(services: @services)
           @appointment.update_price
-          render_success('Appointment(s) created.', @appointment, :created)
+          render_success('Appointment created.', @appointment, :created)
         else
-          render_error("Error. #{@appointment.errors.messages}", :unprocessable_entity)
+          render_error("Can't create appointment #{@appointment.errors.messages}", :unprocessable_entity)
         end
       end
 

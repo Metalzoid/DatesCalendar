@@ -27,9 +27,7 @@ Rails.application.routes.draw do
   get "api/#{api_version}/user_search", to: 'api#user_search'
   namespace :api do
     namespace :v1 do
-
       defaults format: :json do
-        get 'unavailabilities', to: 'availabilities#index'
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
         resources :services, only: %i[index create update destroy]
@@ -50,7 +48,7 @@ Rails.application.routes.draw do
   authenticate :admin do
     mount OasRails::Engine, at: '/docs'
   end
-  
+
   get 'admin', to: 'admins/admins_pages#index', as: :admin_index
 
   get 'up', to: 'rails/health#show', as: :rails_health_check
