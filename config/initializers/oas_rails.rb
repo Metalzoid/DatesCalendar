@@ -3,7 +3,7 @@ OasRails.configure do |config|
   # Basic Information about the API
   config.info.title = 'DatesCalendar'
   config.info.summary = 'A simple Appointment API.'
-  config.info.description = 'Coucou BG <3'
+  config.info.description = "[Go to Admininistration interface](/admin)"
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
@@ -17,7 +17,7 @@ OasRails.configure do |config|
   # Optional Settings (Uncomment to use)
 
   # Extract default tags of operations from namespace or controller. Can be set to :namespace or :controller
-  # config.default_tags_from = :namespace
+  config.default_tags_from = :controller
 
   # Automatically detect request bodies for create/update methods
   # Default: true

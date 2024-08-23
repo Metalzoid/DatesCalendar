@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   api_version = Rails.configuration.x.api.version
 
 
-  root to: 'pages#index'
+  root to: redirect('/docs')
   devise_for :users,
              path: "api/#{api_version}",
              path_names: {
@@ -45,9 +45,7 @@ Rails.application.routes.draw do
     registration: 'signup'
   }
 
-  authenticate :admin do
-    mount OasRails::Engine, at: '/docs'
-  end
+  mount OasRails::Engine, at: '/docs'
 
   get 'admin', to: 'admins/admins_pages#index', as: :admin_index
 
