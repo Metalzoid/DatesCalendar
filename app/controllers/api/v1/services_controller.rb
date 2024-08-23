@@ -4,7 +4,6 @@ module Api
   module V1
     # Services controller
     class ServicesController < ApiController
-      before_action :authenticate_user!
       before_action :authorization!, only: %i[create update destroy]
       before_action :set_service, only: %i[update destroy]
 

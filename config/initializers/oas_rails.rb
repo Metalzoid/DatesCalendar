@@ -1,18 +1,18 @@
 # config/initializers/oas_rails.rb
 OasRails.configure do |config|
   # Basic Information about the API
-  config.info.title = 'OasRails'
-  config.info.summary = 'OasRails: Automatic Interactive API Documentation for Rails'
-  config.info.description = 'coucu'
+  config.info.title = 'DatesCalendar'
+  config.info.summary = 'A simple Appointment API.'
+  config.info.description = 'Coucou BG <3'
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
-  config.servers = [{ url: 'http://localhost:3001', description: 'Local' }]
+  config.servers = [{ url: 'http://localhost:3001', description: 'Development' }, { url: 'http://datescalendar.fr', description: 'Production'}]
 
   # Tag Information. For more details follow: https://spec.openapis.org/oas/latest.html#tag-object
-  config.tags = [{ name: "services", description: "Manage the `amazing` Services." }]
+  # config.tags = [{ name: "services", description: "Manage the `amazing` Services." }]
 
   # Optional Settings (Uncomment to use)
 
@@ -25,7 +25,7 @@ OasRails.configure do |config|
 
   # Automatically detect responses from controller renders
   # Default: true
-  # config.autodiscover_responses = false
+  config.autodiscover_responses = false
 
   # API path configuration if your API is under a different namespace
   config.api_path = "/api/v1/"

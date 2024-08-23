@@ -2,24 +2,23 @@
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
-    # before_action :configure_sign_up_params, only: [:create]
-    # before_action :configure_account_update_params, only: [:update]
-
-    # GET /resource/sign_up
-    # def new
-    #   super
-    # end
-
-    # POST /resource
+    # @summary Register new User
+    # - Necessary Admin API KEY.
+    # - Role can be: seller, customer, both.
+    # - Password minimum length: 6 chars.
+    # - Optionnal: company.
+    # @parameter APIKEY(header) [String!] The admin APIKEY.
+    # @request_body The user informations. At least include an `email`. [Hash!] {user: {email: String, password: String, firstname: String, lastname: String, company: String, role: String}}
+    # @request_body_example basic user [Hash] {user: {email: "test@gmail.com", password: "azerty", firstname: "Pedro", lastname: "Pedro", role: "seller"}}
+    # @response Logged in Successfully.(200) [Hash] {message: String, data: Hash}
+    # @response User couldn't be created successfully. Admin must exist and Admin can't be blank.(422) [Hash] {message: String}
+    # @tags Users
     def create
       @user = build_resource(sign_up_params)
-      if request.headers['Authorization'].present?
-        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
-        current_api_admin = Admin.find(jwt_payload['sub'])
-      elsif request.headers['APIKEY'].present?
+      if request.headers['APIKEY'].present?
         current_api_admin = ApiKey.find_by(api_key: request.headers['APIKEY']).admin
+        @user.admin = current_api_admin
       end
-      @user.admin = current_api_admin
       @user.save
       yield resource if block_given?
       if resource.persisted?

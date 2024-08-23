@@ -3,7 +3,6 @@ module Api
   module V1
     # Appointment controller
     class AppointmentsController < ApiController
-      before_action :authenticate_user!
       before_action :set_appointment, only: %i[show update]
       before_action :set_services_list, only: %i[create update]
 
@@ -33,7 +32,6 @@ module Api
       end
 
       # @summary Create an Appointment.
-      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
       # - end_date it's autocalculated by services list by default.
       # -Optional: End_date can be overrided.
       # @request_body The Appointment to be created [Hash] {appointment: {start_date: String, end_date: String, comment: String}, appointment_services: Integer }
@@ -49,7 +47,7 @@ module Api
         @appointment.customer = current_user
         @appointment.seller = Service.find(@services.first).user
         if @appointment.save
-          create_appointment_service_and_price(services: @services)
+          create_appointment_services(services: @services)
           @appointment.update_price
           render_success('Appointment created.', @appointment, :created)
         else
@@ -57,13 +55,27 @@ module Api
         end
       end
 
+      # @summary Update an Appointment.
+      # - start_date greater than now.
+      # - end_date greater than start_date.
+      # - seller_comment optionnal.
+      # - status is hold on creating Appointment.
+      # - status can be accepted, finished, canceled.
+      # - Can't modifying date after accepted status.
+      # @request_body The Appointment to be updated [Hash] {appointment: {start_date: DateTime, end_date: DateTime, comment: String, status: String, seller_comment: String, price: Float}, appointment_services: Integer}
+      # @request_body_example A complete Appointment. [Hash] {appointment: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 18:00', comment: 'For my son.', status: 'accepted', seller_comment: 'Welcome !', price: 14.99 }, appointment_services: [1,2]}
+      # @response Appointment updated.(200) [Hash] {message: String, data: Hash}
+      # @response You need to be the seller or the customer or Admin to perform this action.(401) [Hash] {message: String}
+      # @response You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status.(403) [Hash] {message: String}
+      # @tags appointments
+      # @auth [bearer_jwt]
       def update
         if authorized_to_update?
           return handle_successful_update if @appointment.update(update_params)
 
           render_error("Error. #{@appointment.errors.messages}", :unprocessable_entity)
         else
-          render_error("Error. #{unauthorized_error_message}", :unprocessable_entity)
+          render_error(unauthorized_error_message, :unprocessable_entity)
         end
       end
 
@@ -89,7 +101,7 @@ module Api
       end
 
       def appointment_params_seller
-        params.require(:appointment).permit(:start_date, :end_date, :status, :status, :seller_comment)
+        params.require(:appointment).permit(:start_date, :end_date, :status, :seller_comment)
       end
 
       def set_appointment
@@ -103,7 +115,7 @@ module Api
         @services = params[:appointment_services]
       end
 
-      def create_appointment_service_and_price(params = {})
+      def create_appointment_services(params = {})
         @services_list = params[:services]
         @services_list.each do |id|
           @appointment.appointment_services.destroy_all
@@ -129,7 +141,7 @@ module Api
 
       def handle_successful_update
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        render_success('Appointment(s) updated.', @appointment, :ok)
+        render_success('Appointment updated.', @appointment, :ok)
       end
 
       def unauthorized_error_message

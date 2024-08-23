@@ -2,12 +2,22 @@
 
 # Controller for API USE RENDER JSON ##
 class ApiController < ActionController::API
+  before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActionController::UnpermittedParameters, with: :handle_errors
 
   # URL = url/user_search?query=NAME&role=ROLE
-  # search by pgsearch (firstname and lastname column) + admin_id has equal from user request
+  # @summary Search a User
+  # - Required: query. Query is a part of the firstname or lastname of a user.
+  # - Optional: role.
+  # @parameter query(query) [String] The part of firstname or lastname of the user.
+  # @response Role not include in the users roles !.(422) [Hash] {message: String}
+  # @response Users founded.(200) [Hash] {message: String, data: Hash}
+  # @response Users not found.(404) [Hash] {message: String}
+  # @tags Users
+  # @auth [bearer_jwt]
   def user_search
+
     @query = params[:query].downcase unless params[:query].nil?
     @role = params[:role].downcase unless params[:role].nil?
     return if verify_search(@query, @role)
@@ -41,7 +51,6 @@ class ApiController < ActionController::API
 
   def find_user(query, role)
     User.by_admin(current_user.admin).search_by_firstname_and_lastname(query)
-
   end
 
   protected

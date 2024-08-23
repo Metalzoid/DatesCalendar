@@ -4,7 +4,6 @@ module Api
   module V1
     # Availabilities controller
     class AvailabilitiesController < ApiController
-      before_action :authenticate_user!
       before_action :set_availability, only: %i[update destroy]
       before_action :authorize_seller!, only: %i[update destroy]
 
