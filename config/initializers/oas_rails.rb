@@ -21,11 +21,11 @@ OasRails.configure do |config|
 
   # Automatically detect request bodies for create/update methods
   # Default: true
-  config.autodiscover_request_body = false
+  # config.autodiscover_request_body = false
 
   # Automatically detect responses from controller renders
   # Default: true
-  config.autodiscover_responses = false
+  # config.autodiscover_responses = false
 
   # API path configuration if your API is under a different namespace
   config.api_path = "/api/v1/"

@@ -16,7 +16,7 @@ module Api
       # @parameter seller_id(query) [Integer] The seller ID.
       # @parameter available(query) [Boolean] The available status.
       # @parameter interval(query) [Integer] The interval expressed in minutes for split dates.
-      # @response Availabilities founded.(200) [Hash] {message: String, data: Hash, data[availabilities]: Hash, data[dates]: Hash}
+      # @response Availabilities founded.(200) [Hash] {message: String, data: {availabilities: Array<String>, dates: Array<String>}}
       # @response Availabilities not founded.(404) [Hash] {message: String}
       # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
       # @response Seller_id required.(400) [Hash] {message: String}
