@@ -2,6 +2,7 @@
 
 Rails.application.routes.draw do
   require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
   mount OasRails::Engine, at: '/docs' unless Rails.env.production?
   api_version = Rails.configuration.x.api.version
   if Rails.env.production?
