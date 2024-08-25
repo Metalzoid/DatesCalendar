@@ -9,7 +9,7 @@ OasRails.configure do |config|
   config.info.contact.url = 'http://florian-gagnaire.dev'
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
-  config.servers = [{ url: 'http://localhost:3001', description: 'Development' }, { url: 'http://datescalendar.fr', description: 'Production'}]
+  config.servers = [{ url: 'https://datescalendar.fr', description: 'Production'}]
 
   # Tag Information. For more details follow: https://spec.openapis.org/oas/latest.html#tag-object
   # config.tags = [{ name: "services", description: "Manage the `amazing` Services." }]
