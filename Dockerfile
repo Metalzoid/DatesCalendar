@@ -28,7 +28,7 @@ COPY . .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
-RUN bundle exec sidekiq -C config/sidekiq.yml
+
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
