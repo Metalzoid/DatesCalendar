@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    command: bash -c "bundle exec puma -C config/puma.rb"
+    depends_on:
+      - redis
+      - sidekiq
+
+  sidekiq:
+    build: .
+    command: bash -c "bundle exec sidekiq -C config/sidekiq.yml"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:6.2
