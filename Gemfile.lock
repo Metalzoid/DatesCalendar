@@ -402,7 +402,6 @@ DEPENDENCIES
   sidekiq (~> 7)
   sidekiq-failures
   simple_form!
-  sprockets (~> 4.0)
   stimulus-rails
   turbo-rails
   tzinfo-data
