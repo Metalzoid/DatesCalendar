@@ -3,9 +3,11 @@
 Rails.application.routes.draw do
   require 'sidekiq/web'
   api_version = Rails.configuration.x.api.version
-
-
-  root to: redirect('/docs')
+  if Rails.env.production?
+    root to: redirect('/admin')
+  else
+    root to: redirect('/docs')
+  end
   devise_for :users,
              path: "api/#{api_version}",
              path_names: {
@@ -45,7 +47,7 @@ Rails.application.routes.draw do
     registration: 'signup'
   }
 
-  mount OasRails::Engine, at: '/docs'
+  mount OasRails::Engine, at: '/docs' unless Rails.env.production?
 
   get 'admin', to: 'admins/admins_pages#index', as: :admin_index
 
