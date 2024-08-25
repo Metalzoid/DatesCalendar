@@ -46,7 +46,6 @@ module DatesCalendar
     config.middleware.use ActionDispatch::Flash
     config.middleware.use ::Rack::MethodOverride
 
-    config.active_job.queue_adapter = :sidekiq
     config.api_only = false
     config.time_zone = 'Europe/Paris'
     config.active_record.default_timezone = :local

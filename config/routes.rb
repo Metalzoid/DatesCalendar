@@ -1,15 +1,11 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  require 'sidekiq/web'
-  # mount Sidekiq::Web => '/sidekiq'
-  mount OasRails::Engine, at: '/docs' unless Rails.env.production?
+  mount OasRails::Engine, at: '/docs'
   api_version = Rails.configuration.x.api.version
-  if Rails.env.production?
-    root to: redirect('/admin')
-  else
-    root to: redirect('/docs')
-  end
+
+  root to: redirect('/docs')
+
   devise_for :users,
              path: "api/#{api_version}",
              path_names: {

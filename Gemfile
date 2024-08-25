@@ -53,10 +53,6 @@ gem 'stimulus-rails'
 
 gem 'jsonapi-serializer'
 
-gem 'sidekiq', '~> 7'
-
-gem 'sidekiq-failures'
-
 gem 'autoprefixer-rails'
 
 gem 'simple_form', github: 'heartcombo/simple_form'
@@ -77,11 +73,12 @@ gem "chartkick"
 
 gem 'sprockets', '~> 4.0'
 
+gem 'oas_rails', '~> 0.5.0'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri mswin mswin64 mingw x64_mingw]
   gem 'dotenv-rails'
-  gem 'oas_rails', '~> 0.5.0'
 end
 
 group :development do
