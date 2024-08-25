@@ -69,15 +69,13 @@ gem 'pg_search'
 
 gem 'omniauth-rails_csrf_protection'
 
-gem 'omniauth-github'
-
 gem 'omniauth-google-oauth2'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri mswin mswin64 mingw x64_mingw]
   gem 'dotenv-rails'
-  gem 'oas_rails', '~> 0.4.5'
+  gem 'oas_rails', '~> 0.5.0'
 end
 
 group :development do

@@ -9,7 +9,7 @@ APP_ROOT = File.expand_path('..', __dir__)
 
 FileUtils.chdir APP_ROOT do
   Rails.application.eager_load!  # Load Rails application
-  Admin.destroy_all               # Destroy all records in the Admin model
+  Admin.destroy_all              # Destroy all records in the Admin model
 
   puts "ALL DONE !"
 end
