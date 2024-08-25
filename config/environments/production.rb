@@ -91,9 +91,15 @@ Rails.application.configure do
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
-  config.action_mailer.perform_deliveries = false
+  config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_url_options = { host: 'http://pg8csckk04kg4s8c4c440ww4.51.158.62.64.sslip.io', protocol: 'https' }
+  config.action_mailer.default_url_options = { host: 'http://datescalendar.fr', protocol: 'https' }
+
+  config.action_mailer.delivery_method = :postmark
+
+  config.action_mailer.postmark_settings = {
+    api_token: ENV['POSTMARK_API_TOKEN']
+  }
 
   # This also configures session_options for use below
   config.session_store :cookie_store, key: '_interslice_session'
