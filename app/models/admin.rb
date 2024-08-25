@@ -35,7 +35,7 @@ class Admin < ApplicationRecord
     ApiKey.create!(admin: self)
   end
 
-  def send_devise_notification(notification, *args)
-    devise_mailer.send(notification, self, *args).deliver_later
-  end
+  #def send_devise_notification(notification, *args)
+    #devise_mailer.send(notification, self, *args).deliver_later
+  #end
 end
