@@ -2,6 +2,7 @@
 
 Rails.application.routes.draw do
   require 'sidekiq/web'
+  mount OasRails::Engine, at: '/docs' unless Rails.env.production?
   api_version = Rails.configuration.x.api.version
   if Rails.env.production?
     root to: redirect('/admin')
@@ -22,14 +23,10 @@ Rails.application.routes.draw do
              },
              defaults: { format: :json }
 
-  devise_scope :user do
-    get "api/#{api_version}/confirmation_success", to: 'users/confirmations#success', as: :confirmation_success
-  end
-
-  get "api/#{api_version}/user_search", to: 'api#user_search'
   namespace :api do
     namespace :v1 do
       defaults format: :json do
+        get 'user_search', to: 'api#user_search'
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
         resources :services, only: %i[index create update destroy]
@@ -40,16 +37,22 @@ Rails.application.routes.draw do
   devise_for :admins, path: "api/#{api_version}/admin", controllers: {
     sessions: 'admins/sessions',
     registrations: 'admins/registrations',
-    omniauth_callbacks: 'admins/omniauth_callbacks'
+    omniauth_callbacks: 'admins/omniauth_callbacks',
+    confirmations: 'admins/confirmations'
   }, path_names: {
     sign_in: 'login',
     sign_out: 'logout',
     registration: 'signup'
   }
 
-  mount OasRails::Engine, at: '/docs' unless Rails.env.production?
+  devise_scope :admin do
+    get '/confirmation-success', to: 'admins/confirmations#success', as: 'confirmation_success'
+  end
 
-  get 'admin', to: 'admins/admins_pages#index', as: :admin_index
+
+  authenticate :admin do
+    get 'admin', to: 'admins/admins_pages#index', as: :admin_index
+  end
 
   get 'up', to: 'rails/health#show', as: :rails_health_check
 end

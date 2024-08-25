@@ -32,10 +32,6 @@ class User < ApplicationRecord
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
   end
 
-  def send_devise_notification(notification, *args)
-    devise_mailer.send(notification, self, *args).deliver_later
-  end
-
   pg_search_scope :search_by_firstname_and_lastname,
                   against: %i[firstname lastname],
                   using: {

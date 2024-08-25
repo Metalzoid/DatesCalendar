@@ -49,16 +49,6 @@ module Admins
     # end
     # private
 
-    # def respond_with(current_admin, _opts = {})
-    #   respond_to do |format|
-    #     # format.json { render json: { message: "Logged in successfully.",
-    #     #                 data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
-    #     #               }, status: :ok }
-    #     format.html
-    #   end
-    # end
-    #
-
     def respond_to_on_destroy
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
@@ -67,11 +57,12 @@ module Admins
       if current_api_admin
         respond_to do |format|
           format.json { render json: { message: 'Logged out successfully.' }, status: :ok }
+          format.html { redirect_to root_path}
         end
       else
         respond_to do |format|
           format.json { render json: { message: "Couldn't find an active session." }, status: :unauthorized }
-          format.html { redirect_to new_admin_session_path }
+          format.html { redirect_to root_path }
         end
 
       end

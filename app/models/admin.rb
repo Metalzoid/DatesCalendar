@@ -7,7 +7,7 @@ class Admin < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :omniauthable, :jwt_authenticatable,
+         :omniauthable, :jwt_authenticatable, :confirmable,
          jwt_revocation_strategy: self, omniauth_providers: [:google_oauth2]
   has_many :users, dependent: :destroy
   has_one :api_key, dependent: :destroy
