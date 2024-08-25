@@ -16,5 +16,6 @@ module Admins
         format.html { render "admins_pages/index" }
       end
     end
+    
   end
 end
