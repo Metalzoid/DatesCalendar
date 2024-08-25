@@ -7,6 +7,11 @@ module Admins
       @availabilities = @users.map(&:availabilities).flatten
       @appointments = @users.map(&:appointments).flatten
       @services = @users.map(&:services).flatten
+      @users_charts = User.group_by_day(current_admin)
+      @services_charts = Service.group_by_day(current_admin)
+      @availabilities_chars = Availability.group_by_day(current_admin)
+      @appointments_chars = Appointment.group_by_day(current_admin)
+
       respond_to do |format|
         format.html { render "admins_pages/index" }
       end

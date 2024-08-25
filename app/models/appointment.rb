@@ -18,7 +18,7 @@ class Appointment < ApplicationRecord
   enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
 
   def self.by_admin(admin)
-    joins(:user).merge(User.by_admin(admin))
+    joins(:customer, :seller).merge(User.by_admin(admin))
   end
 
   def update_price

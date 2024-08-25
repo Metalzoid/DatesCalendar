@@ -9,6 +9,10 @@
       <li>Nombre de Services : <%= @services.count %></li>
       <li>Votre clé API : <%= current_admin.api_key.api_key %></li>
     </ul>
+    <%= line_chart @users_charts %>
+    <%= line_chart @services_charts %>
+    <%= line_chart @availabilities_charts %>
+    <%= line_chart @appointments_charts %>
   </div>
   <%= link_to "Disconnect", destroy_admin_session_path, data: { turbo_method: :delete }, class: 'btn btn-primary my-1' %>
 </div>

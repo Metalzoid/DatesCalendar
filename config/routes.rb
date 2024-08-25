@@ -2,7 +2,7 @@
 
 Rails.application.routes.draw do
   require 'sidekiq/web'
-  mount Sidekiq::Web => '/sidekiq'
+  # mount Sidekiq::Web => '/sidekiq'
   mount OasRails::Engine, at: '/docs' unless Rails.env.production?
   api_version = Rails.configuration.x.api.version
   if Rails.env.production?
@@ -49,7 +49,6 @@ Rails.application.routes.draw do
   devise_scope :admin do
     get '/confirmation-success', to: 'admins/confirmations#success', as: 'confirmation_success'
   end
-
 
   authenticate :admin do
     get 'admin', to: 'admins/admins_pages#index', as: :admin_index
