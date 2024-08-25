@@ -3,6 +3,10 @@ services:
   web:
     build: .
     command: bash -c "bundle exec puma -C config/puma.rb"
+    ports:
+      - "3001:3001"
+    environment:
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       - redis
       - sidekiq
@@ -10,6 +14,8 @@ services:
   sidekiq:
     build: .
     command: bash -c "bundle exec sidekiq -C config/sidekiq.yml"
+    environment:
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       - redis
 
