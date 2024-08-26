@@ -22,10 +22,10 @@ module Users
 
     # @summary Login as User
     # - Return the JWT token in the headers.
-    # @request_body The user login. At least include an `email`. [Hash!] {user: {email: String, password: String}}
-    # @request_body_example basic user [Hash] {user: {email: "test@gmail.com", password: "azerty"}}
-    # @response Invalid Email or password.(401) [Hash] {error: String}
-    # @response Logged in Successfully.(200) [Hash] {message: String, data: Hash}
+    # @request_body The user login. At least include an `email`. [!Hash{user: {email: String, password: String}}]
+    # @request_body_example basic user [Hash{user: {email: "test@gmail.com", password: "azerty"}}]
+    # @response Invalid Email or password.(401) [Hash{error: String}]
+    # @response Logged in Successfully.(200) [Hash{message: String, data: Hash}]
     # @tags Users
     # @no_auth
     def create
@@ -34,8 +34,8 @@ module Users
 
     # @summary Logout as User
     # @parameter Authorization(header) [String!] The Authorization JWT token.
-    # @response Couldn't find an active session.(401) [Hash] {message: String}
-    # @response Logged out Successfully.(200) [Hash] {message: String}
+    # @response Couldn't find an active session.(401) [Hash{message: String}]
+    # @response Logged out Successfully.(200) [Hash{message: String}]
     # @tags Users
     # @no_auth
     def destroy

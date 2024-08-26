@@ -7,9 +7,9 @@ module Api
       before_action :set_services_list, only: %i[create update]
 
       # @summary Returns the list of Appointment.
-      # @response Appointments founded.(200) [Hash] {message: String, data: Hash}
-      # @response Appointments not founded.(404) [Hash] {message: String}
-      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Appointments founded.(200) [Hash{message: String, data: Hash}]
+      # @response Appointments not founded.(404) [Hash{message: String}]
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash{message: String}]
       # @tags appointments
       # @auth [bearer_jwt]
       def index
@@ -20,9 +20,9 @@ module Api
       end
 
       # @summary Returns an Appointment.
-      # @response Appointment founded.(200) [Hash] {message: String, data: Hash}
-      # @response Appointment {{id}} could not be found.(404) [Hash] {message: String}
-      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Appointment founded.(200) [Hash{message: String, data: Hash}]
+      # @response Appointment {{id}} could not be found.(404) [Hash{message: String}]
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash{message: String}]
       # @tags appointments
       # @auth [bearer_jwt]
       def show
@@ -34,11 +34,11 @@ module Api
       # @summary Create an Appointment.
       # - end_date it's autocalculated by services list by default.
       # -Optional: End_date can be overrided.
-      # @request_body The Appointment to be created [Hash] {appointment: {start_date: String, end_date: String, comment: String}, appointment_services: Integer }
-      # @request_body_example A complete availability. [Hash] {appointment: {start_date: '14/07/2024 10:00', comment: 'For my son.'}, appointment_services: [1, 2]}
-      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Appointment created.(201) [Hash] {message: String, data: Hash}
-      # @response Can't create appointment.(422) [Hash] {message: String}
+      # @request_body The Appointment to be created [Hash{appointment: {start_date: String, end_date: String, comment: String}, appointment_services: Integer }]
+      # @request_body_example A complete availability. [Hash{appointment: {start_date: '14/07/2024 10:00', comment: 'For my son.'}, appointment_services: [1, 2]}]
+      # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Appointment created.(201) [Hash{message: String, data: Hash}]
+      # @response Can't create appointment.(422) [Hash{message: String}]
       # @tags appointments
       # @auth [bearer_jwt]
       def create
@@ -62,11 +62,11 @@ module Api
       # - status is hold on creating Appointment.
       # - status can be accepted, finished, canceled.
       # - Can't modifying date after accepted status.
-      # @request_body The Appointment to be updated [Hash] {appointment: {start_date: DateTime, end_date: DateTime, comment: String, status: String, seller_comment: String, price: Float}, appointment_services: Integer}
-      # @request_body_example A complete Appointment. [Hash] {appointment: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 18:00', comment: 'For my son.', status: 'accepted', seller_comment: 'Welcome !', price: 14.99 }, appointment_services: [1,2]}
-      # @response Appointment updated.(200) [Hash] {message: String, data: Hash}
-      # @response You need to be the seller or the customer or Admin to perform this action.(401) [Hash] {message: String}
-      # @response You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status.(403) [Hash] {message: String}
+      # @request_body The Appointment to be updated [Hash{appointment: {start_date: DateTime, end_date: DateTime, comment: String, status: String, seller_comment: String, price: Float}, appointment_services: Integer}]
+      # @request_body_example A complete Appointment. [Hash{appointment: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 18:00', comment: 'For my son.', status: 'accepted', seller_comment: 'Welcome !', price: 14.99 }, appointment_services: [1,2]}]
+      # @response Appointment updated.(200) [Hash{message: String, data: Hash}]
+      # @response You need to be the seller or the customer or Admin to perform this action.(401) [Hash{message: String}]
+      # @response You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status.(403) [Hash{message: String}]
       # @tags appointments
       # @auth [bearer_jwt]
       def update

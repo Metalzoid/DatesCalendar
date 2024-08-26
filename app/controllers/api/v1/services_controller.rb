@@ -10,9 +10,9 @@ module Api
       # @summary Returns the list of Services.
       # - Optionnal: Filter by seller ID.
       # - URL exemple: /api/v1/services?seller_id=1
-      # @response Services founded.(200) [Hash] {message: String, data: Hash}
-      # @response Services not founded.(404) [Hash] {message: String}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @response Services founded.(200) [Hash{message: String, data: Hash}]
+      # @response Services not founded.(404) [Hash{message: String}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
       # @tags services
       # @auth [bearer_jwt]
       def index
@@ -26,11 +26,11 @@ module Api
       # @summary Create a service.
       # - Only for seller or both role.
       # - Time is minutes only.
-      # @request_body The service to be created. [Hash] {service: {title: String, price: Float, time: Integer}}
-      # @request_body_example A complete Service. [Hash] {service: {title: 'Massage', price: 44.99, time: 30}}
-      # @response Service created.(200) [Hash] {message: String, data: Hash}
-      # @response Can't create service.(422) [Hash] {message: String}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
+      # @request_body The service to be created. [Hash{service: {title: String, price: Float, time: Integer}}]
+      # @request_body_example A complete Service. [Hash{service: {title: 'Massage', price: 44.99, time: 30}}]
+      # @response Service created.(200) [Hash{message: String, data: Hash}]
+      # @response Can't create service.(422) [Hash{message: String}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
       # @tags services
       # @auth [bearer_jwt]
       def create
@@ -43,12 +43,12 @@ module Api
 
       # @summary Update a service.
       # - Time is minutes only.
-      # @request_body The service to be created. [Hash] {service: {title: String, price: Float, time: Integer}}
-      # @request_body_example A complete Service. [Hash] {service: {title: 'Massage', price: 44.99, time: 30}}
-      # @response Service updated.(200) [Hash] {message: String, data: Hash}
-      # @response Can't update service.(422) [Hash] {message: String}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Service {id} could not be found.(404) [Hash] {message: String}
+      # @request_body The service to be created. [Hash{service: {title: String, price: Float, time: Integer}}]
+      # @request_body_example A complete Service. [Hash{service: {title: 'Massage', price: 44.99, time: 30}}]
+      # @response Service updated.(200) [Hash{message: String, data: Hash}]
+      # @response Can't update service.(422) [Hash{message: String}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Service {id} could not be found.(404) [Hash{message: String}]
       # @tags services
       # @auth [bearer_jwt]
       def update
@@ -58,10 +58,10 @@ module Api
       end
 
       # @summary Destroy a service.
-      # @response Service destroyed.(200) [Hash] {message: String, data: Hash}
-      # @response Can't destroy service.(422) [Hash] {message: String}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Service {id} could not be found.(404) [Hash] {message: String}
+      # @response Service destroyed.(200) [Hash{message: String, data: Hash}]
+      # @response Can't destroy service.(422) [Hash{message: String}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Service {id} could not be found.(404) [Hash{message: String}]
       # @tags services
       # @auth [bearer_jwt]
       def destroy

@@ -11,9 +11,9 @@ class ApiController < ActionController::API
   # - Required: query. Query is a part of the firstname or lastname of a user.
   # - Optional: role.
   # @parameter query(query) [String] The part of firstname or lastname of the user.
-  # @response Role not include in the users roles !.(422) [Hash] {message: String}
-  # @response Users founded.(200) [Hash] {message: String, data: Hash}
-  # @response Users not found.(404) [Hash] {message: String}
+  # @response Role not include in the users roles !.(422) [Hash{message: String}]
+  # @response Users founded.(200) [Hash{message: String, data: Hash}]
+  # @response Users not found.(404) [Hash{message: String}]
   # @tags Users
   # @auth [bearer_jwt]
   def user_search

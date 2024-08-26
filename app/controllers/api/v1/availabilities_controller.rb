@@ -15,11 +15,11 @@ module Api
       # @parameter seller_id(query) [Integer] The seller ID.
       # @parameter available(query) [Boolean] The available status.
       # @parameter interval(query) [Integer] The interval expressed in minutes for split dates.
-      # @response Availabilities founded.(200) [Hash] {message: String, data: {availabilities: Array<String>, dates: Array<String>}}
-      # @response Availabilities not founded.(404) [Hash] {message: String}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Seller_id required.(400) [Hash] {message: String}
-      # @response Seller not found.(404) [Hash] {message: String}
+      # @response Availabilities founded.(200) [Hash{message: String, data: {availabilities: Array<String>, dates: Array<String>}}]
+      # @response Availabilities not founded.(404) [Hash{message: String}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Seller_id required.(400) [Hash{message: String}]
+      # @response Seller not found.(404) [Hash{message: String}]
       # @tags availabilities
       # @auth [bearer_jwt]
       def index
@@ -38,11 +38,11 @@ module Api
 
       # @summary Create an Availability.
       # - Optionnal: Min and Max time for split Availabilities.
-      # @request_body The availability to be created [Hash] {availability: {start_date: String, end_date: String, available: String}, time: { min_hour: Integer, min_minutes: Integer, max_hour: Integer, max_minutes: Integer }}
-      # @request_body_example A complete availability. [Hash] {availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}, time: {min_hour: 7, min_minutes: 30, max_hour: 19, max_minutes: 0}}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Availability created.(201) [Hash] {message: String, data: Hash}
-      # @response Can't create availability.(422) [Hash] {message: String}
+      # @request_body The availability to be created [Hash{availability: {start_date: String, end_date: String, available: String}, time: { min_hour: Integer, min_minutes: Integer, max_hour: Integer, max_minutes: Integer }}]
+      # @request_body_example A complete availability. [Hash{availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}, time: {min_hour: 7, min_minutes: 30, max_hour: 19, max_minutes: 0}}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Availability created.(201) [Hash{message: String, data: Hash}]
+      # @response Can't create availability.(422) [Hash{message: String}]
       # @tags availabilities
       # @auth [bearer_jwt]
       def create
@@ -60,10 +60,10 @@ module Api
       end
 
       # @summary Update an Availability.
-      # @request_body The availability to be updated [Hash] {availability: {start_date: String, end_date: String, available: String}}
-      # @request_body_example A complete availability. [Hash] {availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}}
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Availability {{id}} could not be found.(404) [Hash] {message: String}
+      # @request_body The availability to be updated [Hash{availability: {start_date: String, end_date: String, available: String}}]
+      # @request_body_example A complete availability. [Hash{availability: {start_date: '14/07/2024 10:00', end_date: '14/07/2024 17:00', available: 'true'}}]
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Availability {{id}} could not be found.(404) [Hash{message: String}]
       # @tags availabilities
       # @auth [bearer_jwt]
       def update
@@ -73,10 +73,10 @@ module Api
       end
 
       # @summary Destroy an Availability.
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash] {message: String}
-      # @response Availability {{id}} could not be found.(404) [Hash] {message: String}
-      # @response Availability destroyed.(200) [Hash] {message: String, data: Hash}
-      # @response Can't destroy availability.(422) [Hash] {message: String}
+      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response Availability {{id}} could not be found.(404) [Hash{message: String}]
+      # @response Availability destroyed.(200) [Hash{message: String, data: Hash}]
+      # @response Can't destroy availability.(422) [Hash{message: String}]
       # @tags availabilities
       # @auth [bearer_jwt]
       def destroy
