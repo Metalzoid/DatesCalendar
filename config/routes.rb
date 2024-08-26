@@ -31,7 +31,7 @@ Rails.application.routes.draw do
     end
   end
 
-  devise_for :admins, path: "api/#{api_version}/admin", controllers: {
+  devise_for :admins, path: "admin", controllers: {
     sessions: 'admins/sessions',
     registrations: 'admins/registrations',
     omniauth_callbacks: 'admins/omniauth_callbacks',
