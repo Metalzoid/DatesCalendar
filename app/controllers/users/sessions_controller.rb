@@ -5,8 +5,19 @@ module Users
     include RackSessionsFix
     respond_to :json
 
+
+    # @summary Get current user informations
+    # @tags Users
+    # @auth [bearer_jwt]
     def new
-      super
+      yield if block_given?
+      if request.headers['Authorization'].present?
+        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
+        current_api_user = User.find(jwt_payload['sub'])
+      end
+      return render json: { message: 'Data of the current user connected.', data: UserSerializer.new(current_api_user).serializable_hash[:data][:attributes] }, status: :ok if current_api_user && current_user
+
+      render json: { message: "Couldn't find an active session." }, status: :unauthorized
     end
 
     # @summary Login as User

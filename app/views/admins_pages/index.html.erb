@@ -9,6 +9,7 @@
       <li>Nombre de Services : <%= @services.count %></li>
       <li>Votre clé API : <%= current_admin.api_key.api_key %></li>
     </ul>
+
     <%= line_chart @users_charts %>
     <%= line_chart @services_charts %>
     <%= line_chart @availabilities_charts %>
