@@ -28,6 +28,8 @@ COPY . .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
+RUN bin/rails assets:clobber
+RUN bin/rails assets:precompile
 
 
 # Install packages needed for deployment
