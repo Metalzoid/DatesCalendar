@@ -27,7 +27,6 @@ COPY . .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
-RUN bin/rails assets:precompile
 
 
 # Install packages needed for deployment
@@ -39,6 +38,7 @@ RUN apt-get update -qq && \
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
+RUN bin/rails assets:precompile
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
