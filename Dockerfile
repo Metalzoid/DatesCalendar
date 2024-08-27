@@ -5,12 +5,14 @@ FROM ruby:3.3.0
 
 # Rails app lives here
 WORKDIR /rails
+ARG RAILS_MASTER_KEY
 
 # Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development" \
+    RAILS_MASTER_KEY=$RAILS_MASTER_KEY
 
 
 # Install packages needed to build gems
