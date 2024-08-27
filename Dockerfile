@@ -5,15 +5,12 @@ FROM ruby:3.3.0
 
 # Rails app lives here
 WORKDIR /rails
-ARG RAILS_MASTER_KEY
 
 # Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
-    RAILS_MASTER_KEY=$RAILS_MASTER_KEY
-
+    BUNDLE_WITHOUT="development"
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
@@ -30,7 +27,6 @@ COPY . .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
-RUN bin/rails assets:clobber
 RUN bin/rails assets:precompile
 
 
