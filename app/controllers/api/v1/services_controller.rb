@@ -9,10 +9,14 @@ module Api
 
       # @summary Returns the list of Services.
       # - Optionnal: Filter by seller ID.
+      # - Time exprimed in minutes.
       # - URL exemple: /api/v1/services?seller_id=1
-      # @response Services founded.(200) [Hash{message: String, data: Hash}]
+      # @response Services founded.(200) [Hash{message: String, data: Array<Hash{id: Integer, title: String, price: Float, user_id: Integer, time: Integer, created_ad: Datetime, updated_at: Datetime}>}]
+      # @response_example Services founded.(200) [{message: "Services founded.", data: [{id: 1, title: "Massage", price: 14.69, user_id: 2, time: 30, created_at: "2024-07-14T10:00:00", updated_at: "2024-07-14T10:00:00"}] }]
       # @response Services not founded.(404) [Hash{message: String}]
+      # @response_example Services not founded.(404) [{message: "Services not founded."}]
       # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response_example You need to be Seller or Admin to perform this action.(403) [{message: "You need to be Seller or Admin to perform this action."}]
       # @tags services
       # @auth [bearer_jwt]
       def index
@@ -25,12 +29,15 @@ module Api
 
       # @summary Create a service.
       # - Only for seller or both role.
-      # - Time is minutes only.
-      # @request_body The service to be created. [Hash{service: {title: String, price: Float, time: Integer}}]
-      # @request_body_example A complete Service. [Hash{service: {title: 'Massage', price: 44.99, time: 30}}]
-      # @response Service created.(200) [Hash{message: String, data: Hash}]
+      # - Time exprimed in minutes.
+      # @request_body The service to be created. [!Hash{service: Hash{ title: String, price: Float, time: Integer }}]
+      # @request_body_example A complete Service. [Hash] {service: {title: 'Massage', price: 44.99, time: 30 }}
+      # @response Service created.(201) [Hash{message: String, data: Array<Hash{id: Integer, title: String, price: Float, user_id: Integer, time: Integer, created_ad: Datetime, updated_at: Datetime}>}]
+      # @response_example Service created.(201) [{message: "Service created.", data: [{id: 1, title: "Massage", price: 14.69, user_id: 2, time: 30, created_at: "2024-07-14T10:00:00", updated_at: "2024-07-14T10:00:00"}] }]
       # @response Can't create service.(422) [Hash{message: String}]
+      # @response_example Can't create service.(422) [{message: "Can't create serivce."}]
       # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
+      # @response_example You need to be Seller or Admin to perform this action.(403) [{message: "You need to be Seller or Admin to perform this action."}]
       # @tags services
       # @auth [bearer_jwt]
       def create
@@ -42,9 +49,9 @@ module Api
       end
 
       # @summary Update a service.
-      # - Time is minutes only.
-      # @request_body The service to be created. [Hash{service: {title: String, price: Float, time: Integer}}]
-      # @request_body_example A complete Service. [Hash{service: {title: 'Massage', price: 44.99, time: 30}}]
+      # - Time exprimed in minutes.
+      # @request_body The service to be created. [!Hashservice: Hash{title: String, price: Float, time: Integer}}]
+      # @request_body_example A complete Service. [Hash] {service: {title: 'Massage', price: 44.99, time: 30}}
       # @response Service updated.(200) [Hash{message: String, data: Hash}]
       # @response Can't update service.(422) [Hash{message: String}]
       # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]

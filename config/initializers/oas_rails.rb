@@ -7,6 +7,7 @@ OasRails.configure do |config|
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
+  config.info.version = "1.5.0"
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
   config.servers = [{ url: 'https://datescalendar.fr', description: 'Production'}]

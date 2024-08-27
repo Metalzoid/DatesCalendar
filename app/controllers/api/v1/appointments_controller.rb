@@ -8,6 +8,7 @@ module Api
 
       # @summary Returns the list of Appointment.
       # @response Appointments founded.(200) [Hash{message: String, data: Hash}]
+      # @response_example Appointments founded.(200) [{message: "Appointments founded.", data: [{id: 1, title: "test"}] }]
       # @response Appointments not founded.(404) [Hash{message: String}]
       # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash{message: String}]
       # @tags appointments
