@@ -15,20 +15,25 @@ module Admins
     # POST /resource/sign_in
     def create
       self.resource = warden.authenticate!(auth_options)
-      set_flash_message!(:notice, :signed_in)
-      sign_in(resource_name, resource)
+      sign_in = sign_in(resource_name, resource)
       yield resource if block_given?
-
-      respond_to do |format|
-        format.json do
-          render json: {
-            message: "Logged in successfully.",
-            data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
-          }, status: :ok
+      if sign_in
+        respond_to do |format|
+          format.json do
+            render json: {
+              message: "Logged in successfully.",
+              data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes]
+            }, status: :ok
+          end
+          format.html do
+            set_flash_message!(:notice, :signed_in)
+            redirect_to after_sign_in_path_for(resource)
+          end
         end
-
-        format.html do
-          redirect_to after_sign_in_path_for(resource)
+      else
+        respond_to do |format|
+          format.json { render json: { message: "Logged in unsuccessfully." }, status: :bad_request }
+          format.html { render :new, status: :unprocessable_entity }
         end
       end
     end

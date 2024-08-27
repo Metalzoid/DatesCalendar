@@ -59,7 +59,9 @@ gem 'simple_form', github: 'heartcombo/simple_form'
 
 gem 'sassc-rails'
 
-gem "bootstrap", '~> 5.3.3'
+gem "bootstrap", '~> 5.2'
+
+gem "font-awesome-sass", "~> 6.1"
 
 gem 'pg_search'
 
@@ -79,7 +81,6 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri mswin mswin64 mingw x64_mingw]
   gem 'dotenv-rails'
-  gem 'pry-byebug'
 end
 
 group :development do

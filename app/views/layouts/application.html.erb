@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>API</title>
+  <title>DatesCalendar</title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 </head>
 <body>
+  <% flash.each do |type, msg| %>
+    <% type === 'alert' ? type = 'danger' : type = 'success' %>
+      <div class="alert alert-<%= type %> alert-dismissible fade show" role="alert">
+        <%= msg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% end %>
+  </div>
+  <%= render "shared/navbar" %>
   <%= yield %>
 </body>
 </html>

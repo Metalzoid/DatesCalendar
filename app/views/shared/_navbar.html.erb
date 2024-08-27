@@ -1,0 +1,15 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <%= link_to "DatesCalendar API", admin_index_path, class: "navbar-brand text-light" %>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <%= link_to "Home", admin_index_path, class: "text-light nav-link #{"active" if request.fullpath == "/admin"}" %>
+        <a class="text-light nav-link" href="#">Users</a>
+        <a class="text-light nav-link" href="#">Availabilities</a>
+        <a class="text-light nav-link" href="#">Appointments</a>
+        <a class="text-light nav-link" href="#">Services</a>
+        <%= link_to "Docs", root_path, class:"text-light nav-link" %>
+      </div>
+    </div>
+  </div>
+</nav>

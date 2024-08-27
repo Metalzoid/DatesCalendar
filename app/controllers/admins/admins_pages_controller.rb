@@ -17,5 +17,9 @@ module Admins
       end
     end
 
+    def users
+      @users = current_admin.users
+    end
+
   end
 end
