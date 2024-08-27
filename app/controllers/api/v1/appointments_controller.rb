@@ -14,8 +14,11 @@ module Api
       # @tags appointments
       # @auth [bearer_jwt]
       def index
-        @appointments = Appointment.where('customer_id = ? OR seller_id = ?', current_user.id, current_user.id)
-        return render_success('Appointment(s) founded.', @appointments, :ok) unless @appointments.empty?
+        @appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
+        @appointments_serialized = @appointments.map do |appointment|
+          AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
+        end
+        return render_success('Appointment(s) founded.', @appointments_serialized, :ok) unless @appointments.empty?
 
         render_error('Appointment(s) not founded.', :not_found)
       end
@@ -29,7 +32,7 @@ module Api
       def show
         return if authorization
 
-        render_success('Appointment founded.', @appointment, :ok)
+        render_success('Appointment founded.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
       end
 
       # @summary Create an Appointment.
@@ -43,14 +46,17 @@ module Api
       # @tags appointments
       # @auth [bearer_jwt]
       def create
+        return render_error("Appointment_services OR End_date required !", :unprocessable_entity) unless @services || params[:appointment][:end_date]
+        return render_error("seller_id required !", :unprocessable_entity) if @services.nil? && params[:appointment][:seller_id].nil?
+
         @appointment = Appointment.new(appointment_params)
         calculate_end_date unless params[:appointment][:end_date]
         @appointment.customer = current_user
-        @appointment.seller = Service.find(@services.first).user
+        @appointment.seller = Service.find(@services.first).user if @services
         if @appointment.save
-          create_appointment_services(services: @services)
+          create_appointment_services(services: @services) if @services
           @appointment.update_price
-          render_success('Appointment created.', @appointment, :created)
+          render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :created)
         else
           render_error("Can't create appointment #{@appointment.errors.messages}", :unprocessable_entity)
         end
@@ -142,7 +148,7 @@ module Api
 
       def handle_successful_update
         create_appointment_service_and_price(services: @services) unless @services.nil?
-        render_success('Appointment updated.', @appointment, :ok)
+        render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
       end
 
       def unauthorized_error_message

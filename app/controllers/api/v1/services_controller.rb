@@ -21,8 +21,11 @@ module Api
       # @auth [bearer_jwt]
       def index
         @services = Service.by_admin(current_user.admin)
-        @services = @services.where(user: params[:seller_id]) if params[:seller_id]
-        return render_success('Services founded.', @services, :ok) unless @services.empty?
+        @services = @services.where(user: params[:seller_id]) if params[:seller_id].present?
+        @services_serialized = @services.map do |service|
+          ServiceSerializer.new(service).serializable_hash[:data][:attributes]
+        end
+        return render_success('Services founded.', @services_serialized, :ok) unless @services.empty?
 
         render_error('Services not founded.', :not_found)
       end
@@ -43,7 +46,7 @@ module Api
       def create
         @service = Service.new(service_params)
         @service.user = current_user
-        return render_success('Service created.', @service, :created) if @service.save
+        return render_success('Service created.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :created) if @service.save
 
         render_error("Can't create service. Error: #{@service.errors.messages}", :unprocessable_entity)
       end
@@ -59,7 +62,7 @@ module Api
       # @tags services
       # @auth [bearer_jwt]
       def update
-        return render_success('Service updated.', @service, :ok) if @service.update(service_params)
+        return render_success('Service updated.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :ok) if @service.update(service_params)
 
         render_error("Can't update service. Error: #{@service.errors.messages}", :unprocessable_entity)
       end
@@ -72,7 +75,7 @@ module Api
       # @tags services
       # @auth [bearer_jwt]
       def destroy
-        return render_success('Service destroyed.', @service, :ok) if @service.destroy
+        return render_success('Service destroyed.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :ok) if @service.destroy
 
         render_error("Can't destroy service. #{@service.errors.messages}", :unprocessable_entity)
       end

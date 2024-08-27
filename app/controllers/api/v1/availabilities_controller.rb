@@ -27,13 +27,16 @@ module Api
         return render_error('Seller id required.', :bad_request) if params[:seller_id].nil?
         return render_error('Seller not found.', :not_found) unless User.find_by(id: params[:seller_id])
         @availabilities = fetch_availabilities(params[:seller_id])
+        @availabilities_serialized = @availabilities.map do |availability|
+          AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
+        end
         return render_error("Availabilities or Unavailabilities not founded.", :not_found) if @availabilities.empty?
 
         params_dates = {}
         params_dates[:availabilities] = @availabilities
         params_dates[:interval] = params[:interval] if params[:interval]
         @dates = generate_dates(params_dates) if @availabilities
-        render_success('Availabilities founded.', { availabilities: @availabilities, dates: @dates }, :ok)
+        render_success('Availabilities founded.', { availabilities: @availabilities_serialized, dates: @dates }, :ok)
       end
 
       # @summary Create an Availability.
@@ -53,7 +56,7 @@ module Api
         if params[:time] && @availability.valid?
           handle_time_params
         elsif @availability.save
-          render_success('Availability created.', @availability, :created)
+          render_success('Availability created.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :created)
         else
           render_error("Can't create availability. #{@availability.errors.messages}", :unprocessable_entity)
         end
@@ -67,7 +70,7 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def update
-        return render_success('Availability updated.', @availability, :ok) if @availability.update(availability_params)
+        return render_success('Availability updated.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok) if @availability.update(availability_params)
 
         render_error("Can't update availability. #{@availability.errors.messages}", :unprocessable_entity)
       end
@@ -80,7 +83,7 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def destroy
-        return render_success('Availability destroyed.', @availability, :ok) if @availability.destroy
+        return render_success('Availability destroyed.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok) if @availability.destroy
 
         render_error("Can't destroy availability. #{@availability.errors.messages}", :unprocessable_entity)
       end
@@ -136,7 +139,10 @@ module Api
 
         if (min_hour..max_hour).include?(@availability.start_date.hour)
           @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
-          render_success('Availabilities created with min and max time.', { data: @availabilities }, :created)
+          @availabilities_serialized = @availabilities.map do |availability|
+            AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
+          end
+          render_success('Availabilities created with min and max time.', { data: @availabilities_serialized }, :created)
         else
           render_error('Start time is not included in the params time', :unprocessable_entity)
         end
