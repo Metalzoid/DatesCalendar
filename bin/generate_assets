@@ -6,8 +6,8 @@ def system!(*args)
 end
 
 FileUtils.chdir APP_ROOT do
-  system! "rails assets:clobber"
+  system! "bin/rails assets:clobber"
   puts "Rails assets clobber done"
-  system! "RAILS_ENV=production dotenv -f .env bin/rails assets:precompile"
+  system! "RAILS_ENV=production bin/rails assets:precompile"
   puts "Rails assets precompile done for prod"
 end
