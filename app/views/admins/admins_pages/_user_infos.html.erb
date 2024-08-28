@@ -1,0 +1,11 @@
+<tr>
+  <th scope="row"><%= user.id %></th>
+  <td><%= user.email %></td>
+  <td><%= user.firstname %></td>
+  <td><%= user.lastname %></td>
+  <td><%= user.company %></td>
+  <td><%= user.role %></td>
+  <td><%= link_to user.services.count, admins_services_path(user_id: user.id)%></td>
+  <td><%= link_to user.appointments.count, admins_appointments_path(user_id: user.id) %></td>
+  <td><%= link_to user.availabilities.count, admins_availabilities_path(user_id: user.id) %></td>
+</tr>

@@ -8,15 +8,17 @@
   <%= javascript_importmap_tags %>
 </head>
 <body>
+  <%= render "shared/navbar" %>
   <% flash.each do |type, msg| %>
     <% type === 'alert' ? type = 'danger' : type = 'success' %>
-      <div class="alert alert-<%= type %> alert-dismissible fade show" role="alert">
+      <div class=" mt-5 alert alert-<%= type %> alert-dismissible fade show" role="alert">
         <%= msg %>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     <% end %>
   </div>
-  <%= render "shared/navbar" %>
-  <%= yield %>
+  <div style="margin: 8vh 0;">
+    <%= yield %>
+  </div>
 </body>
 </html>
