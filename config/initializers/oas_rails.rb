@@ -9,6 +9,7 @@ OasRails.configure do |config|
   config.info.contact.url = 'http://florian-gagnaire.dev'
   config.info.version = "1.0.0"
   config.layout = "application"
+  config.ignored_paths = ["devise/passwords", "devise/unlocks", "users/registrations#index", "users/registrations#destroy", "users/registrations#cancel", "users/registrations#edit", "users/registrations#new"]
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
   config.servers = [{ url: 'https://datescalendar.fr', description: 'Production'}]
