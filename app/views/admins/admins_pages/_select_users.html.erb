@@ -1,0 +1,6 @@
+<select class="form-select" aria-label="Select user" data-action="change->list-updater#update" data-list-updater-target="select">
+  <option selected disabled>Select a User</option>
+  <% users.each do |user| %>
+    <option value="<%= user.id %>"><%= "User ##{user.id} - #{user.firstname.capitalize} #{user.lastname.capitalize}" %></option>
+  <% end %>
+</select>

@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand fixed-top">
+<nav class="navbar navbar-expand sticky-top">
   <div class="container-fluid">
     <%= link_to "DatesCalendar API", root_path, class: "navbar-brand text-light" %>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
@@ -6,7 +6,7 @@
         <% if request.fullpath.include?("docs") %>
           <%= link_to 'Home', root_path, class: "text-light nav-link #{"active" if request.fullpath.include?("docs")}" %>
           <%= link_to 'Administration', admins_index_path, class:"text-light nav-link"%>
-        <% elsif request.fullpath.include?("admin") %>
+        <% elsif request.fullpath.include?("admin") && current_admin %>
           <div class="d-flex align-items-center">
             <%= link_to 'Home', admins_index_path, class: "text-light nav-link #{"active" if request.fullpath == "/admin"}" %>
             <%= link_to 'Appointments', admins_appointments_path, class:"text-light nav-link #{"active" if request.fullpath.include?("appointments")}" %>
@@ -16,7 +16,13 @@
           </div>
           <div class="d-flex align-items-center">
             <%= link_to 'Documentation', root_path, class: "text-light nav-link" %>
-            <%= link_to 'Disconnect', destroy_admin_session_path, data: { turbo_method: :delete }, class: 'text-light nav-link' if current_admin %>
+            <%= link_to 'Disconnect', destroy_admin_session_path, data: { turbo_method: :delete }, class: 'text-light nav-link' %>
+          </div>
+        <% else %>
+          <div class="d-flex align-items-center">
+          </div>
+          <div class="d-flex align-items-center">
+            <%= link_to 'Documentation', root_path, class: "text-light nav-link" %>
           </div>
         <% end %>
       </div>

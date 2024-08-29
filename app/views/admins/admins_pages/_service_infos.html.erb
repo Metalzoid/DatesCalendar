@@ -1,8 +1,0 @@
-<tr>
-  <th scope="row"><%= service.id %></th>
-  <td><%= service.title %></td>
-  <td><%= service.price %> €</td>
-  <td><%= service.time %> minutes</td>
-  <td><%= service.user.id %></td>
-  <td><%= link_to "DELETE", admins_service_path(service), data: { turbo_confirm: "Are you sure ?", turbo_method: :delete } %></td>
-</tr>
