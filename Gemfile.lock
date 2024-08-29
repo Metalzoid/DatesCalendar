@@ -1,4 +1,15 @@
 GIT
+  remote: https://github.com/a-chacon/oas_rails.git
+  revision: abef8d3abe772514b71c49aaa298ef1fe0c8aa37
+  branch: main
+  specs:
+    oas_rails (0.7.0)
+      method_source (~> 1.0)
+      model-to-schema (~> 0.1.1)
+      rails (~> 7.0)
+      yard (~> 0.9)
+
+GIT
   remote: https://github.com/heartcombo/simple_form.git
   revision: c2c7faf3e532072e1ef511a97d677ae0e7c38957
   specs:
@@ -210,11 +221,6 @@ GEM
       racc (~> 1.4)
     nokogiri (1.16.7-x86_64-linux)
       racc (~> 1.4)
-    oas_rails (0.7.0)
-      method_source (~> 1.0)
-      model-to-schema (~> 0.1.1)
-      rails (~> 7.0)
-      yard (~> 0.9)
     oauth2 (2.0.9)
       faraday (>= 0.17.3, < 3.0)
       jwt (>= 1.0, < 3.0)
@@ -390,7 +396,7 @@ DEPENDENCIES
   font-awesome-sass (~> 6.1)
   importmap-rails
   jsonapi-serializer
-  oas_rails (~> 0.7.0)
+  oas_rails!
   omniauth-google-oauth2
   omniauth-rails_csrf_protection
   pg (~> 1.1)
