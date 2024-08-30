@@ -3,13 +3,15 @@ OasRails.configure do |config|
   # Basic Information about the API
   config.info.title = 'DatesCalendar'
   config.info.summary = 'A simple Appointment API.'
-  config.info.description = ""
+  config.info.description = ''
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
-  config.info.version = "1.0.0"
-  config.layout = "application"
-  config.ignored_paths = ["devise/passwords", "devise/unlocks", "users/registrations#index", "users/registrations#destroy", "users/registrations#cancel", "users/registrations#edit", "users/registrations#new"]
+  config.info.version = '1.0.0'
+  config.layout = 'application'
+  config.ignored_actions = ['devise/passwords', 'devise/unlocks', 'users/registrations#index',
+                            'users/registrations#destroy', 'users/registrations#cancel', 'users/registrations#edit',
+                            'users/registrations#new']
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
   config.servers = [{ url: 'https://datescalendar.fr', description: 'Production'}]
@@ -31,7 +33,7 @@ OasRails.configure do |config|
   config.autodiscover_responses = false
 
   # API path configuration if your API is under a different namespace
-  config.api_path = "/api/v1/"
+  config.api_path = '/api/v1/'
 
   # #######################
   # Authentication Settings

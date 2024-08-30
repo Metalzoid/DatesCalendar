@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 module Admins
+  # AdminPages Controller
   class AdminsPagesController < ApplicationController
-    before_action :authorize_data_admin, only: %i[appointments availabilities services service_destroy availability_destroy]
-    before_action :set_users, only: %i[index users appointments availabilities services]
+    before_action :authorize_data_admin,
+                  only: %i[appointments availabilities services service_destroy
+                           availability_destroy]
+    before_action :set_users,
+                  only: %i[index users appointments availabilities services]
+
     def index
       @availabilities = @users.flat_map(&:availabilities)
       @appointments = @users.flat_map(&:appointments)
@@ -14,20 +19,16 @@ module Admins
       @appointments_charts = Appointment.group_by_day(current_admin)
     end
 
-    def users
-    end
+    def users; end
 
     def appointments
-      @users = @users.select { |user| user.appointments.any? }
+      filter_users_with_appointments
       @appointments = current_admin.users.flat_map(&:appointments)
 
-      if params[:user_id].present? && @appointments.any?
-        @appointments = Appointment.where(customer_id: params[:user_id]).or(Appointment.where(seller_id: params[:user_id]))
-        respond_to do |format|
-          format.html
-          format.text { render partial: "admins/admins_pages/appointments_infos", locals: { appointments: @appointments }, formats: [:html] }
-        end
-      end
+      return unless params[:user_id].present? && @appointments.any?
+
+      filter_appointments_by_user_id
+      respond_to_formats('appointments_infos', appointments: @appointments)
     end
 
     def appointment_destroy
@@ -36,16 +37,13 @@ module Admins
     end
 
     def availabilities
-      @users = @users.select { |user| user.availabilities.any? }
+      filter_users_with_availabilities
       @availabilities = @users.flat_map(&:availabilities)
 
-      if params[:user_id].present? && @availabilities.any?
-        @availabilities = Availability.where(user_id: params[:user_id])
-        respond_to do |format|
-          format.html
-          format.text { render partial: "admins/admins_pages/availabilities_infos", locals: { availabilities: @availabilities }, formats: [:html] }
-        end
-      end
+      return unless params[:user_id].present? && @availabilities.any?
+
+      filter_availabilities_by_user_id
+      respond_to_formats('availabilities_infos', availabilities: @availabilities)
     end
 
     def availability_destroy
@@ -54,15 +52,13 @@ module Admins
     end
 
     def services
-      @users = @users.select { |user| user.services.any? }
+      filter_users_with_services
       @services = @users.flat_map(&:services)
-      if params[:user_id].present? && @services.any?
-        @services = Service.where(user_id: params[:user_id])
-        respond_to do |format|
-          format.html
-          format.text { render partial: "admins/admins_pages/services_infos", locals: { services: @services }, formats: [:html] }
-        end
-      end
+
+      return unless params[:user_id].present? && @services.any?
+
+      filter_services_by_user_id
+      respond_to_formats('services_infos', services: @services)
     end
 
     def service_destroy
@@ -82,5 +78,36 @@ module Admins
       redirect_to('/401') unless current_admin.users.find_by(id: params[:user_id])
     end
 
+    def filter_users_with_appointments
+      @users = @users.select { |user| user.appointments.any? }
+    end
+
+    def filter_users_with_availabilities
+      @users = @users.select { |user| user.availabilities.any? }
+    end
+
+    def filter_users_with_services
+      @users = @users.select { |user| user.services.any? }
+    end
+
+    def filter_appointments_by_user_id
+      @appointments = Appointment.where(customer_id: params[:user_id])
+                                 .or(Appointment.where(seller_id: params[:user_id]))
+    end
+
+    def filter_availabilities_by_user_id
+      @availabilities = Availability.where(user_id: params[:user_id])
+    end
+
+    def filter_services_by_user_id
+      @services = Service.where(user_id: params[:user_id])
+    end
+
+    def respond_to_formats(partial_name, locals)
+      respond_to do |format|
+        format.html
+        format.text { render(partial: "admins/admins_pages/#{partial_name}", locals:, formats: [:html]) }
+      end
+    end
   end
 end
