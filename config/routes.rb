@@ -49,13 +49,10 @@ Rails.application.routes.draw do
   authenticate :admin do
     namespace :admins, path: 'admin' do
       get '/', to: 'admins_pages#index', as: :index
-      get 'users', to: 'admins_pages#users'
-      get 'appointments', to: 'admins_pages#appointments'
-      get 'availabilities', to: 'admins_pages#availabilities'
-      get 'services', to: 'admins_pages#services'
-      delete "service/:id", to: "admins_pages#service_destroy", as: :service
-      delete "availability/:id", to: "admins_pages#availability_destroy", as: :availability
-      delete "appointment/:id", to: "admins_pages#appointment_destroy", as: :appointment
+      resources :availabilities, only: %i[index create destroy]
+      resources :appointments, only: %i[index create destroy]
+      resources :services, only: %i[index create destroy]
+      resources :users, only: %i[index]
     end
   end
 

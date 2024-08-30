@@ -1,0 +1,7 @@
+<%= simple_form_for service, url: admins_services_path, data: { modal_service_target: "form", action: "submit->modal-service#submit" } do |f| %>
+  <%= f.input :title, label: 'The title of the service.', error: 'Title required.', placeholder: 'Nice title!', required: true %>
+  <%= f.input :price, as: :float, placeholder: '17.99', required: true %>
+  <%= f.input :time, hint: 'Time exprimed in minutes', placeholder: "30", required: true %>
+  <%= f.association :user, label_method: :full_name_with_id, value_method: :id, required: true %>
+  <%= f.button :submit, class: 'btn btn-success' %>
+<% end %>

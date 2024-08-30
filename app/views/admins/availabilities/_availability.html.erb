@@ -1,0 +1,8 @@
+<tr>
+  <th scope="row"><%= availability.id %></th>
+  <td><%= I18n.l(availability.start_date, format: :custom)  %></td>
+  <td><%= I18n.l(availability.end_date, format: :custom) %></td>
+  <td><%= availability.available %></td>
+  <td><%= availability.user.id %></td>
+  <td><%= link_to "DELETE", admins_availability_path(availability), data: { turbo_confirm: "Are you sure ?", turbo_method: :delete } %></td>
+</tr>

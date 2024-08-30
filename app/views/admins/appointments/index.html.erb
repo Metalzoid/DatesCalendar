@@ -3,7 +3,7 @@
   <ul>
     <li>Total Appointments : <%= @appointments.count %></li>
   </ul>
-  <%= render "select_users", users: @users if @users.any? %>
+  <%= render "admins/shared/select_users", users: @users if @users.any? %>
   <table class="table table-dark table-striped my-5">
     <thead>
       <tr>
