@@ -7,7 +7,7 @@ if Admin.exists?(email: 'admin@datescalendar.fr')
   puts "#{admin.email} has been deleted with all data"
 end
 admin = Admin.create!(email: 'admin@datescalendar.fr', password: 'azerty')
-
+admin.confirm
 puts "Admin #{admin.email} created."
 
 firstnames = %w[
