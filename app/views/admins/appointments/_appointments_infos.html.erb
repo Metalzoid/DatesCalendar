@@ -1,0 +1,24 @@
+<% appointments.each do |appointment| %>
+  <tr>
+    <th scope="row"><%= appointment.id %></th>
+    <td><%= appointment.status %></td>
+    <td><%= I18n.l(appointment.start_date, format: :custom) %></td>
+    <td><%= I18n.l(appointment.end_date, format: :custom) %></td>
+    <td>
+      <a href="" data-bs-toggle="modal" data-bs-target="#Modal_comment_<%= appointment.id %>">
+        Show comment
+      </a>
+    </td>
+    <td>
+      <a href="" data-bs-toggle="modal" data-bs-target="#Modal_seller_<%= appointment.id %>">
+        Show seller comment
+      </a>
+    </td>
+    <td><%= appointment.price %> €</td>
+    <td><%= appointment.seller_id %></td>
+    <td><%= appointment.customer_id %></td>
+    <td><%= link_to "DELETE", admins_appointment_path(appointment), data: { turbo_confirm: "Are you sure ?", turbo_method: :delete } %></td>
+  </tr>
+  <%= render "comments_modal", id: "comment_#{appointment.id}", content: appointment.comment, role: "user" %>
+  <%= render "comments_modal", id: "seller_#{appointment.id}", content: appointment.seller_comment, role: "seller" %>
+<% end %>

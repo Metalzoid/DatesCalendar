@@ -26,14 +26,17 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def index
-        params[:available] ? @available = params[:available] : @available = true
-        return render_error('Seller id required.', :bad_request) if params[:seller_id].nil?
-        return render_error('Seller not found.', :not_found) unless User.find_by(id: params[:seller_id])
-        @availabilities = fetch_availabilities(params[:seller_id])
+        @seller = current_user if %w[seller both].include?(current_user.role)
+        @seller = User.find(params[:seller_id]) if params[:seller_id].present?
+        @available = params[:available] || true
+        return render_error('Seller id required.', :bad_request) unless @seller
+        return render_error('Seller not found.', :not_found) unless @seller
+
+        @availabilities = fetch_availabilities(@seller)
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
         end
-        return render_error("Availabilities or Unavailabilities not founded.", :not_found) if @availabilities.empty?
+        return render_error('Availabilities or Unavailabilities not founded.', :not_found) if @availabilities.empty?
 
         params_dates = {}
         params_dates[:availabilities] = @availabilities
@@ -55,7 +58,7 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def create
-        return render_error('You need to be a Seller or Admin to perform this action.', :unauthorized) unless current_admin || ['seller', 'both'].include?(current_user.role)
+        return render_error('You need to be a Seller or Admin to perform this action.', :unauthorized) unless current_admin || %w[seller both].include?(current_user.role)
 
         @availability = Availability.new(availability_params)
         @availability.user = current_user
@@ -80,7 +83,9 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def update
-        return render_success('Availability updated.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok) if @availability.update(availability_params)
+        if @availability.update(availability_params)
+          return render_success('Availability updated.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok)
+        end
 
         render_error("Can't update availability. #{@availability.errors.messages}", :unprocessable_entity)
       end
@@ -121,8 +126,8 @@ module Api
         render_error('You need to be the Seller or Admin to perform this action.', :unauthorized)
       end
 
-      def fetch_availabilities(seller_id)
-        Availability.by_admin(User.find(seller_id).admin).where(available: @available, user_id: seller_id)
+      def fetch_availabilities(seller)
+        Availability.by_admin(seller.admin).where(available: @available, user: seller)
       end
 
       def generate_dates(params = {})
@@ -150,7 +155,6 @@ module Api
       def handle_time_params
         min_hour = params[:time][:min_hour]
         max_hour = params[:time][:max_hour]
-
         if (min_hour..max_hour).include?(@availability.start_date.hour)
           @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
           @availabilities_serialized = @availabilities.map do |availability|

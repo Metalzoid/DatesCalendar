@@ -1,0 +1,28 @@
+<div data-controller="list-updater">
+  <div data-controller="modal-service" style="width: 75vw" class="container d-flex flex-column align-items-center mt-3">
+    <h1 class="text-center">Service administration</h1>
+    <ul>
+      <li>Total Services : <%= @services.count %></li>
+    </ul>
+    <%= render "admins/shared/select_users", users: @users if @users.any? %>
+    <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modalForm">
+      Create new service
+    </button>
+    <%= render "admins/shared/modal_form", model: @service %>
+    <table class="table table-dark table-striped my-5">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Title</th>
+          <th scope="col">Price</th>
+          <th scope="col">Time</th>
+          <th scope="col">User ID</th>
+          <th scope="col">DELETE</th>
+        </tr>
+      </thead>
+      <tbody data-list-updater-target="list" data-modal-service-target="list">
+        <%= render "services_infos", services: @services %>
+      </tbody>
+    </table>
+  </div>
+</div>

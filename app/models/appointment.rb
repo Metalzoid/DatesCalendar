@@ -1,7 +1,9 @@
 # frozen_string_literal: true
+
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
+  after_create :update_price
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'
@@ -23,7 +25,7 @@ class Appointment < ApplicationRecord
 
   def update_price
     new_price = services.sum(&:price)
-    self.price = new_price
+    update(price: new_price)
   end
 
   private
@@ -44,22 +46,25 @@ class Appointment < ApplicationRecord
 
   def create_availability
     return unless [saved_change_to_status&.last || status].include?('accepted')
+
     @availability = Availability.set_unavailability(start_date, end_date, seller)
   end
 
   def restore_availabilities
-    if [status, saved_change_to_status&.last].include?('canceled') && saved_change_to_status&.first == "accepted"
-      @before = Availability.find_by("start_date < ? AND end_date = ? AND user_id = ?", (saved_change_to_start_date&.first || start_date), (saved_change_to_start_date&.first || start_date), seller.id)
-      @availability = Availability.find_by(start_date: saved_change_to_start_date&.first || start_date,
-                                          end_date: saved_change_to_end_date&.first || end_date,
-                                          user: seller)
-      @after = Availability.find_by("start_date = ? AND end_date > ? AND user_id = ?", (saved_change_to_end_date&.first || end_date), (saved_change_to_end_date&.first || end_date), seller.id)
+    return unless [status, saved_change_to_status&.last].include?('canceled') && saved_change_to_status&.first == 'accepted'
 
-      ActiveRecord::Base.transaction do
-        @after.update!(start_date: @before.start_date, skip_validation: true)
-        @availability.destroy!
-        @before.destroy!
-      end
+    @before = Availability.find_by('start_date < ? AND end_date = ? AND user_id = ?', (saved_change_to_start_date&.first || start_date),
+                                   (saved_change_to_start_date&.first || start_date), seller.id)
+    @availability = Availability.find_by(start_date: saved_change_to_start_date&.first || start_date,
+                                         end_date: saved_change_to_end_date&.first || end_date,
+                                         user: seller)
+    @after = Availability.find_by('start_date = ? AND end_date > ? AND user_id = ?', (saved_change_to_end_date&.first || end_date),
+                                  (saved_change_to_end_date&.first || end_date), seller.id)
+
+    ActiveRecord::Base.transaction do
+      @after.update!(start_date: @before.start_date, skip_validation: true)
+      @availability.destroy!
+      @before.destroy!
     end
   end
 end

@@ -1,0 +1,26 @@
+<div class="container d-flex flex-column align-items-center mt-3" style="width: 75vw" data-controller="list-updater">
+  <h1 class="text-center">Appointments administration</h1>
+  <ul>
+    <li>Total Appointments : <%= @appointments.count %></li>
+  </ul>
+  <%= render "admins/shared/select_users", users: @users if @users.any? %>
+  <table class="table table-dark table-striped my-5">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Status</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Comment</th>
+        <th scope="col">Seller comment</th>
+        <th scope="col">Price</th>
+        <th scope="col">Seller ID</th>
+        <th scope="col">Customer ID</th>
+        <th scope="col">DELETE</th>
+      </tr>
+    </thead>
+    <tbody data-list-updater-target="list">
+      <%= render "appointments_infos", appointments: @appointments%>
+    </tbody>
+  </table>
+</div>

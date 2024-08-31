@@ -1,14 +1,30 @@
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand sticky-top">
   <div class="container-fluid">
-    <%= link_to "DatesCalendar API", admin_index_path, class: "navbar-brand text-light" %>
+    <%= link_to "DatesCalendar API", root_path, class: "navbar-brand text-light" %>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <%= link_to "Home", admin_index_path, class: "text-light nav-link #{"active" if request.fullpath == "/admin"}" %>
-        <a class="text-light nav-link" href="#">Users</a>
-        <a class="text-light nav-link" href="#">Availabilities</a>
-        <a class="text-light nav-link" href="#">Appointments</a>
-        <a class="text-light nav-link" href="#">Services</a>
-        <%= link_to "Docs", root_path, class:"text-light nav-link" %>
+      <div class="navbar-nav justify-content-between w-100">
+        <% if request.fullpath.include?("docs") %>
+          <%= link_to 'Home', root_path, class: "text-light nav-link #{"active" if request.fullpath.include?("docs")}" %>
+          <%= link_to 'Administration', admins_index_path, class:"text-light nav-link"%>
+        <% elsif request.fullpath.include?("admin") && current_admin %>
+          <div class="d-flex align-items-center">
+            <%= link_to 'Home', admins_index_path, class: "text-light nav-link #{"active" if request.fullpath == "/admin"}" %>
+            <%= link_to 'Appointments', admins_appointments_path, class:"text-light nav-link #{"active" if request.fullpath.include?("appointments")}" %>
+            <%= link_to 'Availabilities', admins_availabilities_path, class:"text-light nav-link #{"active" if request.fullpath.include?("availabilities")}" %>
+            <%= link_to 'Services', admins_services_path, class:"text-light nav-link #{"active" if request.fullpath.include?("services")}" %>
+            <%= link_to 'Users', admins_users_path, class: "text-light nav-link #{"active" if request.fullpath.include?("users")}" %>
+          </div>
+          <div class="d-flex align-items-center">
+            <%= link_to 'Documentation', root_path, class: "text-light nav-link" %>
+            <%= link_to 'Disconnect', destroy_admin_session_path, data: { turbo_method: :delete }, class: 'text-light nav-link' %>
+          </div>
+        <% else %>
+          <div class="d-flex align-items-center">
+          </div>
+          <div class="d-flex align-items-center">
+            <%= link_to 'Documentation', root_path, class: "text-light nav-link" %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

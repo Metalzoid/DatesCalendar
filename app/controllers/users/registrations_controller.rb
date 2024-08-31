@@ -39,11 +39,6 @@ module Users
       end
     end
 
-    # GET /resource/edit
-    # def edit
-    #   super
-    # end
-
     # @summary Edit a User
     # - Required: current_password
     # @request_body The user informations. At least include an `email`. [!Hash{user: Hash{email: String, current_password: String, password: String, password_confirmation: String, firstname: String, lastname: String, company: String, role: String}}]
@@ -79,19 +74,6 @@ module Users
       end
     end
 
-    # DELETE /resource
-    # def destroy
-    #   super
-    # end
-
-    # GET /resource/cancel
-    # Forces the session data which is usually expired after sign
-    # in to be expired now. This is useful if the user wants to
-    # cancel oauth signing in/up in the middle of the process,
-    # removing all OAuth session data.
-    # def cancel
-    #   super
-    # end
 
     # protected
 

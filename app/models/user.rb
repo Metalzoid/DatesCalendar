@@ -32,6 +32,10 @@ class User < ApplicationRecord
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
   end
 
+  def full_name_with_id
+    "#{id} - #{firstname} #{lastname}"
+  end
+
   pg_search_scope :search_by_firstname_and_lastname,
                   against: %i[firstname lastname],
                   using: {

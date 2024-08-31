@@ -47,7 +47,13 @@ Rails.application.routes.draw do
   end
 
   authenticate :admin do
-    get 'admin', to: 'admins/admins_pages#index', as: :admin_index
+    namespace :admins, path: 'admin' do
+      get '/', to: 'admins_pages#index', as: :index
+      resources :availabilities, only: %i[index create destroy]
+      resources :appointments, only: %i[index create destroy]
+      resources :services, only: %i[index create destroy]
+      resources :users, only: %i[index]
+    end
   end
 
   get 'up', to: 'rails/health#show', as: :rails_health_check

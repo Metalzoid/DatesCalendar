@@ -1,0 +1,38 @@
+<div class="container d-flex flex-column align-items-center mt-3" style="width: 75vw" data-controller="buttons">
+  <h1>Administration</h1>
+  <h3>Your informations</h3>
+  <ul>
+    <li>Number of your Users : <%= @users.count %></li>
+    <li>Number of Availabilities : <%= @availabilities.count %></li>
+    <li>Number of Appointments : <%= @appointments.count %></li>
+    <li>Number of Services : <%= @services.count %></li>
+  </ul>
+  <button class="btn btn-success" type="button" aria-expanded="false" data-buttons-target="apikey" data-action="click->buttons#toggleApikey">
+    Show your API KEY
+  </button>
+  <div class="collapse" id="apiKey">
+    <div class="input-group d-flex align-items-center" data-controller="copy-to-clipboard">
+      <input class="form-control my-3 text-black" style="field-sizing: content;" type="text" value=<%= current_admin.api_key.api_key %> aria-label="ApiKey ReadOnly" disabled readonly data-copy-to-clipboard-target="input">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon2" style="height: max-content;" data-copy-to-clipboard-target="button" data-action="click->copy-to-clipboard#copyToClipboard">Copy</button>
+    </div>
+  </div>
+  <h3 class="text-center mt-5">Last week</h3>
+  <div class="row text-center gap-3 justify-content-center">
+    <div class="col-12 col-lg-5">
+      <h5>Users</h5>
+      <%= line_chart @users_charts %>
+    </div>
+    <div class="col-12 col-lg-5">
+      <h5>Appointments</h5>
+      <%= line_chart @appointments_charts %>
+    </div>
+    <div class="col-12 col-lg-5">
+      <h5>Services</h5>
+      <%= line_chart @services_charts %>
+    </div>
+    <div class="col-12 col-lg-5">
+      <h5>Availabilities</h5>
+      <%= line_chart @availabilities_charts %>
+    </div>
+  </div>
+</div>

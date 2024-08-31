@@ -1,25 +1,17 @@
 # frozen_string_literal: true
 
 module Admins
+  # AdminPages Controller
   class AdminsPagesController < ApplicationController
     def index
       @users = current_admin.users
-      @availabilities = @users.map(&:availabilities).flatten
-      @appointments = @users.map(&:appointments).flatten
-      @services = @users.map(&:services).flatten
+      @availabilities = @users.flat_map(&:availabilities)
+      @appointments = @users.flat_map(&:appointments)
+      @services = @users.flat_map(&:services)
       @users_charts = User.group_by_day(current_admin)
       @services_charts = Service.group_by_day(current_admin)
       @availabilities_charts = Availability.group_by_day(current_admin)
       @appointments_charts = Appointment.group_by_day(current_admin)
-
-      respond_to do |format|
-        format.html { render "admins_pages/index" }
-      end
     end
-
-    def users
-      @users = current_admin.users
-    end
-
   end
 end

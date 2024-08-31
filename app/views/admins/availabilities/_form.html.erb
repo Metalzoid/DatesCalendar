@@ -1,0 +1,7 @@
+<%= simple_form_for availability, url: admins_availabilities_path, data: { modal_service_target: "form", action: "submit->modal-service#submit" } do |f| %>
+  <%= f.input :start_date, required: true %>
+  <%= f.input :end_date, required: true %>
+  <%= f.input :available, as: :boolean, required: true %>
+  <%= f.association :user, label_method: :full_name_with_id, value_method: :id, required: true %>
+  <%= f.button :submit, class: 'btn btn-success' %>
+<% end %>
