@@ -6,32 +6,28 @@ module Admins
 
     def index
       filter_users_with_availabilities
-      @availabilities = @users.flat_map(&:availabilities)
+      @availabilities = @users.flat_map(&:availabilities).sort_by(&:id)
       @availability = Availability.new
-      return unless params[:user_id].present? && @availabilities.any?
-
-      filter_availabilities_by_user_id
+      filter_availabilities_by_user_id if params[:user_id].present? && params[:user_id] != 'none'
       respond_to_formats('availabilities_infos', availabilities: @availabilities)
     end
 
     def create
       @availability = Availability.new(availability_params)
       if @availability.save
-        respond_to do |format|
-          format.html { redirect_to admins_availabilities_path }
-          format.json { render json: { success: true, partial: render_to_string(partial: 'admins/availabilities/availability', locals: { availability: @availability }, formats: [:html]) } }
-        end
+        respond_to_success_create(@availability)
       else
-        respond_to do |format|
-          format.html { redirect_to admins_availabilities_path }
-          format.json { render json: { success: false, partial: render_to_string(partial: 'admins/availabilities/form', locals: { availability: @availability }, formats: [:html]) } }
-        end
+        respond_to_errors_create(@availability)
       end
     end
 
     def destroy
       @availability = Availability.find(params[:id])
-      redirect_to admins_availabilities_path if @availability.destroy
+      if params[:listed].present? && @availability.user.availabilities.length > 2
+        redirect_to "#{admins_availabilities_url}?user_id=#{@availability.user.id}" if @availability.destroy
+      elsif @availability.destroy
+        redirect_to admins_availabilities_path
+      end
     end
 
     private
@@ -42,12 +38,6 @@ module Admins
 
     def set_users
       @users = current_admin.users
-    end
-
-    def authorize_data_admin
-      return unless params[:user_id].present?
-
-      redirect_to('/401') unless current_admin.users.find_by(id: params[:user_id])
     end
 
     def filter_users_with_availabilities

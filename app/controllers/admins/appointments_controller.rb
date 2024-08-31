@@ -1,34 +1,29 @@
 # app/controllers/admins/appointments_controller.rb
 module Admins
-  class AppointmentsController < ApplicationController
+  class AppointmentsController < Admins::AdminsPagesController
     before_action :authorize_data_admin, only: %i[index destroy]
     before_action :set_users, only: %i[index]
 
     def index
       filter_users_with_appointments
-      @appointments = @users.flat_map(&:appointments)
-
-      return unless params[:user_id].present? && @appointments.any?
-
-      filter_appointments_by_user_id
+      @appointments = @users.flat_map(&:appointments).sort_by(&:id)
+      filter_appointments_by_user_id if params[:user_id].present? && params[:user_id] != 'none'
       respond_to_formats('appointments_infos', appointments: @appointments)
     end
 
     def destroy
       @appointment = Appointment.find(params[:id])
-      redirect_to admins_appointments_path if @appointment.destroy
+      if params[:listed].present? && @appointment.destroy
+        redirect_to "#{admins_appointments_url}?user_id=#{@appointment.user.id}"
+      elsif @appointment.destroy
+        redirect_to admins_appointments_path
+      end
     end
 
     private
 
     def set_users
       @users = current_admin.users
-    end
-
-    def authorize_data_admin
-      return unless params[:user_id].present?
-
-      redirect_to('/401') unless current_admin.users.find_by(id: params[:user_id])
     end
 
     def filter_users_with_appointments

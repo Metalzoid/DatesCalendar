@@ -1,7 +1,7 @@
 # config/initializers/oas_rails.rb
 OasRails.configure do |config|
   # Basic Information about the API
-  config.info.title = 'DatesCalendar'
+  config.info.title = 'DatesCalendar API'
   config.info.summary = 'A simple Appointment API.'
   config.info.description = "[View on GitHub](https://github.com/metalzoid/datescalendar)
 ### DatesCalendar API Presentation
