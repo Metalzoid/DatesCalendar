@@ -64,7 +64,7 @@ lastnames = %w[
 @sellers = []
 
 def seller_actions(user)
-  @services.sample(10).each do |service|
+  @services.sample(4).each do |service|
     Service.create!(service.merge(user:))
   end
   puts "#{user.services.count} services created for #{user.firstname}"
