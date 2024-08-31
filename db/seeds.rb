@@ -86,7 +86,8 @@ def customer_actions(customer)
   service = seller.services.sample
   start_date = availability.start_date
   end_date = start_date + service.time.to_i.minutes
-  Appointment.create!(start_date:, end_date:, comment: "For my son.", seller:, customer:)
+  appointment = Appointment.new(start_date:, end_date:, comment: "For my son.", seller:, customer:)
+  appointment.save(validate: false)
   @sellers.delete(seller)
 end
 
@@ -125,7 +126,7 @@ end
   password = 'azerty'
   role = 'customer'
 
-  customer = User.create!(
+  customer = User.create(
     firstname:,
     lastname:,
     email:,
