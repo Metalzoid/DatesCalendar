@@ -5,6 +5,7 @@
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
   <script>
     window.axeptioSettings = {
       clientId: "66d2dfd1cf8b5d64e77a298b",
@@ -26,7 +27,6 @@
       t.parentNode.insertBefore(e, t);
     })(document, "script");
   </script>
-  <%= javascript_importmap_tags %>
 </head>
 <body data-controller="flashs">
   <%= render "shared/navbar" %>
