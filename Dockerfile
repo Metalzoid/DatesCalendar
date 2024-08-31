@@ -17,6 +17,7 @@ ENV RAILS_ENV="production" \
     GOOGLE_CLIENT_SECRET="fake_secret" \
     POSTMARK_API_TOKEN="fake_secret" \
     COOKIEBOT_KEY="fake_secret" \
+    FAKE_PASSWORD="fake_secret" \
     RAILS_MASTER_KEY=$RAILS_MASTER_KEY
 
 # Install packages needed to build gems
