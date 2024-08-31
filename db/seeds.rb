@@ -6,7 +6,7 @@ if Admin.exists?(email: 'admin@datescalendar.fr')
   admin = Admin.find_by(email: 'admin@datescalendar.fr').destroy
   puts "#{admin.email} has been deleted with all data"
 end
-admin = Admin.create!(email: 'admin@datescalendar.fr', password: 'azerty')
+admin = Admin.create!(email: 'admin@datescalendar.fr', password: ENV['FAKE_PASSWORD'])
 admin.confirm
 puts "Admin #{admin.email} created."
 
