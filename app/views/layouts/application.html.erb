@@ -41,5 +41,10 @@
     <% end %>
   </div>
   <%= yield %>
+<% if request.fullpath.exclude?("docs") %>
+  <footer class="text-center mt-5">
+    <%= link_to "Click here to change your cookie preferences", "javascript:openAxeptioCookies()", class: "text-light" %>
+  </footer>
+<% end %>
 </body>
 </html>

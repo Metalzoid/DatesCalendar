@@ -57,7 +57,13 @@ For more information or any questions, please do not hesitate to contact us at [
 
 ---
 
-Thank you for your attention."
+Thank you for your attention.
+
+
+---
+
+[Click here to change your cookie preferences](javascript:openAxeptioCookies())
+"
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
