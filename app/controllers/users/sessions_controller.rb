@@ -56,7 +56,6 @@ module Users
       return render json: { message: 'Logged out Successfully.' }, status: :ok if current_api_user && user
 
       render json: { message: "Couldn't find an active session." }, status: :unauthorized
-
     end
 
     # protected

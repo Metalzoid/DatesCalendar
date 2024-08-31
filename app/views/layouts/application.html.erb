@@ -6,26 +6,11 @@
   <%= csp_meta_tag %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
-  <script>
-    window.axeptioSettings = {
-      clientId: "66d2dfd1cf8b5d64e77a298b",
-      cookiesVersion: "datescalendar-fr-EU",
-      googleConsentMode: {
-        default: {
-          analytics_storage: "denied",
-          ad_storage: "denied",
-          ad_user_data: "denied",
-          ad_personalization: "denied",
-          wait_for_update: 500
-        }
-      }
-    };
-
-    (function(d, s) {
-      var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
-      e.async = true; e.src = "//static.axept.io/sdk.js";
-      t.parentNode.insertBefore(e, t);
-    })(document, "script");
+  <script
+    id="Cookiebot"
+    src="https://consent.cookiebot.com/uc.js"
+    data-cbid="<%= ENV['COOKIEBOT_KEY'] %>"
+    type="text/javascript">
   </script>
 </head>
 <body data-controller="flashs">
@@ -41,10 +26,5 @@
     <% end %>
   </div>
   <%= yield %>
-<% if request.fullpath.exclude?("docs") %>
-  <footer class="text-center mt-5">
-    <%= link_to "Click here to change your cookie preferences", "javascript:openAxeptioCookies()", class: "text-light" %>
-  </footer>
-<% end %>
 </body>
 </html>
