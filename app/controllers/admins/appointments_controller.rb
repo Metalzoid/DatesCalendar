@@ -1,4 +1,3 @@
-# app/controllers/admins/appointments_controller.rb
 module Admins
   class AppointmentsController < Admins::AdminsPagesController
     before_action :authorize_data_admin, only: %i[index destroy]
@@ -14,7 +13,7 @@ module Admins
     def destroy
       @appointment = Appointment.find(params[:id])
       if params[:listed].present? && @appointment.destroy
-        redirect_to "#{admins_appointments_url}?user_id=#{@appointment.user.id}"
+        redirect_to "#{admins_appointments_url}?user_id=#{params[:user_id]}"
       elsif @appointment.destroy
         redirect_to admins_appointments_path
       end

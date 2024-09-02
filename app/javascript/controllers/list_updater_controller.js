@@ -30,7 +30,7 @@ export default class extends Controller {
   updateLinkToDestroy() {
     this.listTarget.querySelectorAll("tr > td > a").forEach((linkto) => {
       if (this.selectTarget.value !== "none") {
-        linkto.href += "?listed=true";
+        linkto.href += `?listed=true&user_id=${this.selectTarget.value}`;
       }
     });
   }

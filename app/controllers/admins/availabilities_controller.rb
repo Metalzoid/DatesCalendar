@@ -24,7 +24,7 @@ module Admins
     def destroy
       @availability = Availability.find(params[:id])
       if params[:listed].present? && @availability.user.availabilities.length > 2
-        redirect_to "#{admins_availabilities_url}?user_id=#{@availability.user.id}" if @availability.destroy
+        redirect_to "#{admins_availabilities_url}?user_id=#{params[:user_id]}" if @availability.destroy
       elsif @availability.destroy
         redirect_to admins_availabilities_path
       end

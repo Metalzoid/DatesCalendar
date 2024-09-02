@@ -24,7 +24,7 @@ module Admins
     def destroy
       @service = Service.find(params[:id])
       if params[:listed].present? && @service.destroy
-        redirect_to "#{admins_services_url}?user_id=#{@service.user.id}"
+        redirect_to "#{admins_services_url}?user_id=#{params[:user_id]}"
       elsif @service.destroy
         redirect_to admins_services_path
       end
