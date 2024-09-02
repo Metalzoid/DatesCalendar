@@ -59,7 +59,8 @@ module Api
         @appointment = Appointment.new(appointment_params)
         calculate_end_date unless params.dig(:appointment, :end_date)
         @appointment.customer = current_user
-        @appointment.seller = Service.find(@services.first).user if @services
+        @appointment.seller = @services.first.user if @services.any?
+        @appointment.price = @services.sum(&:price)
         if @appointment.save
           create_appointment_services if @services
           render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :created)
@@ -77,7 +78,7 @@ module Api
       # - Can't modifying date after accepted status.
       # @request_body The Appointment to be updated [!Hash{appointment: Hash{start_date: DateTime, end_date: DateTime, status: String, comment: String, seller_comment: String, price: Float}}]
       # @request_body_example The Appointment to be updated [Hash] {appointment: {start_date: '14/07/2024 10:00',end_date: '14/07/2024 10:30', status: "accepted", seller_comment: "It's ok for me."}, appointment_services: "En attente"}
-       # @response Appointment updated.(200) [Hash{message: String, data: Hash{id: Integer, start_date: Datetime, end_date: Datetime, status: String, comment: String, seller_comment: String, price: Float, seller_id: Integer, customer_id: Integer}}]
+      # @response Appointment updated.(200) [Hash{message: String, data: Hash{id: Integer, start_date: Datetime, end_date: Datetime, status: String, comment: String, seller_comment: String, price: Float, seller_id: Integer, customer_id: Integer}}]
       # @response_example Appointment updated.(200) [{message: "Appointment updated.", data: {id: 1, start_date: "2024-07-14T10:00:00.000+02:00", end_date: "2024-07-14T10:30:00.000+02:00", status: "accepted", comment: "For my son.", seller_comment: "It's ok for me.", price: 36.99, seller_id: 3, customer_id: 4}}]
       # @response You need to be the seller or the customer or Admin to perform this action.(401) [Hash{message: String}]
       # @response_example You need to be the seller or the customer or Admin to perform this action.(401) [{message: "You need to be the seller or the customer or Admin to perform this action."}]
@@ -89,7 +90,7 @@ module Api
         return render_error(unauthorized_error_message, :forbidden) unless authorized_to_update?
 
         if @appointment.update(update_params)
-          create_appointment_services if @services
+          create_appointment_services if @services.any?
           render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
         else
           render_error("Error: #{@appointment.errors.full_messages.to_sentence}", :unprocessable_entity)
@@ -99,7 +100,7 @@ module Api
       private
 
       def calculate_end_date
-        @appointment.end_date = @appointment.start_date.to_datetime + @services.sum { |id| Service.find(id).time }.minutes
+        @appointment.end_date = @appointment.start_date.to_datetime + @services.sum(&:time).minutes
       end
 
       def authorization
@@ -130,12 +131,18 @@ module Api
       end
 
       def set_services_list
-        @services = params[:appointment_services]
+        @services = params[:appointment_services].map do |service_id|
+          service = Service.by_admin(current_user.admin).find_by(id: service_id)
+          unless service
+            return render_error('Service not found', :not_found)
+          end
+          service
+        end
       end
 
       def create_appointment_services
         @appointment.appointment_services.destroy_all
-        @services.each { |id| AppointmentService.create(appointment: @appointment, service: Service.find(id)) }
+        @services.each { |service| AppointmentService.create(appointment: @appointment, service: service) }
       end
 
       def authorized_to_update?

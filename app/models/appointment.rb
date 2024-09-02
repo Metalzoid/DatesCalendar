@@ -3,7 +3,6 @@
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
-  after_create :update_price
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'
@@ -21,11 +20,6 @@ class Appointment < ApplicationRecord
 
   def self.by_admin(admin)
     joins(:customer, :seller).merge(User.by_admin(admin))
-  end
-
-  def update_price
-    new_price = services.sum(&:price)
-    update(price: new_price)
   end
 
   private
