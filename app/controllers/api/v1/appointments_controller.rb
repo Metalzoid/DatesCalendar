@@ -133,9 +133,8 @@ module Api
       def set_services_list
         @services = params[:appointment_services].map do |service_id|
           service = Service.by_admin(current_user.admin).find_by(id: service_id)
-          unless service
-            return render_error('Service not found', :not_found)
-          end
+          return render_error('Service not found', :not_found) unless service
+
           service
         end
       end
