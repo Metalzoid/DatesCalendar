@@ -3,6 +3,7 @@
 # Controller for API USE RENDER JSON ##
 class ApiController < ActionController::API
   before_action :authenticate_user!
+  before_action :custom_authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActionController::UnpermittedParameters, with: :handle_errors
 
@@ -17,14 +18,13 @@ class ApiController < ActionController::API
   # @tags Users
   # @auth [bearer_jwt]
   def user_search
-
     @query = params[:query].downcase unless params[:query].nil?
     @role = params[:role].downcase unless params[:role].nil?
     return if verify_search(@query, @role)
 
     @users = find_user(@query, @role)
-    render_success("#{@role ? @role.capitalize : 'User' }(s) founded.", @users, :ok) if @users.length.positive?
-    render_error("#{@role ? @role.capitalize : 'User' }(s) not found.", :not_found) if @users.empty?
+    render_success("#{@role ? @role.capitalize : 'User'}(s) founded.", @users, :ok) if @users.length.positive?
+    render_error("#{@role ? @role.capitalize : 'User'}(s) not found.", :not_found) if @users.empty?
   end
 
   def render_success(message, data, status)
@@ -49,8 +49,17 @@ class ApiController < ActionController::API
            status: :unprocessable_entity
   end
 
-  def find_user(query, role)
+  def find_user(query, _role)
     User.by_admin(current_user.admin).search_by_firstname_and_lastname(query)
+  end
+
+  def custom_authenticate_user!
+    if request.headers['Authorization'].present?
+      jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
+    else
+      return render_error('Authorization token required.', :unauthorized)
+    end
+    render json: { message: 'JWT token revoked.' }, status: :unauthorized if current_user.jwt_revoked?(jwt_payload)
   end
 
   protected

@@ -141,7 +141,7 @@ module Api
 
       def create_appointment_services
         @appointment.appointment_services.destroy_all
-        @services.each { |service| AppointmentService.create(appointment: @appointment, service: service) }
+        @services.each { |service| AppointmentService.create(appointment: @appointment, service:) }
       end
 
       def authorized_to_update?

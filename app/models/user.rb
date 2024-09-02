@@ -16,7 +16,7 @@ class User < ApplicationRecord
   has_many :availabilities, dependent: :destroy
   belongs_to :admin
 
-  scope :by_admin, ->(admin) { where(admin: admin) }
+  scope :by_admin, ->(admin) { where(admin:) }
 
   enum role: {
     customer: 0,
@@ -34,6 +34,15 @@ class User < ApplicationRecord
 
   def full_name_with_id
     "#{id} - #{firstname} #{lastname}"
+  end
+
+  def revoke_jwt(payload)
+    revoked_jwts << payload['jti']
+    save!
+  end
+
+  def jwt_revoked?(payload)
+    revoked_jwts.include?(payload['jti'])
   end
 
   pg_search_scope :search_by_firstname_and_lastname,
