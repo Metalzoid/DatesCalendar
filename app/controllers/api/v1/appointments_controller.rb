@@ -54,15 +54,15 @@ module Api
       # @auth [bearer_jwt]
       def create
         return render_error('Appointment_services OR End_date required!', :unprocessable_entity) unless @services || params.dig(:appointment, :end_date)
-        return render_error('seller_id required!', :unprocessable_entity) if @services.nil? && params.dig(:appointment, :seller_id).nil?
+        return render_error('Seller_id required!', :unprocessable_entity) if @services.nil? && params.dig(:appointment, :seller_id).nil?
+        return render_error('Seller not founded!', :unprocessable_entity) unless User.exists?(id: params.dig(:appointment, :seller_id))
 
         @appointment = Appointment.new(appointment_params)
         calculate_end_date unless params.dig(:appointment, :end_date)
         @appointment.customer = current_user
-        @appointment.seller = @services.first.user if @services.any?
-        @appointment.price = @services.sum(&:price)
+        @appointment.price = @services.sum(&:price) unless @services.nil?
         if @appointment.save
-          create_appointment_services if @services
+          create_appointment_services unless @services.nil?
           render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :created)
         else
           render_error("Can't create appointment: #{@appointment.errors.full_messages.to_sentence}", :unprocessable_entity)
@@ -118,11 +118,11 @@ module Api
       end
 
       def appointment_params
-        params.require(:appointment).permit(:start_date, :end_date, :comment, :seller_id)
+        params.require(:appointment).permit(:start_date, :end_date, :comment, :seller_id, :price)
       end
 
       def appointment_params_seller
-        params.require(:appointment).permit(:start_date, :end_date, :status, :seller_comment)
+        params.require(:appointment).permit(:start_date, :end_date, :status, :seller_comment, :price)
       end
 
       def set_appointment
@@ -131,6 +131,8 @@ module Api
       end
 
       def set_services_list
+        return unless params[:appointment_services].present?
+
         @services = params[:appointment_services].map do |service_id|
           service = Service.by_admin(current_user.admin).find_by(id: service_id)
           return render_error('Service not found', :not_found) unless service
