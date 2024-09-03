@@ -53,6 +53,7 @@ Rails.application.routes.draw do
       resources :appointments, only: %i[index create destroy]
       resources :services, only: %i[index create destroy]
       resources :users, only: %i[index]
+      get 'resetApikey', to: 'admins_pages#resetApikey'
     end
   end
 

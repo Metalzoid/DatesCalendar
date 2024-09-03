@@ -3,12 +3,14 @@
 require 'date'
 
 if Admin.exists?(email: 'admin@datescalendar.fr')
-  admin = Admin.find_by(email: 'admin@datescalendar.fr').destroy
-  puts "#{admin.email} has been deleted with all data"
+  admin = Admin.find_by(email: 'admin@datescalendar.fr')
+  admin.users.destroy_all
+  puts "#{admin.email} - all data destroyed"
+else
+  admin = Admin.create!(email: 'admin@datescalendar.fr', password: ENV['FAKE_PASSWORD'])
+  admin.confirm
 end
-admin = Admin.create!(email: 'admin@datescalendar.fr', password: ENV['FAKE_PASSWORD'])
-admin.confirm
-puts "Admin #{admin.email} created."
+puts "Admin #{admin.email} initialized."
 
 firstnames = %w[
   Alice Bob Claire David Eva Frank Grace Hugo Isabelle Jack

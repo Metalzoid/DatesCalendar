@@ -14,6 +14,11 @@ module Admins
       @appointments_charts = Appointment.group_by_day(current_admin)
     end
 
+    def resetApikey
+      current_admin.api_key.update_api_key
+      render json: { apikey: current_admin.api_key.api_key }
+    end
+
     def authorize_data_admin
       return unless params[:user_id].present?
 

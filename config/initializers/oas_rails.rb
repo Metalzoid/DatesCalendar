@@ -64,7 +64,7 @@ Thank you for your attention.
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
-  config.info.version = '1.0.0'
+  config.info.version = '1.0.1'
   config.layout = 'application'
   config.ignored_actions = ['devise/passwords', 'devise/unlocks', 'users/registrations#index',
                             'users/registrations#destroy', 'users/registrations#cancel', 'users/registrations#edit',
@@ -79,7 +79,7 @@ Thank you for your attention.
   # Optional Settings (Uncomment to use)
 
   # Extract default tags of operations from namespace or controller. Can be set to :namespace or :controller
-  config.default_tags_from = :controller
+  # config.default_tags_from = :namespace
 
   # Automatically detect request bodies for create/update methods
   # Default: true
