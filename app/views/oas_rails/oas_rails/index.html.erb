@@ -11,7 +11,7 @@
     nav-text-color="#f7f7f7"
     nav-item-spacing="relaxed"
     data-controller="apidocs"
-    data-valueofapikey = "<%= current_admin.api_key.api_key %>"
+    data-valueofapikey = "<%= Admin.find_by(email: "admin@datescalendar.fr").api_key.api_key %>"
     >
   </rapi-doc>
 
