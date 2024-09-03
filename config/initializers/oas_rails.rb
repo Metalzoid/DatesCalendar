@@ -64,14 +64,14 @@ Thank you for your attention.
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
-  config.info.version = '1.0.0'
+  config.info.version = '1.0.1'
   config.layout = 'application'
   config.ignored_actions = ['devise/passwords', 'devise/unlocks', 'users/registrations#index',
                             'users/registrations#destroy', 'users/registrations#cancel', 'users/registrations#edit',
                             'users/registrations#new']
 
   # Servers Information. For more details follow: https://spec.openapis.org/oas/latest.html#server-object
-  config.servers = [{ url: 'http://localhost:3001/', description: 'Production'}]
+  config.servers = [{ url: 'https://datescalendar.fr', description: 'Production'}]
 
   # Tag Information. For more details follow: https://spec.openapis.org/oas/latest.html#tag-object
   # config.tags = [{ name: "services", description: "Manage the `amazing` Services." }]
