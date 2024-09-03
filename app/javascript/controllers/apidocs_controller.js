@@ -14,9 +14,8 @@ export default class extends Controller {
     event.preventDefault();
     const rapidoc = document.querySelector("rapi-doc");
     const apikey = rapidoc.getAttribute("data-valueofapikey");
-    event.target.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(
-      "input"
-    ).value = apikey;
+    const inputElement = event.target.closest("table").querySelector("input");
+    inputElement.value = apikey;
     rapidoc.setAttribute("api-key-name", "APIKEY");
     rapidoc.setAttribute("api-key-location", "header");
     rapidoc.setAttribute("api-key-value", apikey);
