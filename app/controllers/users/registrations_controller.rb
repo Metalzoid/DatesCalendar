@@ -7,7 +7,7 @@ module Users
     # - Role can be: seller, customer, both.
     # - Password minimum length: 6 chars.
     # - Optionnal: company.
-    # @parameter APIKEY(header) [String] Your admin APIKEY. <button onclick="setApikey(event)" type="button" class="m-btn primary thin-border" >Set DEMO API KEY</button>
+    # @parameter APIKEY(header) [!String] Your admin APIKEY. <button onclick="setApikey(event)" type="button" class="m-btn primary thin-border" >Set DEMO API KEY</button>
     # @request_body The user informations. At least include an `email`. [!Hash{user: Hash{email: String, password: String, firstname: String, lastname: String, company: String, role: String}}]
     # @request_body_example basic user [Hash] {user: {email: "test@gmail.com", password: "azerty", firstname: "Pedro", lastname: "Pedro", role: "seller"}}
     # @response Logged in Successfully.(200) [Hash{message: String, data: Hash{user: Hash{id: Integer, email: String, firstname: String, lastname: String, company: String, role: String}}}]
