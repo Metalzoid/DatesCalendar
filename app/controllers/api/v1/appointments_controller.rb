@@ -90,7 +90,7 @@ module Api
         return render_error(unauthorized_error_message, :forbidden) unless authorized_to_update?
 
         if @appointment.update(update_params)
-          create_appointment_services if @services.any?
+          create_appointment_services unless @services.nil?
           render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
         else
           render_error("Error: #{@appointment.errors.full_messages.to_sentence}", :unprocessable_entity)
