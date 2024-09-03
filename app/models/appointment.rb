@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Appointment Model
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?

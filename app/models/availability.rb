@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Availability Model
 class Availability < ApplicationRecord
   belongs_to :user
 

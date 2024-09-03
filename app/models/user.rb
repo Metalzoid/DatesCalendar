@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Model User
+# User Model
 class User < ApplicationRecord
   include PgSearch::Model
   include Devise::JWT::RevocationStrategies::JTIMatcher
@@ -16,7 +16,7 @@ class User < ApplicationRecord
   has_many :availabilities, dependent: :destroy
   belongs_to :admin
 
-  scope :by_admin, ->(admin) { where(admin:) }
+  scope :by_admin, ->(admin) { where(admin:).sort_by(&:id) }
 
   enum role: {
     customer: 0,

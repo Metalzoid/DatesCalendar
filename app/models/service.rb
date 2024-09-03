@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Service Model
 class Service < ApplicationRecord
   belongs_to :user
   has_many :appointment_services, dependent: :destroy
