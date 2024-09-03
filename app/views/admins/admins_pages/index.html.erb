@@ -7,13 +7,14 @@
     <li>Number of Appointments : <%= @appointments.count %></li>
     <li>Number of Services : <%= @services.count %></li>
   </ul>
-  <button class="btn btn-success" type="button" aria-expanded="false" data-buttons-target="apikey" data-action="click->buttons#toggleApikey">
+  <button class="btn btn-success" type="button" aria-expanded="false" data-buttons-target="toggleApikey" data-action="click->buttons#toggleApikey">
     Show your API KEY
   </button>
   <div class="collapse" id="apiKey">
     <div class="input-group d-flex align-items-center" data-controller="copy-to-clipboard">
-      <input class="form-control my-3 text-black" style="field-sizing: content;" type="text" value=<%= current_admin.api_key.api_key %> aria-label="ApiKey ReadOnly" disabled readonly data-copy-to-clipboard-target="input">
+      <input class="form-control my-3 text-black" style="field-sizing: content;" type="text" data-buttons-target="apikey" value=<%= current_admin.api_key.api_key %> aria-label="ApiKey ReadOnly" disabled readonly data-copy-to-clipboard-target="input">
       <button class="btn btn-outline-secondary" type="button" id="button-addon2" style="height: max-content;" data-copy-to-clipboard-target="button" data-action="click->copy-to-clipboard#copyToClipboard">Copy</button>
+      <%= link_to "Reset API KEY", admins_resetApikey_path, class: 'btn btn-outline-secondary', data: { action: 'click->buttons#resetApikey', turbo_confirm: "Are you sure ?" } %>
     </div>
   </div>
   <h3 class="text-center mt-5">Last week</h3>
