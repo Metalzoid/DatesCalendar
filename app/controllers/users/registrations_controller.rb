@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'pry-byebug'
+
 module Users
   class RegistrationsController < Devise::RegistrationsController
     # @summary Register new User
@@ -22,8 +23,10 @@ module Users
         if headers.include?(',')
           api_key = headers.split(',').first
           current_api_admin = ApiKey.find_by(api_key:).admin
+          render json: { message: "Your APIKEY #{api_key} not match in our records." }, status: :unprocessable_entity
         else
           current_api_admin = ApiKey.find_by(api_key: headers).admin
+          render json: { message: "Your APIKEY #{headers} not match in our records." }, status: :unprocessable_entity
         end
         @user.admin = current_api_admin
       end
@@ -59,7 +62,8 @@ module Users
     # @tags Users
     # @auth [bearer_jwt]
     def update
-      return render json: {message: "Bearer JWT Token required !"}, status: :unauthorized unless request.headers['Authorization'].present?
+      return render json: { message: 'Bearer JWT Token required !' }, status: :unauthorized unless request.headers['Authorization'].present?
+
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
@@ -73,21 +77,21 @@ module Users
         set_flash_message_for_update(resource, prev_unconfirmed_email)
         bypass_sign_in resource, scope: resource_name if sign_in_after_change_password?
 
-        render json: {message: "User has been updated.", data: {user: UserSerializer.new(self.resource).serializable_hash[:data][:attributes]}}, status: :ok
+        render json: { message: 'User has been updated.',
+                       data: { user: UserSerializer.new(resource).serializable_hash[:data][:attributes] } }, status: :ok
       else
         clean_up_passwords resource
         set_minimum_password_length
-        render json: {message: "User has not been updated. #{self.resource.errors.messages}"}, status: :unprocessable_entity
+        render json: { message: "User has not been updated. #{resource.errors.messages}" }, status: :unprocessable_entity
       end
     end
-
 
     # protected
 
     # If you have extra params to permit, append them to the sanitizer.
-    # def configure_sign_up_params
-    #   devise_parameter_sanitizer.permit(:sign_up, keys: [:attribute])
-    # end
+    def configure_sign_up_params
+      devise_parameter_sanitizer.permit(:sign_up, keys: [:attribute])
+    end
 
     # If you have extra params to permit, append them to the sanitizer.
     def configure_account_update_params
