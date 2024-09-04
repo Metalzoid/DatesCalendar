@@ -53,9 +53,10 @@ module Users
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
+        return render json: { message: 'User not found with this JWT token.' }, status: :not_found
       end
 
-      return render json: { message: "Couldn't find an active session." } if current_api_user.jwt_revoked?(jwt_payload)
+      return render json: { message: 'JWT token already revoked!' } if current_api_user.jwt_revoked?(jwt_payload)
 
       signed_out = sign_out(resource_name)
       current_api_user.revoke_jwt(jwt_payload) if signed_out
