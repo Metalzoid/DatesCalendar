@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'pry-byebug'
 module Users
   # Sessions controller users
   class SessionsController < Devise::SessionsController
@@ -53,7 +53,7 @@ module Users
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
-        return render json: { message: 'User not found with this JWT token.' }, status: :not_found
+        return render json: { message: 'User not found with this JWT token.' }, status: :not_found unless current_api_user
       end
 
       return render json: { message: 'JWT token already revoked!' } if current_api_user.jwt_revoked?(jwt_payload)
