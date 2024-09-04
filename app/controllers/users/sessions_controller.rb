@@ -73,9 +73,7 @@ module Users
 
     private
 
-    def verify_signed_out_user
-      render json: { message: "Couldn't find an active session." }, status: :unauthorized if all_signed_out?
-    end
+    def verify_signed_out_user; end
 
     def respond_with(current_user, _opts = {})
       render json: {
