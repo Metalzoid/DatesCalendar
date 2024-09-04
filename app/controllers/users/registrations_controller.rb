@@ -1,8 +1,10 @@
 # frozen_string_literal: true
-require 'pry-byebug'
 
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    include RackSessionsFix
+    respond_to :json
+
     # @summary Register new User
     # - Necessary: Admin API KEY.
     # - Role can be: seller, customer, both.
@@ -22,19 +24,23 @@ module Users
       if request.headers['APIKEY'].present?
         api_key = extract_api_key(request.headers['APIKEY'])
         current_api_admin = ApiKey.find_by(api_key:)&.admin
-
         unless current_api_admin
           return render json: { message: "Your APIKEY #{api_key} does not match our records." }, status: :unprocessable_entity
         end
 
         @user.admin = current_api_admin
       end
-      if @user.save
-        handle_successful_signup(@user)
-      else
-        clean_up_passwords @user
-        set_minimum_password_length
-        respond_with @user
+
+      begin
+        if @user.save
+          handle_successful_signup(@user)
+        else
+          clean_up_passwords @user
+          set_minimum_password_length
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      rescue ActiveRecord::RecordNotUnique
+        render json: { error: 'Email has already been taken' }, status: :unprocessable_entity
       end
     end
 
@@ -73,7 +79,7 @@ module Users
       end
     end
 
-    # protected
+    protected
 
     # If you have extra params to permit, append them to the sanitizer.
     def configure_sign_up_params
@@ -94,8 +100,6 @@ module Users
     # def after_inactive_sign_up_path_for(resource)
     #   super(resource)
     # end
-    include RackSessionsFix
-    respond_to :json
 
     private
 
@@ -122,7 +126,7 @@ module Users
       else
         expire_data_after_sign_in!
       end
-      respond_with user
+      render json: { message: 'User created successfully' }, status: :created
     end
   end
 end
