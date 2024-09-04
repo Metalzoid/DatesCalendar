@@ -48,8 +48,8 @@ module Api
       # @response_example Appointment created.(201) [{message: "Appointment created.", data: {id: 1, start_date: "2024-07-14T10:00:00.000+02:00", end_date: "2024-07-14T10:30:00.000+02:00", status: "hold", comment: "For my son.", seller_comment: "", price: 36.99, seller_id: 3, customer_id: 4}}]
       # @response You need to be the seller or the customer or Admin to perform this action.(403) [Hash{message: String}]
       # @response_example You need to be the seller or the customer or Admin to perform this action.(403) [{message: "You need to be the seller or the customer or Admin to perform this action."}]
-      # @response Can't create appointment.(422) [Hash{message: String}]
-      # @response_example Can't create appointment.(422) [{message: "Can't create appointment."}]
+      # @response Can't create appointment.(422) [Hash{message: String, errors: Hash}]
+      # @response_example Can't create appointment.(422) [{message: "Can't create appointment.", errors: {start_date: ["Can't be blank."]}}]
       # @tags appointments
       # @auth [bearer_jwt]
       def create
@@ -65,7 +65,7 @@ module Api
           create_appointment_services unless @services.nil?
           render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :created)
         else
-          render_error("Can't create appointment: #{@appointment.errors.full_messages.to_sentence}", :unprocessable_entity)
+          render_error("Can't create appointment:", @appointment.errors.full_messages.to_sentence, :unprocessable_entity)
         end
       end
 
@@ -84,6 +84,8 @@ module Api
       # @response_example You need to be the seller or the customer or Admin to perform this action.(401) [{message: "You need to be the seller or the customer or Admin to perform this action."}]
       # @response You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status.(403) [Hash{message: String}]
       # @response_example You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status.(403) [{message: "You can't modify this appointment, because you're not the creator of this appointment, the appointment status is not hold or you want modifying date after accepted status."}]
+      # @response Can't update appointment.(422) [Hash{message: String, errors: Hash}]
+      # @response_example Can't update appointment.(422) [{message: "Can't update appointment.", errors: {start_date: ["Can't be blank."]}}]
       # @tags appointments
       # @auth [bearer_jwt]
       def update
@@ -93,7 +95,7 @@ module Api
           create_appointment_services unless @services.nil?
           render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
         else
-          render_error("Error: #{@appointment.errors.full_messages.to_sentence}", :unprocessable_entity)
+          render_error("Can't update appointment.", @appointment.errors.full_messages.to_sentence, :unprocessable_entity)
         end
       end
 

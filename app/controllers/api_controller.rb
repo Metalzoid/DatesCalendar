@@ -31,8 +31,8 @@ class ApiController < ActionController::API
     render json: { message:, data: }, status:
   end
 
-  def render_error(message, status)
-    render json: { errors: message }, status:
+  def render_error(message, errors = nil, status )
+    render json: { message:, errors: }, status:
   end
 
   private
