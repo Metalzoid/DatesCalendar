@@ -18,31 +18,24 @@ module Users
     # @tags Users
     def create
       @user = build_resource(sign_up_params)
+
       if request.headers['APIKEY'].present?
-        headers = request.headers['APIKEY']
-        if headers.include?(',')
-          api_key = headers.split(',').first
-          current_api_admin = ApiKey.find_by(api_key:).admin
-          render json: { message: "Your APIKEY #{api_key} not match in our records." }, status: :unprocessable_entity
-        else
-          current_api_admin = ApiKey.find_by(api_key: headers).admin
-          render json: { message: "Your APIKEY #{headers} not match in our records." }, status: :unprocessable_entity
+        api_key = extract_api_key(request.headers['APIKEY'])
+        current_api_admin = ApiKey.find_by(api_key:)&.admin
+
+        unless current_api_admin
+          return render json: { message: "Your APIKEY #{api_key} does not match our records." }, status: :unprocessable_entity
         end
+
         @user.admin = current_api_admin
       end
-      @user.save
-      yield resource if block_given?
-      if resource.persisted?
-        if resource.active_for_authentication?
-          sign_up(resource_name, resource)
-        else
-          expire_data_after_sign_in!
-        end
+      if @user.save
+        handle_successful_signup(@user)
       else
-        clean_up_passwords resource
+        clean_up_passwords @user
         set_minimum_password_length
+        respond_with @user
       end
-      respond_with resource
     end
 
     # @summary Edit a User
@@ -117,6 +110,19 @@ module Users
           message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}"
         }, status: :unprocessable_entity
       end
+    end
+
+    def extract_api_key(header)
+      header.include?(',') ? header.split(',').first : header
+    end
+
+    def handle_successful_signup(user)
+      if user.active_for_authentication?
+        sign_up(resource_name, user)
+      else
+        expire_data_after_sign_in!
+      end
+      respond_with user
     end
   end
 end
