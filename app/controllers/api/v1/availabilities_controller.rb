@@ -156,17 +156,11 @@ module Api
       end
 
       def handle_time_params
-        min_hour = params[:time][:min_hour]
-        max_hour = params[:time][:max_hour]
-        if (min_hour..max_hour).include?(@availability.start_date.hour)
-          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
-          @availabilities_serialized = @availabilities.map do |availability|
-            AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
-          end
-          render_success('Availabilities created with min and max time.', @availabilities_serialized, :created)
-        else
-          render_error('Start time is not included in the params time', :unprocessable_entity)
+        @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
+        @availabilities_serialized = @availabilities.map do |availability|
+          AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
         end
+        render_success('Availabilities created with min and max time.', @availabilities_serialized, :created)
       end
     end
   end
