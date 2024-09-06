@@ -1,7 +1,15 @@
-<%= simple_form_for availability, url: admins_availabilities_path, data: { modal_service_target: "form", action: "submit->modal-service#submit" } do |f| %>
+<%= simple_form_for availability, url: admins_availabilities_path do |f| %>
   <%= f.input :start_date, required: true %>
   <%= f.input :end_date, required: true %>
   <%= f.input :available, as: :boolean, required: true %>
   <%= f.association :user, collection: User.by_admin(current_admin).sort_by(&:id), label_method: :full_name_with_id, value_method: :id, required: true %>
+
+  <%= simple_fields_for :time do |time_form| %>
+    <%= time_form.input :min_hour, collection: 0..23 %>
+    <%= time_form.input :min_minutes, collection: 0..59 %>
+    <%= time_form.input :max_hour, collection: 0..23 %>
+    <%= time_form.input :max_minutes, collection: 0..59 %>
+  <% end %>
+
   <%= f.button :submit, class: 'btn btn-success' %>
 <% end %>

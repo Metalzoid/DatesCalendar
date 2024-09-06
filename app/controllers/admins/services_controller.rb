@@ -6,10 +6,10 @@ module Admins
 
     def index
       filter_users_with_services
-      @services = @users.flat_map(&:services).sort_by(&:id)
+      @services = @users.flat_map(&:services)
       @service = Service.new
       filter_services_by_user_id if params[:user_id].present? && params[:user_id] != 'none'
-      respond_to_formats('services_infos', services: @services)
+      respond_to_formats('services_infos', services: @services.sort_by(&:id))
     end
 
     def create

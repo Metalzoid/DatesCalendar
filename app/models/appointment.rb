@@ -42,7 +42,7 @@ class Appointment < ApplicationRecord
   def create_availability
     return unless [saved_change_to_status&.last || status].include?('accepted')
 
-    @availability = Availability.set_unavailability(start_date, end_date, seller)
+    @availability = Availability.set_unavailability(start_date, end_date, false, seller)
   end
 
   def restore_availabilities

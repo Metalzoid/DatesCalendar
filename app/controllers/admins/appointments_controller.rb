@@ -5,9 +5,9 @@ module Admins
 
     def index
       filter_users_with_appointments
-      @appointments = @users.flat_map(&:appointments).sort_by(&:id)
+      @appointments = @users.flat_map(&:appointments).sort_by(&:start_date).uniq(&:id)
       filter_appointments_by_user_id if params[:user_id].present? && params[:user_id] != 'none'
-      respond_to_formats('appointments_infos', appointments: @appointments)
+      respond_to_formats('appointments_infos', appointments: @appointments.sort_by(&:start_date).uniq(&:id))
     end
 
     def destroy
