@@ -15,6 +15,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
 1. **User Creation by Admin**
    - Administrators can create users from a remote site.
    - Each user can have one of the following three roles: Seller, Customer, or Both.
+   - Authentification by Bearer JWT-Token. Valid 60 minutes.
 
 2. **Role Management**
    - **Seller**: Sellers can offer services and manage their availability.

@@ -322,7 +322,7 @@ Devise.setup do |config|
     jwt.revocation_requests = [
       ['DELETE', %r{^/admin/logout$}]
     ]
-    jwt.expiration_time = 30.minutes.to_i
+    jwt.expiration_time = 60.minutes.to_i
   end
   # for user
   config.jwt do |jwt|
@@ -333,6 +333,6 @@ Devise.setup do |config|
     jwt.revocation_requests = [
       ['DELETE', %r{^/api/v1/logout$}]
     ]
-    jwt.expiration_time = 30.minutes.to_i
+    jwt.expiration_time = 60.minutes.to_i
   end
 end
