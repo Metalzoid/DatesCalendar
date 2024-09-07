@@ -18,12 +18,17 @@ class ApiController < ActionController::API
   # @tags Users
   # @auth [bearer_jwt]
   def user_search
-    @query = params[:query].downcase unless params[:query].nil?
-    @role = params[:role].downcase unless params[:role].nil?
+    @query = params[:query].downcase if params[:query].present?
+    @role = params[:role].downcase if params[:role].present?
+    @user_id = params[:user_id].to_i if params[:user_id].present?
+    @user = User.by_admin(current_user.admin).find_by(id: @user_id)
+    return render_success('User founded by id.', UserSerializer.new(@user).serializable_hash[:data][:attributes], :ok) if @user_id && @user
+
     return if verify_search(@query, @role)
 
     @users = find_user(@query, @role)
-    render_success("#{@role ? @role.capitalize : 'User'}(s) founded.", @users, :ok) if @users.length.positive?
+    return render_success("#{@role ? @role.capitalize : 'User'}(s) founded.", @users, :ok) if @users.length.positive?
+
     render_error("#{@role ? @role.capitalize : 'User'}(s) not found.", :not_found) if @users.empty?
   end
 
