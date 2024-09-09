@@ -18,7 +18,11 @@ module Api
       # @auth [bearer_jwt]
       def index
         appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
-        serialized_appointments = appointments.map { |appointment| AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes] }
+        serialized_appointments = appointments.map do |appointment|
+          services = appointment.services.map { |service| ServiceSerializer.new(service).serializable_hash[:data][:attributes] }
+          appointment = AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
+          { appointment:, services: }
+        end
         render_success('Appointments found.', serialized_appointments, :ok)
       rescue ActiveRecord::RecordNotFound
         render_error('Appointments not found.', :not_found)
@@ -35,6 +39,7 @@ module Api
       # @auth [bearer_jwt]
       def show
         return if authorization
+
         appointment = AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes]
         services = @appointment.services.map do |service|
           ServiceSerializer.new(service).serializable_hash[:data][:attributes]
