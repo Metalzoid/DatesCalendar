@@ -35,8 +35,11 @@ module Api
       # @auth [bearer_jwt]
       def show
         return if authorization
-
-        render_success('Appointment found.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
+        appointment = AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes]
+        services = @appointment.services.map do |service|
+          ServiceSerializer.new(service).serializable_hash[:data][:attributes]
+        end
+        render_success('Appointment found.', { appointment:, services: }, :ok)
       end
 
       # @summary Create an Appointment.
