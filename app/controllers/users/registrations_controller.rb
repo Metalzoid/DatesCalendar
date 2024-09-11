@@ -75,7 +75,7 @@ module Users
       else
         clean_up_passwords resource
         set_minimum_password_length
-        render json: { message: "User has not been updated. #{resource.errors.messages}" }, status: :unprocessable_entity
+        render json: { message: 'User has not been updated.', errors: resource.errors.messages }, status: :unprocessable_entity
       end
     end
 
