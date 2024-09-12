@@ -25,7 +25,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
 #### Data Models
 
 1. **Service**
-   - **Attributes**: title, price, time (in minutes)
+   - **Attributes**: title, price, time (in minutes), enabled
    - **Description**: Represents the offers provided by sellers (or users with the Both role).
 
 2. **Availability**
@@ -33,7 +33,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
    - **Description**: Indicates the periods of availability or unavailability of a seller or a user with the Both role.
 
 3. **Appointments**
-   - **Attributes**: start_date, end_date (automatically calculated if not specified and if one or more services are selected), price (calculated based on the specified services), customer comment, seller comment
+   - **Attributes**: start_date, end_date (automatically calculated if not specified and if one or more services are selected), price (calculated based on the specified services), customer comment, seller comment, status of appointment (hold, accepted, refused, canceled).
    - **Description**: Represents the appointments booked by customers, including service details, dates, and comments.
 
 #### Availability Retrieval

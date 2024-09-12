@@ -3,15 +3,15 @@ module Api
   module V1
     # Services controller
     class ServicesController < ApiController
-      before_action :authorization!, only: %i[create update destroy]
-      before_action :set_service, only: %i[update destroy]
+      before_action :authorization!, only: %i[create update]
+      before_action :set_service, only: %i[update]
 
       # @summary Returns the list of Services.
       # - Optionnal: Filter by seller ID.
       # - Time exprimed in minutes.
       # - URL exemple: /api/v1/services?seller_id=1
-      # @response Services founded.(200) [Hash{message: String, data: Array<Hash{id: Integer, title: String, price: Float, time: Integer, user_id: Integer}>}]
-      # @response_example Services founded.(200) [{message: "Services founded.", data: [{id: 1, title: "Massage", price: 14.69, time: 30, user_id: 2}] }]
+      # @response Services founded.(200) [Hash{message: String, data: Array<Hash{id: Integer, title: String, price: Float, time: Integer, user_id: Integer, enabled: Boolean}>}]
+      # @response_example Services founded.(200) [{message: "Services founded.", data: [{id: 1, title: "Massage", price: 14.69, time: 30, user_id: 2, disabled: true}] }]
       # @response Services not founded.(404) [Hash{message: String}]
       # @response_example Services not founded.(404) [{message: "Services not founded."}]
       # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
@@ -19,7 +19,7 @@ module Api
       # @tags services
       # @auth [bearer_jwt]
       def index
-        @services = Service.by_admin(current_user.admin)
+        @services = Service.by_admin(current_user.admin).where(disabled: false)
         @services = @services.where(user: params[:seller_id]) if params[:seller_id].present?
         @services_serialized = @services.map do |service|
           ServiceSerializer.new(service).serializable_hash[:data][:attributes]
@@ -70,27 +70,10 @@ module Api
         render_error("Can't update service.", @service.errors.messages, :unprocessable_entity)
       end
 
-      # @summary Destroy a service.
-      # @response Service destroyed.(200) [Hash{message: String, data:Hash{id: Integer,title: String, price: Float, time: Integer}}]
-      # @response_example Service destroyed.(200) [{message: "Service destroyed.", data: {id: 1, title: "Massage", price: 14.69, time: 30, user_id: 2} }]
-      # @response Can't destroy service.(422) [Hash{message: String, errors: Hash}]
-      # @response_example Can't destroy service.(422) [{message: "Can't destroy service.", errors: {title: ["Can't be blank"]}}]
-      # @response You need to be Seller or Admin to perform this action.(403) [Hash{message: String}]
-      # @response_example You need to be Seller or Admin to perform this action.(403) [{message: "You need to be Seller or Admin to perform this action."}]
-      # @response Service {id} could not be found.(404) [Hash{message: String}]
-      # @response_example Service {id} could not be found.(404)[{message: "Service 3 could not be found."}]
-      # @tags services
-      # @auth [bearer_jwt]
-      def destroy
-        return render_success('Service destroyed.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :ok) if @service.destroy
-
-        render_error("Can't destroy service.", @service.errors.messages, :unprocessable_entity)
-      end
-
       private
 
       def service_params
-        params.require(:service).permit(:title, :price, :time)
+        params.require(:service).permit(:title, :price, :time, :disabled)
       end
 
       def set_service
@@ -99,7 +82,7 @@ module Api
       end
 
       def authorization!
-        return if !current_admin.nil? || ['seller', 'both'].include?(current_user.role)
+        return if !current_admin.nil? || %w[seller both].include?(current_user.role)
 
         render json: { message: 'You need to be Seller or Admin to perform this action.' }, status: :forbidden
       end
