@@ -21,6 +21,7 @@ Rails.application.routes.draw do
              defaults: { format: :json }
 
   get 'api/v1/user_search', to: 'api#user_search'
+  get 'api/v1/user_datas', to: 'api#user_datas'
 
   namespace :api do
     namespace :v1 do
@@ -28,11 +29,12 @@ Rails.application.routes.draw do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
         resources :services, only: %i[index create update]
+
       end
     end
   end
 
-  devise_for :admins, path: "admin", controllers: {
+  devise_for :admins, path: 'admin', controllers: {
     sessions: 'admins/sessions',
     registrations: 'admins/registrations',
     omniauth_callbacks: 'admins/omniauth_callbacks',

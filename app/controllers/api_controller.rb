@@ -32,11 +32,21 @@ class ApiController < ActionController::API
     render_error("#{@role ? @role.capitalize : 'User'}(s) not found.", :not_found) if @users.empty?
   end
 
+  def user_datas
+    role_to_datas_method = {
+      'seller' => method(:user_datas_seller),
+      'customer' => method(:user_datas_customer),
+      'both' => method(:user_datas_both)
+    }
+
+    render_success('All your datas', role_to_datas_method[current_user&.role]&.call, :ok)
+  end
+
   def render_success(message, data, status)
     render json: { message:, data: }, status:
   end
 
-  def render_error(message, errors = nil, status )
+  def render_error(message, errors = nil, status)
     render json: { message:, errors: }, status:
   end
 
@@ -59,12 +69,54 @@ class ApiController < ActionController::API
   end
 
   def custom_authenticate_user!
-    if request.headers['Authorization'].present?
-      jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
-    else
-      return render_error('Authorization token required.', :unauthorized)
-    end
+    return render_error('Authorization token required.', :unauthorized) unless request.headers['Authorization'].present?
+
+    jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
     render json: { message: 'JWT token revoked.' }, status: :unauthorized if current_user.jwt_revoked?(jwt_payload)
+  end
+
+  def user_datas_seller
+    @appointments = fetch_appointments(role: :seller)
+    @appointments_serialized = @appointments.map { |appointment| serializer(appointment, AppointmentSerializer) }
+    @customers = @appointments.map(&:customer).uniq(&:id)
+    @customers_serialized = @customers.map { |customer| serializer(customer, UserSerializer) }
+    @availabilities = current_user.availabilities.uniq(&:id)
+    @availabilities_serialized = @availabilities.map { |availability| serializer(availability, AvailabilitySerializer) }
+    @services = current_user.services.uniq(&:id)
+    @services_serialized = @services.map { |service| serializer(service, ServiceSerializer) }
+
+    { appointments: @appointments_serialized, customers: @customers_serialized,
+      services: @services_serialized, availabilities: @availabilities_serialized }
+  end
+
+  def user_datas_customer
+    @appointments = fetch_appointments(role: :customer)
+    @appointments_serialized = @appointments.map { |appointment| serializer(appointment, AppointmentSerializer) }
+
+    @sellers = @appointments.map(&:seller).uniq(&:id)
+    @sellers_serialized = @sellers.map { |seller| serializer(seller, UserSerializer) }
+
+    @services = @appointments.flat_map(&:services)
+    @services_serialized = @services.map { |service| serializer(service, ServiceSerializer) }
+
+    { appointments: @appointments_serialized, sellers: @sellers_serialized, services: @services_serialized }
+  end
+
+  def user_datas_both
+    data = {}
+    data[:seller] = user_datas_seller unless user_datas_seller.values.all?(&:empty?)
+    data[:customer] = user_datas_customer unless user_datas_customer.values.all?(&:empty?)
+
+    data
+  end
+
+  def fetch_appointments(role:)
+    role_column = role == :seller ? :customer : :seller
+    current_user.appointments.includes(role_column).where(role => current_user).uniq(&:id)
+  end
+
+  def serializer(item, serializer)
+    serializer.new(item).serializable_hash[:data][:attributes]
   end
 
   protected
