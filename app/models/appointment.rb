@@ -17,7 +17,7 @@ class Appointment < ApplicationRecord
   validates :seller_id, presence: true
   validate :check_availability, if: :new_record?
 
-  enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
+  enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3, refused: 4 }
 
   def self.by_admin(admin)
     joins(:customer, :seller).merge(User.by_admin(admin))
