@@ -19,9 +19,7 @@ module Api
       def index
         appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
         serialized_appointments = appointments.map do |appointment|
-          services = appointment.services.map { |service| ServiceSerializer.new(service).serializable_hash[:data][:attributes] }
-          appointment = AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
-          { appointment:, services: }
+          AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
         end
         render_success('Appointments found.', serialized_appointments, :ok)
       rescue ActiveRecord::RecordNotFound
@@ -63,9 +61,11 @@ module Api
       def create
         return render_error('Appointment_services OR End_date required!', :unprocessable_entity) unless @services || params.dig(:appointment, :end_date)
         return render_error('Seller_id required!', :unprocessable_entity) if @services.nil? && params.dig(:appointment, :seller_id).nil?
-        return render_error('Seller not founded!', :unprocessable_entity) unless User.exists?(id: params.dig(:appointment, :seller_id))
 
         @appointment = Appointment.new(appointment_params)
+        @appointment.seller = @services.sample.user
+        return render_error('Seller not founded!', :unprocessable_entity) unless @appointment.seller || User.exists?(id: params.dig(:appointment, :seller_id))
+
         calculate_end_date unless params.dig(:appointment, :end_date)
         @appointment.customer = current_user
         @appointment.price = @services.sum(&:price) unless @services.nil?

@@ -46,7 +46,7 @@ class Appointment < ApplicationRecord
   end
 
   def restore_availabilities
-    return unless status_changed_to_canceled?
+    return unless saved_change_to_status&.first == 'accepted'
 
     before_availability = find_availability_before_change
     current_availability = find_current_availability
@@ -57,10 +57,6 @@ class Appointment < ApplicationRecord
       current_availability.destroy!
       before_availability.destroy!
     end
-  end
-
-  def status_changed_to_canceled?
-    [status, saved_change_to_status&.last].include?('canceled') && saved_change_to_status&.first == 'accepted'
   end
 
   def find_availability_before_change
