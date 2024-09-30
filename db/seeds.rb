@@ -4,6 +4,7 @@ require 'date'
 
 if Admin.exists?(email: 'admin@datescalendar.fr')
   admin = Admin.find_by(email: 'admin@datescalendar.fr')
+  admin.confirm unless admin.confirmed?
   admin.users.destroy_all
   puts "#{admin.email} - all data destroyed"
 else
