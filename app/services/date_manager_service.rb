@@ -32,7 +32,7 @@ class DateManagerService
     while start_date < end_date
       current_day_end = calculate_current_day_end(start_date, end_date)
       new_start_date = calculate_new_start_date(start_date)
-      temp = Availability.create!(user: @user, available: @availability.available, start_date: new_start_date,
+      temp = Availability.new(user: @user, available: @availability.available, start_date: new_start_date,
                                   end_date: current_day_end)
       @availabilities << temp
       start_date = advance_to_next_day(start_date)
@@ -40,15 +40,15 @@ class DateManagerService
   end
 
   def calculate_current_day_end(start_date, end_date)
-    current_day_end = start_date.change(hour: @params[:max_hour], min: @params[:max_minutes])
+    current_day_end = start_date.change(hour: @params[:max_hour]&.to_i, min: @params[:max_minutes]&.to_i)
     current_day_end > end_date ? end_date : current_day_end
   end
 
   def calculate_new_start_date(start_date)
-    if start_date == @availability.start_date.to_datetime && start_date.hour >= @params[:min_hour]
+    if start_date == @availability.start_date.to_datetime && start_date.hour >= @params[:min_hour]&.to_i
       start_date
     else
-      start_date.change(hour: @params[:min_hour], min: @params[:min_minutes])
+      start_date.change(hour: @params[:min_hour]&.to_i, min: @params[:min_minutes]&.to_i)
     end
   end
 

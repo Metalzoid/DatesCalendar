@@ -3,7 +3,10 @@ import { Controller } from "@hotwired/stimulus";
 // Connects to data-controller="list-updater"
 export default class extends Controller {
   static targets = ["select", "list"];
-  connect() {}
+
+  connect() {
+    this.updateLinkToDestroy();
+  }
 
   update() {
     const currentUrl = window.location.pathname;
@@ -20,6 +23,15 @@ export default class extends Controller {
       .then((response) => response.text())
       .then((data) => {
         this.listTarget.innerHTML = data;
+        this.updateLinkToDestroy();
       });
+  }
+
+  updateLinkToDestroy() {
+    this.listTarget.querySelectorAll("tr > td > a").forEach((linkto) => {
+      if (this.selectTarget.value !== "none") {
+        linkto.href += `?listed=true&user_id=${this.selectTarget.value}`;
+      }
+    });
   }
 }

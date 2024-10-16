@@ -1,12 +1,16 @@
 # frozen_string_literal: true
+
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    include RackSessionsFix
+    respond_to :json
+
     # @summary Register new User
-    # - Necessary Admin API KEY.
+    # - Necessary: Admin API KEY.
     # - Role can be: seller, customer, both.
     # - Password minimum length: 6 chars.
     # - Optionnal: company.
-    # @parameter APIKEY(header) [String!] The admin APIKEY.
+    # @parameter APIKEY(header) [!String] Your admin APIKEY. <button onclick="setApikey(event)" type="button" class="m-btn primary thin-border" >Set DEMO API KEY</button>
     # @request_body The user informations. At least include an `email`. [!Hash{user: Hash{email: String, password: String, firstname: String, lastname: String, company: String, role: String}}]
     # @request_body_example basic user [Hash] {user: {email: "test@gmail.com", password: "azerty", firstname: "Pedro", lastname: "Pedro", role: "seller"}}
     # @response Logged in Successfully.(200) [Hash{message: String, data: Hash{user: Hash{id: Integer, email: String, firstname: String, lastname: String, company: String, role: String}}}]
@@ -16,26 +20,27 @@ module Users
     # @tags Users
     def create
       @user = build_resource(sign_up_params)
+
       if request.headers['APIKEY'].present?
-        current_api_admin = ApiKey.find_by(api_key: request.headers['APIKEY']).admin
+        api_key = extract_api_key(request.headers['APIKEY'])
+        current_api_admin = ApiKey.find_by(api_key:)&.admin
+        unless current_api_admin
+          return render json: { message: "Your APIKEY #{api_key} does not match our records." }, status: :unprocessable_entity
+        end
+
         @user.admin = current_api_admin
       end
-      @user.save
-      yield resource if block_given?
-      if resource.persisted?
-        if resource.active_for_authentication?
-          set_flash_message! :notice, :signed_up
-          sign_up(resource_name, resource)
-          respond_with resource, location: after_sign_up_path_for(resource)
+
+      begin
+        if @user.save
+          handle_successful_signup(@user)
         else
-          set_flash_message! :notice, :"signed_up_but_#{resource.inactive_message}"
-          expire_data_after_sign_in!
-          respond_with resource, location: after_inactive_sign_up_path_for(resource)
+          clean_up_passwords @user
+          set_minimum_password_length
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
         end
-      else
-        clean_up_passwords resource
-        set_minimum_password_length
-        respond_with resource
+      rescue ActiveRecord::RecordNotUnique
+        render json: { error: 'Email has already been taken' }, status: :unprocessable_entity
       end
     end
 
@@ -52,35 +57,34 @@ module Users
     # @tags Users
     # @auth [bearer_jwt]
     def update
-      return render json: {message: "Bearer JWT Token required !"}, status: :unauthorized unless request.headers['Authorization'].present?
+      return render json: { message: 'Bearer JWT Token required !' }, status: :unauthorized unless request.headers['Authorization'].present?
+
       if request.headers['Authorization'].present?
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
       end
       self.resource = current_api_user
-      prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
 
       resource_updated = update_resource(resource, account_update_params)
       yield resource if block_given?
       if resource_updated
-        set_flash_message_for_update(resource, prev_unconfirmed_email)
         bypass_sign_in resource, scope: resource_name if sign_in_after_change_password?
 
-        render json: {message: "User has been updated.", data: {user: UserSerializer.new(self.resource).serializable_hash[:data][:attributes]}}, status: :ok
+        render json: { message: 'User has been updated.',
+                       data: { user: UserSerializer.new(resource).serializable_hash[:data][:attributes] } }, status: :ok
       else
         clean_up_passwords resource
         set_minimum_password_length
-        render json: {message: "User has not been updated. #{self.resource.errors.messages}"}, status: :unprocessable_entity
+        render json: { message: 'User has not been updated.', errors: resource.errors.messages }, status: :unprocessable_entity
       end
     end
 
-
-    # protected
+    protected
 
     # If you have extra params to permit, append them to the sanitizer.
-    # def configure_sign_up_params
-    #   devise_parameter_sanitizer.permit(:sign_up, keys: [:attribute])
-    # end
+    def configure_sign_up_params
+      devise_parameter_sanitizer.permit(:sign_up, keys: [:attribute])
+    end
 
     # If you have extra params to permit, append them to the sanitizer.
     def configure_account_update_params
@@ -96,8 +100,6 @@ module Users
     # def after_inactive_sign_up_path_for(resource)
     #   super(resource)
     # end
-    include RackSessionsFix
-    respond_to :json
 
     private
 
@@ -112,6 +114,19 @@ module Users
           message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}"
         }, status: :unprocessable_entity
       end
+    end
+
+    def extract_api_key(header)
+      header.include?(',') ? header.split(',').first : header
+    end
+
+    def handle_successful_signup(user)
+      if user.active_for_authentication?
+        sign_up(resource_name, user)
+      else
+        expire_data_after_sign_in!
+      end
+      render json: { message: 'User created successfully' }, status: :created
     end
   end
 end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Model User
+# User Model
 class User < ApplicationRecord
   include PgSearch::Model
   include Devise::JWT::RevocationStrategies::JTIMatcher
@@ -16,7 +16,7 @@ class User < ApplicationRecord
   has_many :availabilities, dependent: :destroy
   belongs_to :admin
 
-  scope :by_admin, ->(admin) { where(admin: admin) }
+  scope :by_admin, ->(admin) { where(admin:) }
 
   enum role: {
     customer: 0,
@@ -24,7 +24,6 @@ class User < ApplicationRecord
     both: 2
   }
 
-  validates :firstname, :lastname, presence: true
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
 
@@ -34,6 +33,15 @@ class User < ApplicationRecord
 
   def full_name_with_id
     "#{id} - #{firstname} #{lastname}"
+  end
+
+  def revoke_jwt(payload)
+    revoked_jwts << payload['jti']
+    save!
+  end
+
+  def jwt_revoked?(payload)
+    revoked_jwts.include?(payload['jti'])
   end
 
   pg_search_scope :search_by_firstname_and_lastname,

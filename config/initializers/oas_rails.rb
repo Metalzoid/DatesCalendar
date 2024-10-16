@@ -1,7 +1,7 @@
 # config/initializers/oas_rails.rb
 OasRails.configure do |config|
   # Basic Information about the API
-  config.info.title = 'DatesCalendar'
+  config.info.title = 'DatesCalendar API'
   config.info.summary = 'A simple Appointment API.'
   config.info.description = "[View on GitHub](https://github.com/metalzoid/datescalendar)
 ### DatesCalendar API Presentation
@@ -15,6 +15,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
 1. **User Creation by Admin**
    - Administrators can create users from a remote site.
    - Each user can have one of the following three roles: Seller, Customer, or Both.
+   - Authentification by Bearer JWT-Token. Valid 60 minutes.
 
 2. **Role Management**
    - **Seller**: Sellers can offer services and manage their availability.
@@ -24,7 +25,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
 #### Data Models
 
 1. **Service**
-   - **Attributes**: title, price, time (in minutes)
+   - **Attributes**: title, price, time (in minutes), enabled
    - **Description**: Represents the offers provided by sellers (or users with the Both role).
 
 2. **Availability**
@@ -32,7 +33,7 @@ We are pleased to present our Reservation API, developed with Ruby on Rails 7. T
    - **Description**: Indicates the periods of availability or unavailability of a seller or a user with the Both role.
 
 3. **Appointments**
-   - **Attributes**: start_date, end_date (automatically calculated if not specified and if one or more services are selected), price (calculated based on the specified services), customer comment, seller comment
+   - **Attributes**: start_date, end_date (automatically calculated if not specified and if one or more services are selected), price (calculated based on the specified services), customer comment, seller comment, status of appointment (hold, accepted, refused, canceled).
    - **Description**: Represents the appointments booked by customers, including service details, dates, and comments.
 
 #### Availability Retrieval
@@ -57,11 +58,14 @@ For more information or any questions, please do not hesitate to contact us at [
 
 ---
 
-Thank you for your attention."
+Thank you for your attention.
+
+---
+"
   config.info.contact.name = 'Florian GAGNAIRE'
   config.info.contact.email = 'gagnaire.flo@gmail.com'
   config.info.contact.url = 'http://florian-gagnaire.dev'
-  config.info.version = '1.0.0'
+  config.info.version = '1.0.1'
   config.layout = 'application'
   config.ignored_actions = ['devise/passwords', 'devise/unlocks', 'users/registrations#index',
                             'users/registrations#destroy', 'users/registrations#cancel', 'users/registrations#edit',
@@ -76,7 +80,7 @@ Thank you for your attention."
   # Optional Settings (Uncomment to use)
 
   # Extract default tags of operations from namespace or controller. Can be set to :namespace or :controller
-  config.default_tags_from = :controller
+  # config.default_tags_from = :namespace
 
   # Automatically detect request bodies for create/update methods
   # Default: true

@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>DatesCalendar</title>
+  <title>DatesCalendar API</title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
+  <script
+    id="Cookiebot"
+    src="https://consent.cookiebot.com/uc.js"
+    data-cbid="<%= ENV['COOKIEBOT_KEY'] %>"
+    type="text/javascript">
+  </script>
 </head>
 <body data-controller="flashs">
   <%= render "shared/navbar" %>

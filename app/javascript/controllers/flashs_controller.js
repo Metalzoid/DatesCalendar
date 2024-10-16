@@ -7,7 +7,7 @@ export default class extends Controller {
   }
 
   create_alert_list() {
-    const alertList = document.querySelectorAll(".alert");
+    const alertList = document.querySelectorAll(".alert:not(#alert-modal)");
     const alerts = [...alertList].map(
       (element) => new bootstrap.Alert(element)
     );

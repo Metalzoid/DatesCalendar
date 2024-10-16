@@ -8,30 +8,32 @@ module Admins
       filter_users_with_availabilities
       @availabilities = @users.flat_map(&:availabilities)
       @availability = Availability.new
-      return unless params[:user_id].present? && @availabilities.any?
-
-      filter_availabilities_by_user_id
-      respond_to_formats('availabilities_infos', availabilities: @availabilities)
+      filter_availabilities_by_user_id if params[:user_id].present? && params[:user_id] != 'none'
+      respond_to_formats('availabilities_infos', availabilities: @availabilities.sort_by(&:start_date))
     end
 
     def create
       @availability = Availability.new(availability_params)
-      if @availability.save
-        respond_to do |format|
-          format.html { redirect_to admins_availabilities_path }
-          format.json { render json: { success: true, partial: render_to_string(partial: 'admins/availabilities/availability', locals: { availability: @availability }, formats: [:html]) } }
+      params[:time].delete_if { |_key, value| value.blank? }
+      if params[:time].present? && @availability.valid?
+        handle_time_params
+      elsif @availability.valid?
+        ActiveRecord::Base.transaction do
+          @availability.save!
+          redirect_to admins_availabilities_url(user_id: @availability.user_id)
         end
       else
-        respond_to do |format|
-          format.html { redirect_to admins_availabilities_path }
-          format.json { render json: { success: false, partial: render_to_string(partial: 'admins/availabilities/form', locals: { availability: @availability }, formats: [:html]) } }
-        end
+        respond_to_errors_create(@availability)
       end
     end
 
     def destroy
       @availability = Availability.find(params[:id])
-      redirect_to admins_availabilities_path if @availability.destroy
+      if params[:listed].present? && @availability.user.availabilities.length > 1
+        redirect_to "#{admins_availabilities_url}?user_id=#{params[:user_id]}" if @availability.destroy
+      elsif @availability.destroy
+        redirect_to admins_availabilities_path
+      end
     end
 
     private
@@ -44,24 +46,26 @@ module Admins
       @users = current_admin.users
     end
 
-    def authorize_data_admin
-      return unless params[:user_id].present?
-
-      redirect_to('/401') unless current_admin.users.find_by(id: params[:user_id])
-    end
-
     def filter_users_with_availabilities
       @users = @users.select { |user| user.availabilities.any? }
     end
 
     def filter_availabilities_by_user_id
-      @availabilities = Availability.where(user_id: params[:user_id])
+      @availabilities = Availability.where(user_id: params[:user_id]).sort_by(&:start_date)
     end
 
     def respond_to_formats(partial_name, locals)
       respond_to do |format|
         format.html
         format.text { render(partial: "admins/availabilities/#{partial_name}", locals:, formats: [:html]) }
+      end
+    end
+
+    def handle_time_params
+      @availabilities = DateManagerService.new(@availability, params[:time], @availability.user).call
+      @availabilities.map(&:save!)
+      @availabilities_serialized = @availabilities.map do |availability|
+        AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
       end
     end
   end

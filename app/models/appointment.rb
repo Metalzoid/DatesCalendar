@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+# Appointment Model
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
-  after_create :update_price
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'
@@ -17,15 +17,10 @@ class Appointment < ApplicationRecord
   validates :seller_id, presence: true
   validate :check_availability, if: :new_record?
 
-  enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3 }
+  enum status: { hold: 0, accepted: 1, finished: 2, canceled: 3, refused: 4 }
 
   def self.by_admin(admin)
     joins(:customer, :seller).merge(User.by_admin(admin))
-  end
-
-  def update_price
-    new_price = services.sum(&:price)
-    update(price: new_price)
   end
 
   private
@@ -51,20 +46,42 @@ class Appointment < ApplicationRecord
   end
 
   def restore_availabilities
-    return unless [status, saved_change_to_status&.last].include?('canceled') && saved_change_to_status&.first == 'accepted'
+    return unless saved_change_to_status&.first == 'accepted'
 
-    @before = Availability.find_by('start_date < ? AND end_date = ? AND user_id = ?', (saved_change_to_start_date&.first || start_date),
-                                   (saved_change_to_start_date&.first || start_date), seller.id)
-    @availability = Availability.find_by(start_date: saved_change_to_start_date&.first || start_date,
-                                         end_date: saved_change_to_end_date&.first || end_date,
-                                         user: seller)
-    @after = Availability.find_by('start_date = ? AND end_date > ? AND user_id = ?', (saved_change_to_end_date&.first || end_date),
-                                  (saved_change_to_end_date&.first || end_date), seller.id)
+    before_availability = find_availability_before_change
+    current_availability = find_current_availability
+    after_availability = find_availability_after_change
 
     ActiveRecord::Base.transaction do
-      @after.update!(start_date: @before.start_date, skip_validation: true)
-      @availability.destroy!
-      @before.destroy!
+      after_availability.update!(start_date: before_availability.start_date, skip_validation: true)
+      current_availability.destroy!
+      before_availability.destroy!
     end
+  end
+
+  def find_availability_before_change
+    Availability.find_by(
+      'start_date < ? AND end_date = ? AND user_id = ?',
+      saved_change_to_start_date&.first || start_date,
+      saved_change_to_start_date&.first || start_date,
+      seller.id
+    )
+  end
+
+  def find_current_availability
+    Availability.find_by(
+      start_date: saved_change_to_start_date&.first || start_date,
+      end_date: saved_change_to_end_date&.first || end_date,
+      user: seller
+    )
+  end
+
+  def find_availability_after_change
+    Availability.find_by(
+      'start_date = ? AND end_date > ? AND user_id = ?',
+      saved_change_to_end_date&.first || end_date,
+      saved_change_to_end_date&.first || end_date,
+      seller.id
+    )
   end
 end

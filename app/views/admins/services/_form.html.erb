@@ -2,6 +2,6 @@
   <%= f.input :title, label: 'The title of the service.', error: 'Title required.', placeholder: 'Nice title!', required: true %>
   <%= f.input :price, as: :float, placeholder: '17.99', required: true %>
   <%= f.input :time, hint: 'Time exprimed in minutes', placeholder: "30", required: true %>
-  <%= f.association :user, label_method: :full_name_with_id, value_method: :id, required: true %>
+  <%= f.association :user, collection: User.by_admin(current_admin).sort_by(&:id), label_method: :full_name_with_id, value_method: :id, required: true %>
   <%= f.button :submit, class: 'btn btn-success' %>
 <% end %>

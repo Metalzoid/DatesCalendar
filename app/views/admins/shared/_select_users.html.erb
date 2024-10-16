@@ -1,6 +1,6 @@
 <select class="form-select" aria-label="Select user" data-action="change->list-updater#update" data-list-updater-target="select">
-  <option selected disabled>Select a User</option>
+  <option value="none" <%= "selected" unless params[:user_id].present? %>>All users</option>
   <% users.each do |user| %>
-    <option value="<%= user.id %>"><%= "User ##{user.id} - #{user.firstname.capitalize} #{user.lastname.capitalize}" %></option>
+    <option value="<%= user.id %>" <%= "selected" if params[:user_id].to_i == user.id %>><%= "User ##{user.id} - #{user.firstname.capitalize} #{user.lastname.capitalize}" %></option>
   <% end %>
 </select>

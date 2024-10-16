@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Model Admin
+# Admin Model
 class Admin < ApplicationRecord
   include Devise::JWT::RevocationStrategies::JTIMatcher
   # Include default devise modules. Others available are:
@@ -34,8 +34,4 @@ class Admin < ApplicationRecord
   def init_api_key
     ApiKey.create!(admin: self)
   end
-
-  #def send_devise_notification(notification, *args)
-    #devise_mailer.send(notification, self, *args).deliver_later
-  #end
 end

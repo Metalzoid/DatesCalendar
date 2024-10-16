@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'fileutils'
+require_relative '../config/environment'
+
+# Path to your application root.
+APP_ROOT = File.expand_path('..', __dir__)
+
+FileUtils.chdir APP_ROOT do
+  Rails.application.eager_load!       # Load Rails application
+  puts "Admin count : #{Admin.count}" # Destroy all records in the Admin model
+  Admin.all.each do |admin|
+    puts "Admin #{admin.email} has #{admin.users.count} users"
+    puts "Admin #{admin.email} has #{admin.users.sum { |user| user.availabilities.count }} availabilities"
+    puts "Admin #{admin.email} has #{admin.users.sum { |user| user.services.count }} services"
+    puts "Admin #{admin.email} has #{admin.users.sum { |user| user.appointments.count }} appointments"
+  end
+end
