@@ -4,6 +4,7 @@
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
+  after_commit :send_data_cable
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'

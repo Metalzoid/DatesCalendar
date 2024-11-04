@@ -82,4 +82,7 @@ Rails.application.configure do
   config.action_mailer.postmark_settings = {
     api_token: ENV['POSTMARK_API_TOKEN']
   }
+
+  config.action_cable.url = 'ws://localhost:3001/cable'
+  config.action_cable.disable_request_forgery_protection = true
 end

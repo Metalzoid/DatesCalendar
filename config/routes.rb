@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  mount OasRails::Engine, at: '/docs'
   api_version = Rails.configuration.x.api.version
+
+  mount OasRails::Engine, at: '/docs'
 
   root to: redirect('/docs')
 
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      mount ActionCable.server => '/cable'
       defaults format: :json do
         resources :appointments, only: %i[index show create update]
         resources :availabilities, only: %i[index create update destroy]
