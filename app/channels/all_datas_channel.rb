@@ -1,7 +1,7 @@
-class AllDataChannel < ApplicationCable::Channel
+class AllDatasChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "all_data_user#{current_user.id}"
-    AllDataChannel.send_all_datas(current_user)
+    stream_from "all_datas_user#{current_user.id}"
+    AllDatasChannel.send_all_datas(current_user)
   end
 
   def unsubscribed
@@ -24,6 +24,6 @@ class AllDataChannel < ApplicationCable::Channel
       availabilities:,
       services:
   }
-    ActionCable.server.broadcast("all_data_user#{current_user.id}", data)
+    ActionCable.server.broadcast("all_datas_user#{current_user.id}", data)
   end
 end

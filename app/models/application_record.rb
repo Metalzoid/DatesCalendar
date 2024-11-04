@@ -32,7 +32,7 @@ class ApplicationRecord < ActiveRecord::Base
   #     services:
   # }
   #   ActionCable.server.broadcast("all_data_user#{self.user_id}", data)
-    AllDataChannel.send_all_datas(self.user)
+    AllDatasChannel.send_all_datas(self.user)
   end
 
   private

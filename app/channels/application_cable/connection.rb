@@ -12,8 +12,14 @@ module ApplicationCable
 
     def find_verified_user
       if request.headers['Authorization'].present?
-        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
-        User.find(jwt_payload['sub'])
+        begin
+          jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
+          user = User.find(jwt_payload['sub'])
+          user || reject_unauthorized_connection
+        rescue JWT::DecodeError, ActiveRecord::RecordNotFound
+          # Capturer les erreurs liées au JWT ou si l'utilisateur n'est pas trouvé
+          reject_unauthorized_connection
+        end
       else
         reject_unauthorized_connection
       end
