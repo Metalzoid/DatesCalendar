@@ -49,7 +49,6 @@ RUN chmod 775 /rails/public
 RUN bundle exec bin/rails assets:clobber
 RUN bundle exec bin/rails assets:precompile
 USER rails:rails
-RUN bin/rails assets:precompile
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
