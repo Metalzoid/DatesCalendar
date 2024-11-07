@@ -26,6 +26,7 @@ class User < ApplicationRecord
 
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
+  after_commit :send_data_cable
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
@@ -49,4 +50,6 @@ class User < ApplicationRecord
                   using: {
                     tsearch: { prefix: true }
                   }
+
+
 end

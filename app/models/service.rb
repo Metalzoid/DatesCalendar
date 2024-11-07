@@ -11,7 +11,10 @@ class Service < ApplicationRecord
   validates :price, presence: true, numericality: { only_float: true }
   validates :time, presence: true
 
+  after_commit :send_data_cable
+
   def self.by_admin(admin)
     joins(:user).merge(User.by_admin(admin))
   end
+
 end
