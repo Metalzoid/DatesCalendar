@@ -40,6 +40,9 @@ class Rack::Attack
   #
   # Key: "rack::attack:#{Time.now.to_i/:period}:logins/ip:#{req.ip}"
   throttle('logins/ip', limit: 5, period: 20.seconds) do |req|
+    allowed_ips = ["127.0.0.1", "::1"]
+    # Disable protection for local test
+    next if allowed_ips.include?(req.ip)
     if req.path == '/api/v1/login' && req.post?
       req.ip
     end

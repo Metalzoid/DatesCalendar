@@ -65,6 +65,8 @@ module Api
       # @tags services
       # @auth [bearer_jwt]
       def update
+        return render_error("Can't update another user's service.", :forbidden) if current_user != @service.user
+
         return render_success('Service updated.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :ok) if @service.update(service_params)
 
         render_error("Can't update service.", @service.errors.messages, :unprocessable_entity)
