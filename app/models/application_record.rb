@@ -16,25 +16,7 @@ class ApplicationRecord < ActiveRecord::Base
   end
 
   def send_data_cable
-  #   appointments = self.user.appointments.map do |appointment|
-  #     AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
-  #   end
-  #   availabilities = self.user.availabilities.map do |availability|
-  #     AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
-  #   end
-  #   services = self.user.services.map do |service|
-  #     ServiceSerializer.new(service).serializable_hash[:data][:attributes]
-  #   end
-  #   data = {
-  #     user: UserSerializer.new(self.user).serializable_hash[:data][:attributes],
-  #     appointments:,
-  #     availabilities:,
-  #     services:
-  # }
-  #   ActionCable.server.broadcast("all_data_user#{self.user_id}", data)
-    AllDatasChannel.send_all_datas(self.user)
+    AllDatasChannel.send_all_datas(self.user) unless Rails.env.test?
   end
-
-  private
 
 end
