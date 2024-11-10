@@ -21,9 +21,9 @@ module Api
         serialized_appointments = appointments.map do |appointment|
           AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
         end
-        render_success('Appointments found.', serialized_appointments, :ok)
-      rescue ActiveRecord::RecordNotFound
+        return render_success('Appointments found.', serialized_appointments, :ok) if serialized_appointments.count.positive?
         render_error('Appointments not found.', :not_found)
+      rescue ActiveRecord::RecordNotFound
       end
 
       # @summary Returns an Appointment.
