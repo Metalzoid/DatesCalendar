@@ -28,6 +28,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
   config.cache_store = :null_store
 
+
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 
@@ -63,4 +64,16 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
+
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :postmark
+
+  config.action_mailer.postmark_settings = {
+    api_token: ENV['POSTMARK_API_TOKEN']
+  }
+
+  config.action_cable.url = 'ws://localhost:3001/cable'
+  config.action_cable.disable_request_forgery_protection = true
 end
