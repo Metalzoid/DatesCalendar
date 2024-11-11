@@ -41,6 +41,11 @@ jobs:
         id: generate_secret
         run: echo "DEVISE_JWT_SECRET_KEY=$(bundle exec rails secret)" >> $GITHUB_ENV
 
+      - name: Set PostgreSQL timezone to Europe/Paris
+        run: |
+          psql -U postgres -c "ALTER DATABASE postgres SET TIMEZONE TO 'Europe/Paris';"
+          psql -U postgres -c "SHOW TIMEZONE;"
+
       - name: Run tests
         env:
           RAILS_ENV: test
