@@ -52,6 +52,7 @@ jobs:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
         run: |
+          export PGPASSWORD=postgres
           psql -h localhost -U postgres -c "ALTER DATABASE postgres SET TIMEZONE TO 'Europe/Paris';"
           psql -h localhost -U postgres -c "SHOW TIMEZONE;"
 
