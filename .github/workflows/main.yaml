@@ -5,6 +5,11 @@ on:
   push:
     branches: [master]
 
+env:
+  GOOGLE_CLIENT_ID: Fake
+  GOOGLE_CLIENT_SECRET: Fake
+  POSTMARK_API_TOKEN: Fake
+
 jobs:
   test:
     runs-on: ubuntu-latest
