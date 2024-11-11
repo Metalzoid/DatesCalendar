@@ -41,7 +41,16 @@ jobs:
         id: generate_secret
         run: echo "DEVISE_JWT_SECRET_KEY=$(bundle exec rails secret)" >> $GITHUB_ENV
 
+      - name: Run db setup
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+        run: bin/rails db:setup
+
       - name: Set PostgreSQL timezone to Europe/Paris
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
         run: |
           psql -U postgres -c "ALTER DATABASE postgres SET TIMEZONE TO 'Europe/Paris';"
           psql -U postgres -c "SHOW TIMEZONE;"
@@ -50,7 +59,7 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: bin/rails db:setup spec
+        run: bin/rails spec
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v4
