@@ -13,7 +13,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres
@@ -36,6 +35,10 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+
+      - name: Set up Rails secret
+        id: generate_secret
+        run: echo "DEVISE_JWT_SECRET_KEY=$(bundle exec rails secret)" >> $GITHUB_ENV
 
       - name: Run tests
         env:
