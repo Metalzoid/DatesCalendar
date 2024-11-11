@@ -9,6 +9,7 @@ env:
   GOOGLE_CLIENT_ID: Fake
   GOOGLE_CLIENT_SECRET: Fake
   POSTMARK_API_TOKEN: Fake
+  FAKE_PASSWORD: Fake
 
 jobs:
   test:
