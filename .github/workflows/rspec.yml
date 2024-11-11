@@ -8,9 +8,6 @@ name: Run RSpec tests
 8      - name: Set up Ruby
 9        uses: ruby/setup-ruby@v1
 10        with:
-11          # Not needed with a .ruby-version file
-12          ruby-version: 3.3.0
-13          # runs 'bundle install' and caches installed gems automatically
 14          bundler-cache: true
 15      - name: Run tests
 16        run: |
