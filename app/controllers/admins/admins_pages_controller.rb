@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'pry-byebug'
 module Admins
   # AdminPages Controller
   class AdminsPagesController < ApplicationController
@@ -17,6 +17,10 @@ module Admins
     def resetApikey
       current_admin.api_key.update_api_key
       render json: { apikey: current_admin.api_key.api_key }
+    end
+
+    def updateIpAddress
+      redirect_to admins_index_path if current_admin.update(params.require(:admin).permit(:ip_address))
     end
 
     def authorize_data_admin

@@ -91,7 +91,6 @@ group :development, :test do
   gem 'pry-byebug'
   gem 'rspec-rails'
   gem 'database_cleaner-active_record'
-  gem 'pry-byebug'
 end
 
 group :development do

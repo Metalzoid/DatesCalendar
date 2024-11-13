@@ -10,10 +10,10 @@ export default class extends Controller {
       toggle: false,
     });
     if (apikeyCollapse._element.classList.contains("show")) {
-      this.toggleApikeyTarget.innerText = "Show your API KEY";
+      this.toggleApikeyTarget.innerText = "Show your configuration";
       apikeyCollapse.hide();
     } else {
-      this.toggleApikeyTarget.innerText = "Hide your API KEY";
+      this.toggleApikeyTarget.innerText = "Hide your configuration";
       apikeyCollapse.show();
     }
   }
@@ -41,5 +41,9 @@ export default class extends Controller {
       .then((data) => {
         this.apikeyTarget.value = data.apikey;
       });
+  }
+
+  saveIpAddress(event) {
+    console.log("coucou");
   }
 }

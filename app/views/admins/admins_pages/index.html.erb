@@ -8,13 +8,20 @@
     <li>Number of Services : <%= @services.count %></li>
   </ul>
   <button class="btn btn-success" type="button" aria-expanded="false" data-buttons-target="toggleApikey" data-action="click->buttons#toggleApikey">
-    Show your API KEY
+    Show your configuration
   </button>
-  <div class="collapse" id="apiKey">
-    <div class="input-group d-flex align-items-center" data-controller="copy-to-clipboard">
+
+  <div class="collapse" id="apiKey"  data-controller="copy-to-clipboard">
+    <div class="input-group d-flex align-items-center">
       <input class="form-control my-3 text-black" style="field-sizing: content;" type="text" data-buttons-target="apikey" value=<%= current_admin.api_key.api_key %> aria-label="ApiKey ReadOnly" disabled readonly data-copy-to-clipboard-target="input">
       <button class="btn btn-outline-secondary" type="button" id="button-addon2" style="height: max-content;" data-copy-to-clipboard-target="button" data-action="click->copy-to-clipboard#copyToClipboard">Copy</button>
       <%= link_to "Reset API KEY", admins_resetApikey_path, class: 'btn btn-outline-secondary', data: { action: 'click->buttons#resetApikey', turbo_confirm: "Are you sure ?" } %>
+    </div>
+    <div class="input-group d-flex align-items-center w-full" >
+      <%= simple_form_for current_admin, url: admins_updateIpAddress_path, html: { class: "w-100"} do |f| %>
+        <%= f.input :ip_address, as: :string, input_html: { value: current_admin.ip_address }, label: "IP address or domain name"%>
+        <%= f.submit "Apply change", class: "rounded-full btn btn-success center" %>
+      <% end %>
     </div>
   </div>
   <h3 class="text-center mt-5">Last week</h3>
