@@ -11,13 +11,8 @@ module ApplicationCable
     private
     def find_verified_user
       if cookies.signed["user.id"].present?
-        begin
-          user = User.find_by(id: cookies.signed["user.id"])
-          user || reject_unauthorized_connection
-        rescue JWT::DecodeError, ActiveRecord::RecordNotFound
-          # Capturer les erreurs liées au JWT ou si l'utilisateur n'est pas trouvé
-          reject_unauthorized_connection
-        end
+        user = User.find_by(id: cookies.signed["user.id"])
+        user || reject_unauthorized_connection
       else
         reject_unauthorized_connection
       end

@@ -23,7 +23,7 @@ class User < ApplicationRecord
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
 
-  after_commit :send_data_cable, unless: :saved_change_to_revoked_jwts?
+  after_commit :send_data_cable, unless: [:saved_change_to_revoked_jwts?, :destroyed?, :saved_change_to_created_at?]
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
