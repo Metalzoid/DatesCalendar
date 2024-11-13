@@ -50,8 +50,8 @@ module Users
     # @tags Users
     # @auth [bearer_jwt]
     def destroy
-      return render json: { message: 'Not found Cookie User !' } unless cookies.signed["user.id"]
-      return render json: { message: 'JWT token required !' } unless request.headers["Authorization"].present?
+      return render json: { message: "User's cookie required !" }, status: :unauthorized unless cookies.signed["user.id"]
+      return render json: { message: 'JWT token required !' }, status: :unauthorized unless request.headers["Authorization"].present?
 
       if request.headers['Authorization'].present? && cookies.signed["user.id"] == current_user.id
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
