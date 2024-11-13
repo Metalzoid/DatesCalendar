@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'pry-byebug'
 module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :current_user
@@ -10,10 +10,9 @@ module ApplicationCable
 
     private
     def find_verified_user
-      if cookies.request.params[:token].present?
+      if cookies.signed["user.id"].present?
         begin
-          jwt_payload = JWT.decode(cookies.request.params[:token].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
-          user = User.find(jwt_payload['sub'])
+          user = User.find_by(id: cookies.signed["user.id"])
           user || reject_unauthorized_connection
         rescue JWT::DecodeError, ActiveRecord::RecordNotFound
           # Capturer les erreurs liées au JWT ou si l'utilisateur n'est pas trouvé

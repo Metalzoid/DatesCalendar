@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 ruby '3.3.0'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 7.1.3', '>= 7.1.3.4'
+gem 'rails', '~> 8.0.0'
 
 # Use postgreSQL as the database for Active Record
 gem 'pg', '~> 1.1'
@@ -91,6 +91,7 @@ group :development, :test do
   gem 'pry-byebug'
   gem 'rspec-rails'
   gem 'database_cleaner-active_record'
+  gem 'pry-byebug'
 end
 
 group :development do

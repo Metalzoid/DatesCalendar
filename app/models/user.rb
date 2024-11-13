@@ -18,15 +18,12 @@ class User < ApplicationRecord
 
   scope :by_admin, ->(admin) { where(admin:) }
 
-  enum role: {
-    customer: 0,
-    seller: 1,
-    both: 2
-  }
+  enum :role, [:customer, :seller, :both]
 
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
-  after_commit :send_data_cable
+
+  after_commit :send_data_cable, unless: :saved_change_to_revoked_jwts?
 
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)

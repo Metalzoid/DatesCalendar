@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+#
 # Assuming you have not yet modified this file, each configuration option below
 # is set to its default value. Note that some are commented out while others
 # are not: uncommented lines are intended to protect your configuration from
@@ -279,8 +279,8 @@ Devise.setup do |config|
   # change the failure app, you can configure them inside the config.warden block.
   #
   # config.warden do |manager|
-  #   manager.intercept_401 = false
-  #   manager.default_strategies(scope: :user).unshift :some_external_strategy
+    # manager.intercept_401 = false
+    # manager.default_strategies(scope: :user).unshift :some_external_strategy
   # end
 
   # ==> Mountable engine configurations
@@ -334,5 +334,22 @@ Devise.setup do |config|
       ['DELETE', %r{^/api/v1/logout$}]
     ]
     jwt.expiration_time = 60.minutes.to_i
+  end
+
+  # Warden configuration
+  Warden::Manager.after_set_user do |user, auth, opts|
+    scope = opts[:scope]
+    auth.cookies.signed["#{scope}.id"] = {
+      value: user.id,
+      expires: 60.minutes.from_now,
+      httponly: true,
+      secure: Rails.env.production?,
+      same_site: :strict
+    }
+  end
+
+  Warden::Manager.before_logout do |user, auth, opts|
+    scope = opts[:scope]
+    auth.cookies.signed["#{scope}.id"] = nil
   end
 end

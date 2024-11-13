@@ -7,15 +7,15 @@ RSpec.describe "Api::V1::Appointments", type: :request do
     admin.save
     admin
   end
-  let!(:user) { User.create(email: "user@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "both", admin: admin) }
-  let!(:user2) { User.create(email: "user2@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "both", admin: admin) }
-  let!(:customer) { User.create(email: "customer@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "customer", admin: admin)}
-  let!(:serviceUser1) { Service.create(title: "service user 1", time: 5, price: 50, user: user) }
-  let!(:serviceUser2) { Service.create(title: "service user 2", time: 5, price: 50, user: user2) }
-  let!(:availabilityUser1) { Availability.create(start_date: I18n.l(Time.now, format: :custom), end_date: I18n.l(Time.now  + 2.hours, format: :custom), available: true, user: user) }
-  let!(:unavailabilityUser1) { Availability.create(start_date: I18n.l(Time.now + 3.hours, format: :custom), end_date: I18n.l(Time.now + 4.hours, format: :custom), available: false, user: user) }
-  let!(:availabilityUser2) { Availability.create(start_date: I18n.l(Time.now, format: :custom), end_date: I18n.l(Time.now + 2.hours, format: :custom), available: true, user: user2) }
-  let!(:unavailabilityUser2) { Availability.create(start_date: I18n.l(Time.now + 3.hours, format: :custom), end_date: I18n.l(Time.now + 4.hours, format: :custom), available: false, user: user2) }
+  let!(:user) { User.create!(email: "user@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "both", admin: admin) }
+  let!(:user2) { User.create!(email: "user2@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "both", admin: admin) }
+  let!(:customer) { User.create!(email: "customer@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "customer", admin: admin)}
+  let!(:serviceUser1) { Service.create!(title: "service user 1", time: 5, price: 50, user: user) }
+  let!(:serviceUser2) { Service.create!(title: "service user 2", time: 5, price: 50, user: user2) }
+  let!(:availabilityUser1) { Availability.create!(start_date: I18n.l(Time.now, format: :custom), end_date: I18n.l(Time.now  + 2.hours, format: :custom), available: true, user: user) }
+  let!(:unavailabilityUser1) { Availability.create!(start_date: I18n.l(Time.now + 3.hours, format: :custom), end_date: I18n.l(Time.now + 4.hours, format: :custom), available: false, user: user) }
+  let!(:availabilityUser2) { Availability.create!(start_date: I18n.l(Time.now, format: :custom), end_date: I18n.l(Time.now + 2.hours, format: :custom), available: true, user: user2) }
+  let!(:unavailabilityUser2) { Availability.create!(start_date: I18n.l(Time.now + 3.hours, format: :custom), end_date: I18n.l(Time.now + 4.hours, format: :custom), available: false, user: user2) }
   let!(:validAppointmentUser1) { Appointment.new(start_date: Time.now + 5.minutes, end_date: Time.now + 10.minutes, comment: "Hello world !", seller: user, customer: customer) }
 
   let(:user_headers) do
@@ -47,6 +47,7 @@ RSpec.describe "Api::V1::Appointments", type: :request do
     end
 
     it "get 1 appointment for seller" do
+      puts availabilityUser1.start_date
       save_appointments
       get api_v1_appointments_path, headers: user_headers
       serialized_response = JSON.parse(response.body)

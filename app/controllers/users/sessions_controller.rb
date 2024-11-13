@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require "pry-byebug"
 module Users
   # Sessions controller users
   class SessionsController < Devise::SessionsController
@@ -50,7 +50,10 @@ module Users
     # @tags Users
     # @auth [bearer_jwt]
     def destroy
-      if request.headers['Authorization'].present?
+      return render json: { message: 'Not found Cookie User !' } unless cookies.signed["user.id"]
+      return render json: { message: 'JWT token required !' } unless request.headers["Authorization"].present?
+
+      if request.headers['Authorization'].present? && cookies.signed["user.id"] == current_user.id
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
         return render json: { message: 'User not found with this JWT token.' }, status: :not_found unless current_api_user
