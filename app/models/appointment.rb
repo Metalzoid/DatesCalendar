@@ -26,6 +26,14 @@ class Appointment < ApplicationRecord
 
   private
 
+  def send_data_cable
+    unless Rails.env.test?
+      AllDatasChannel.send_all_datas(self.customer)
+      AllDatasChannel.send_all_datas(self.seller)
+    end
+
+  end
+
   def transform_date(date)
     I18n.l(date, format: :custom)
   end
