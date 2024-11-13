@@ -344,7 +344,7 @@ Devise.setup do |config|
       expires: 60.minutes.from_now,
       httponly: true,
       secure: Rails.env.production?,
-      same_site: nil,
+      same_site: :none,
     }
   end
 
