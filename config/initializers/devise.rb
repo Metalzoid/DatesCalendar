@@ -342,9 +342,9 @@ Devise.setup do |config|
     auth.cookies.signed["#{scope}.id"] = {
       value: user.id,
       expires: 60.minutes.from_now,
-      httponly: false,
+      httponly: true,
       secure: Rails.env.production?,
-      same_site: false,
+      same_site: "none",
     }
   end
 
