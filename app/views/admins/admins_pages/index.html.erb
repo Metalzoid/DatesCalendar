@@ -19,7 +19,7 @@
     </div>
     <div class="input-group d-flex align-items-center w-full" >
       <%= simple_form_for current_admin, url: admins_updateIpAddress_path, html: { class: "w-100"} do |f| %>
-        <%= f.input :ip_address, as: :string, input_html: { value: current_admin.ip_address }, label: "IP address or domain name"%>
+        <%= f.input :ip_address, as: :string, input_html: { value: current_admin.ip_address }, label: "IP address or domain name to allow", hint: "Separate IP or Domain by =>' , '" %>
         <%= f.submit "Apply change", class: "rounded-full btn btn-success center" %>
       <% end %>
     </div>

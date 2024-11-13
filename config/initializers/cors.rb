@@ -8,7 +8,7 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins -> (origin, _env) {
-      Admin.pluck(:ip_address).include?(origin)
+      Admin.pluck(:ip_address).map { |ip| ip.gsub(" ", "").split(",") }.flatten.include?(origin)
     }
 
     resource "*",
