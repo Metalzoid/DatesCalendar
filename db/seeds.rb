@@ -8,7 +8,7 @@ if Admin.exists?(email: 'admin@datescalendar.fr')
   admin.users.destroy_all
   puts "#{admin.email} - all data destroyed"
 else
-  admin = Admin.create!(email: 'admin@datescalendar.fr', password: ENV['FAKE_PASSWORD'])
+  admin = Admin.create!(email: 'admin@datescalendar.fr', password: ENV['FAKE_PASSWORD'], ip_address: "https://localhost:3001")
   admin.confirm
 end
 puts "Admin #{admin.email} initialized."
