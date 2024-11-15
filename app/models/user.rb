@@ -42,6 +42,10 @@ class User < ApplicationRecord
     revoked_jwts.include?(payload['jti'])
   end
 
+  def send_data_cable
+    AllDatasChannel.send_all_datas(self) unless Rails.env.test?
+  end
+
   pg_search_scope :search_by_firstname_and_lastname,
                   against: %i[firstname lastname],
                   using: {

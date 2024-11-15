@@ -9,8 +9,8 @@ module ApplicationCable
     end
 
     private
+
     def find_verified_user
-      puts cookies.signed["user.id"]
       if cookies.signed["user.id"].present?
         user = User.find_by(id: cookies.signed["user.id"])
         user || reject_unauthorized_connection
