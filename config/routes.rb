@@ -58,7 +58,6 @@ Rails.application.routes.draw do
       resources :services, only: %i[index create destroy]
       resources :users, only: %i[index]
       get 'resetApikey', to: 'admins_pages#resetApikey'
-      patch 'updateIpAddress', to: 'admins_pages#updateIpAddress'
     end
   end
 
