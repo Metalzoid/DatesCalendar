@@ -19,6 +19,10 @@ module Admins
       render json: { apikey: current_admin.api_key.api_key }
     end
 
+    def updateIpAddress
+      redirect_to admins_index_path if current_admin.update(params.require(:admin).permit(:ip_address))
+    end
+
     def authorize_data_admin
       return unless params[:user_id].present?
 
