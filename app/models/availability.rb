@@ -8,6 +8,7 @@ class Availability < ApplicationRecord
   validates :start_date, presence: true
   validates :end_date, presence: true, comparison: { greater_than: :start_date }
   validate :no_overlapping_dates, unless: :skip_validation
+  validate :no_overlapping_dates_same_status, unless: :skip_validation
   after_commit :send_data_cable
 
   attr_accessor :skip_validation
@@ -34,8 +35,33 @@ class Availability < ApplicationRecord
                                .where(user_id:)
                                .where.not(id:)
                                .where('start_date < ? AND end_date > ?', end_date, start_date)
+                               .where(available: !available)
+                               .order(:start_date)
+    Availability.set_unavailability(start_date, end_date, user, self) if overlapping_availability.any?
+  end
 
-    Availability.set_unavailability(start_date, end_date, user, self) if overlapping_availability.exists?
+  def no_overlapping_dates_same_status
+    return if skip_validation || destroyed?
+
+    overlapping_availability = Availability
+                               .where(user_id:)
+                               .where.not(id:)
+                               .where(available:)
+                               .where('start_date < ? AND end_date > ?', end_date, start_date)
+                               .order(:start_date)
+    return if overlapping_availability.blank?
+
+    if overlapping_availability.count == 1
+      self.start_date = overlapping_availability.first.start_date if overlapping_availability.first.start_date < self.start_date
+      self.end_date = overlapping_availability.first.end_date if overlapping_availability.first.end_date > self.end_date
+      self.skip_validation
+      overlapping_availability.destroy_all
+      self.save
+    else
+      self.start_date = overlapping_availability.first.start_date if overlapping_availability.first.start_date < self.start_date
+      self.end_date = overlapping_availability.last.end_date if overlapping_availability.last.end_date > self.end_date
+      overlapping_availability.destroy_all
+    end
   end
 
   class << self
