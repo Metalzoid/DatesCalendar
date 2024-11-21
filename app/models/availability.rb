@@ -60,6 +60,7 @@ class Availability < ApplicationRecord
                                .where.not(id:)
                                .where('start_date < ? AND end_date > ?', end_date, start_date)
                                .where(available: !available)
+                               .order(:start_date)
 
     Availability.set_unavailability(start_date, end_date, user, self, overlapping_availabilities) if overlapping_availabilities.exists?
   end
