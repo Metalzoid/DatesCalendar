@@ -24,9 +24,8 @@ class Availability < ApplicationRecord
           availability.end_date = overlapped_availability.start_date
 
         elsif availability.start_date < overlapped_availability.end_date && availability.start_date > overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
-          binding.pry
           availability.start_date = overlapped_availability.end_date
-
+          
         elsif availability.start_date < overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
           new_end_availability = Availability.new(
             start_date: overlapped_availability.end_date,
