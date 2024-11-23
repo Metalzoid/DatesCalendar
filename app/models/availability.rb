@@ -32,8 +32,8 @@ class Availability < ApplicationRecord
             available: availability.available,
             user: availability.user
           )
+          availability.end_date = overlapped_availability.start_date
         end
-        availability.end_date = overlapped_availability.start_date
         temp_availabilities << availability
         update_availabilities(params = temp_availabilities)
       end
