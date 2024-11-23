@@ -47,7 +47,6 @@ RSpec.describe "Api::V1::Appointments", type: :request do
     end
 
     it "get 1 appointment for seller" do
-      puts availabilityUser1.start_date
       save_appointments
       get api_v1_appointments_path, headers: user_headers
       serialized_response = JSON.parse(response.body)

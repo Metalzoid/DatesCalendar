@@ -8,7 +8,7 @@ RSpec.describe Availability, type: :model do
     admin
   end
   let!(:user) { User.create(email: "user@test.fr", password: "azerty", firstname: "firstnameTest", lastname: "lastnameTest", phone_number: "01 02 03 04 05", role: "both", admin: admin) }
-  let!(:availability1) { Availability.create!(start_date: Time.now, end_date: (Time.now + 1.hour), available: true, user: user) }
+  let!(:availability1) { Availability.create!(start_date: (Time.now + 5.minutes), end_date: (Time.now + 1.hour), available: true, user: user) }
   let!(:availability2) { Availability.create!(start_date: (Time.now + 1.hours + 1.minutes), end_date: (Time.now + 2.hours), available: false, user: user) }
   let!(:availability3) { Availability.create!(start_date: (Time.now + 2.hours + 1.minutes), end_date: (Time.now + 3.hours), available: true, user: user) }
   let!(:availability4) { Availability.create!(start_date: (Time.now + 3.hours + 1.minutes), end_date: (Time.now + 4.hours), available: [true, false].sample, user: user) }
@@ -54,4 +54,34 @@ RSpec.describe Availability, type: :model do
     expect(Availability.by_admin(admin).count).to eq 5
   end
 
+  it "Availability with same status and overlapping is combined" do
+    expect(user.availabilities.count).to eq 5
+    Availability.create!(start_date: (Time.now + 1.day + 1.hour), end_date: (Time.now + 1.day + 2.hour), available: true, user: user)
+    Availability.create!(start_date: (Time.now + 1.day + 2.hour + 1.minute), end_date: (Time.now + 1.day + 3.hour), available: true, user: user)
+    Availability.create!(start_date: (Time.now + 1.day), end_date: (Time.now + 1.day + 4.hour), available: true, user: user)
+    expect(user.availabilities.count).to eq 6
+  end
+
+  it "Availability with different status and overlapping is correctly seperate with 1 overlapped" do
+    expect(user.availabilities.count).to eq 5
+    Availability.create!(start_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), available: false, user: user)
+    Availability.create!(start_date: (Time.now + 1.day).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 4.hour).strftime("%Y%m%d%H%M"), available: true, user: user)
+    expect(user.availabilities.count).to eq 8
+    expect(user.availabilities.where(start_date: (Time.now + 1.day).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), available: true).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), available: false).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 4.hour).strftime("%Y%m%d%H%M"), available: true).count).to eq 1
+  end
+
+  it "Availability with different status and overlapping is correctly seperate with 2 overlapped" do
+    expect(user.availabilities.count).to eq 5
+    Availability.create!(start_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 2.hour + 15.minutes).strftime("%Y%m%d%H%M"), available: false, user: user)
+    Availability.create!(start_date: (Time.now + 1.day + 2.hour + 45.minutes).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), available: false, user: user)
+    Availability.create!(start_date: (Time.now + 1.day).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 4.hour).strftime("%Y%m%d%H%M"), available: true, user: user)
+    expect(user.availabilities.count).to eq 10
+    expect(user.availabilities.where(start_date: (Time.now + 1.day).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), available: true).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 2.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 2.hour + 15.minutes).strftime("%Y%m%d%H%M"), available: false).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 2.hour + 15.minutes).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 2.hour + 45.minutes).strftime("%Y%m%d%H%M"), available: true).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 2.hour + 45.minutes).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), available: false).count).to eq 1
+    expect(user.availabilities.where(start_date: (Time.now + 1.day + 3.hour).strftime("%Y%m%d%H%M"), end_date: (Time.now + 1.day + 4.hour).strftime("%Y%m%d%H%M"), available: true).count).to eq 1
+  end
 end

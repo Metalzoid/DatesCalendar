@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require "pry-byebug"
 # Availability Model
 class Availability < ApplicationRecord
   belongs_to :user
@@ -18,25 +18,24 @@ class Availability < ApplicationRecord
   end
 
   def self.set_unavailability(start_date, end_date, user, availability = nil, overlapping_availabilities = nil)
+    temp_availabilities = []
     if overlapping_availabilities
       overlapping_availabilities.each do |overlapped_availability|
         if availability.start_date < overlapped_availability.start_date && availability.end_date < overlapped_availability.end_date
           availability.end_date = overlapped_availability.start_date
-
         elsif availability.start_date < overlapped_availability.end_date && availability.start_date > overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
-          binding.pry
           availability.start_date = overlapped_availability.end_date
-
         elsif availability.start_date < overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
-          new_end_availability = Availability.new(
+          temp_availabilities << Availability.new(
             start_date: overlapped_availability.end_date,
             end_date: availability.end_date,
             available: availability.available,
             user: availability.user
           )
-          availability.end_date = overlapped_availability.start_date
         end
-        update_availabilities(new_end_availability, availability, overlapped_availability)
+        availability.end_date = overlapped_availability.start_date
+        temp_availabilities << availability
+        update_availabilities(params = temp_availabilities)
       end
     else
       current_availability = find_current_availability(start_date, end_date, user)
@@ -45,13 +44,11 @@ class Availability < ApplicationRecord
       new_end_availability = create_new_end_availability(end_date, current_availability)
       new_unavailability = create_new_unavailability(start_date, end_date, current_availability, user)
       current_availability.end_date = start_date
-      update_availabilities(new_end_availability, new_unavailability, current_availability)
+      update_availabilities(params = [new_end_availability, new_unavailability, current_availability])
     end
   end
 
   private
-
-
 
   def no_overlapping_dates
     return if skip_validation || destroyed?
@@ -61,6 +58,7 @@ class Availability < ApplicationRecord
                                .where.not(id:)
                                .where('start_date < ? AND end_date > ?', end_date, start_date)
                                .where(available: !available)
+                               .order(start_date: :desc)
 
     Availability.set_unavailability(start_date, end_date, user, self, overlapping_availabilities) if overlapping_availabilities.exists?
   end
@@ -123,14 +121,12 @@ class Availability < ApplicationRecord
       new_unavailability
     end
 
-    def update_availabilities(new_end_availability, new_unavailability, current_availability)
+    def update_availabilities(params = [])
       ActiveRecord::Base.transaction do
-        current_availability.skip_validation = true if current_availability
-        new_end_availability.skip_validation = true if new_end_availability
-        new_unavailability.skip_validation = true if new_unavailability
-        current_availability.save! if current_availability
-        new_end_availability.save! if new_end_availability
-        new_unavailability.save! if new_unavailability
+        params.each do |availability|
+          availability.skip_validation = true
+          availability.save!
+        end
       end
     end
   end
