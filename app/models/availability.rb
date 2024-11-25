@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require "pry-byebug"
+
 # Availability Model
 class Availability < ApplicationRecord
   belongs_to :user
@@ -8,7 +8,6 @@ class Availability < ApplicationRecord
   validates :start_date, presence: true
   validates :end_date, presence: true, comparison: { greater_than: :start_date }
   validate :no_overlapping_dates, unless: :skip_validation
-  validate :no_overlapping_dates_same_status, unless: :skip_validation
   after_commit :send_data_cable
 
   attr_accessor :skip_validation
@@ -21,21 +20,25 @@ class Availability < ApplicationRecord
     temp_availabilities = []
     if overlapping_availabilities
       overlapping_availabilities.each do |overlapped_availability|
-        if availability.start_date < overlapped_availability.start_date && availability.end_date < overlapped_availability.end_date
+        if overlapped_availability.available != availability.available
+          if availability.start_date < overlapped_availability.start_date && availability.end_date < overlapped_availability.end_date
+            availability.end_date = overlapped_availability.start_date
+          elsif availability.start_date < overlapped_availability.end_date && availability.start_date > overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
+            availability.start_date = overlapped_availability.end_date
+          elsif availability.start_date < overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
+            temp_availabilities << Availability.new(
+              start_date: overlapped_availability.end_date,
+              end_date: availability.end_date,
+              available: availability.available,
+              user: availability.user
+            )
+          end
           availability.end_date = overlapped_availability.start_date
-        elsif availability.start_date < overlapped_availability.end_date && availability.start_date > overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
-          availability.start_date = overlapped_availability.end_date
-        elsif availability.start_date < overlapped_availability.start_date && availability.end_date > overlapped_availability.end_date
-          temp_availabilities << Availability.new(
-            start_date: overlapped_availability.end_date,
-            end_date: availability.end_date,
-            available: availability.available,
-            user: availability.user
-          )
+          temp_availabilities << availability
+          update_availabilities(params = temp_availabilities)
+        else
+          overlapped_availability.destroy
         end
-        availability.end_date = overlapped_availability.start_date
-        temp_availabilities << availability
-        update_availabilities(params = temp_availabilities)
       end
     else
       current_availability = find_current_availability(start_date, end_date, user)
@@ -57,38 +60,9 @@ class Availability < ApplicationRecord
                                .where(user_id:)
                                .where.not(id:)
                                .where('start_date < ? AND end_date > ?', end_date, start_date)
-                               .where(available: !available)
                                .order(start_date: :desc)
 
     Availability.set_unavailability(start_date, end_date, user, self, overlapping_availabilities) if overlapping_availabilities.exists?
-  end
-
-  def no_overlapping_dates_same_status
-    return if skip_validation || destroyed?
-
-    overlapping_availabilities = Availability
-                               .where(user_id:)
-                               .where.not(id:)
-                               .where(available:)
-                               .where('start_date < ? AND end_date > ?', end_date, start_date)
-                               .order(:start_date)
-    return if overlapping_availabilities.blank?
-
-    if overlapping_availabilities.count == 1
-      self.start_date = overlapping_availabilities.first.start_date if overlapping_availabilities.first.start_date < self.start_date
-      self.end_date = overlapping_availabilities.first.end_date if overlapping_availabilities.first.end_date > self.end_date
-      overlapping_availabilities.destroy_all
-      self.save
-    else
-      if overlapping_availabilities.where(available: !available).exists?
-        errors.add(:overlapping_availabilities, "An Availability found with #{!available} status.")
-        raise ActiveRecord::RecordInvalid.new(self)
-      end
-      self.start_date = overlapping_availabilities.first.start_date if overlapping_availabilities.first.start_date < self.start_date
-      self.end_date = overlapping_availabilities.last.end_date if overlapping_availabilities.last.end_date > self.end_date
-      overlapping_availabilities.destroy_all
-      self.save
-    end
   end
 
   class << self
@@ -125,9 +99,10 @@ class Availability < ApplicationRecord
       ActiveRecord::Base.transaction do
         params.each do |availability|
           availability.skip_validation = true
-          availability.save!
+          availability.save
         end
       end
+
     end
   end
 end
