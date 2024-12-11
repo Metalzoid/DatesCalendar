@@ -156,7 +156,11 @@ module Api
 
       def handle_time_params
         @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
-        @availabilities.map(&:save!)
+        @availabilities.each do |availability|
+          Availability.transaction do
+            availability.save!
+          end
+        end
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
         end
