@@ -158,7 +158,7 @@ module Api
         @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
         @availabilities.each do |availability|
           availability.save!
-          AllDatasChannel.send_all_datas(@availability.user) unless Rails.env.test?
+          AllDatasChannel.send_all_datas(availability.user) unless Rails.env.test?
         end
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
