@@ -155,15 +155,16 @@ module Api
       end
 
       def handle_time_params
-        @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
-        @availabilities.each do |availability|
-          if availability.save!
-            AllDatasChannel.send_all_datas(availability.user) unless Rails.env.test?
-          end
+        @availabilities = nil
+        ActiveRecord::Base.transaction do
+          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
+          @availabilities.each(&:save!)
         end
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
         end
+
+        AllDatasChannel.send_all_datas(current_user) unless Rails.env.test?
         render_success('Availabilities created with min and max time.', @availabilities_serialized, :created)
       end
     end
