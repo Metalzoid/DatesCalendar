@@ -157,9 +157,8 @@ module Api
       def handle_time_params
         @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
         @availabilities.each do |availability|
-          Availability.transaction do
-            availability.save!
-          end
+          availability.save!
+          AllDatasChannel.send_all_datas(@availability.user) unless Rails.env.test?
         end
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
