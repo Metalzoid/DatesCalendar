@@ -11,6 +11,4 @@ pin "bootstrap", to: "bootstrap.min.js", preload: true
 pin "@popperjs/core", to: "popper.js", preload: true
 pin "chartkick", to: "chartkick.js"
 pin "Chart.bundle", to: "Chart.bundle.js"
-pin "sweetalert2" # @11.14.5
 pin "@rails/actioncable", to: "actioncable.esm.js"
-pin_all_from "app/javascript/channels", under: "channels"
