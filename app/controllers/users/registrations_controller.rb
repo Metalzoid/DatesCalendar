@@ -71,7 +71,7 @@ module Users
         bypass_sign_in resource, scope: resource_name if sign_in_after_change_password?
 
         render json: { message: 'User has been updated.',
-                       data: { user: UserSerializer.new(resource).serializable_hash[:data][:attributes] } }, status: :ok
+                       data: { user: UserSerializer.new(resource).serializable_hash.dig(:data, :attributes) } }, status: :ok
       else
         clean_up_passwords resource
         set_minimum_password_length
@@ -107,7 +107,7 @@ module Users
       if resource.persisted?
         render json: {
           message: 'Signed up successfully.',
-          data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
+          data: UserSerializer.new(current_user).serializable_hash.dig(:data, :attributes)
         }, status: :ok
       else
         render json: {

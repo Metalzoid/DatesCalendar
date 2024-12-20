@@ -22,7 +22,7 @@ module Api
         @services = Service.by_admin(current_user.admin).where(disabled: false)
         @services = @services.where(user: params[:seller_id]) if params[:seller_id].present?
         @services_serialized = @services.map do |service|
-          ServiceSerializer.new(service).serializable_hash[:data][:attributes]
+          ServiceSerializer.new(service).serializable_hash.dig(:data, :attributes)
         end
         return render_success('Services founded.', @services_serialized, :ok) unless @services.empty?
 
@@ -45,7 +45,7 @@ module Api
       def create
         @service = Service.new(service_params)
         @service.user = current_user
-        return render_success('Service created.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :created) if @service.save
+        return render_success('Service created.', ServiceSerializer.new(@service).serializable_hash.dig(:data, :attributes), :created) if @service.save
 
         render_error("Can't create service.", @service.errors.messages, :unprocessable_entity)
       end
@@ -67,7 +67,7 @@ module Api
       def update
         return render_error("Can't update another user's service.", :forbidden) if current_user != @service.user
 
-        return render_success('Service updated.', ServiceSerializer.new(@service).serializable_hash[:data][:attributes], :ok) if @service.update(service_params)
+        return render_success('Service updated.', ServiceSerializer.new(@service).serializable_hash.dig(:data, :attributes), :ok) if @service.update(service_params)
 
         render_error("Can't update service.", @service.errors.messages, :unprocessable_entity)
       end

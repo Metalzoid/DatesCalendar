@@ -40,7 +40,7 @@ module Admins
       respond_to do |format|
         format.json do
           render json: { message: 'Logged in successfully.',
-                         data: AdminSerializer.new(current_admin).serializable_hash[:data][:attributes] }, status: :ok
+                         data: AdminSerializer.new(current_admin).serializable_hash.dig(:data, :attributes) }, status: :ok
         end
         format.html do
           set_flash_message!(:notice, :signed_in)

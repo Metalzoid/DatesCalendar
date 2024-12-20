@@ -19,7 +19,7 @@ module Users
         jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEVISE_JWT_SECRET_KEY']).first
         current_api_user = User.find(jwt_payload['sub'])
       end
-      return render json: { message: 'Data of the current user connected.', data: UserSerializer.new(current_api_user).serializable_hash[:data][:attributes] }, status: :ok if current_api_user && current_user
+      return render json: { message: 'Data of the current user connected.', data: UserSerializer.new(current_api_user).serializable_hash.dig(:data, :attributes) }, status: :ok if current_api_user && current_user
 
       render json: { message: "Couldn't find an active session." }, status: :unauthorized
     end
@@ -81,7 +81,7 @@ module Users
     def respond_with(current_user, _opts = {})
       render json: {
         message: 'Logged in Successfully.',
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+        data: { user: UserSerializer.new(current_user).serializable_hash.dig(:data, :attributes) }
       }, status: :ok
     end
   end

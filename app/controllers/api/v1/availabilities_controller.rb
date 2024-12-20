@@ -34,7 +34,7 @@ module Api
 
         @availabilities = fetch_availabilities(@seller)
         @availabilities_serialized = @availabilities.map do |availability|
-          AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
+          AvailabilitySerializer.new(availability).serializable_hash.dig(:data, :attributes)
         end
         return render_error('Availabilities or Unavailabilities not founded.', :not_found) if @availabilities.empty?
 
@@ -65,7 +65,7 @@ module Api
         if params[:time] && @availability.valid?
           handle_time_params
         elsif @availability.save
-          render_success('Availability created.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :created)
+          render_success('Availability created.', AvailabilitySerializer.new(@availability).serializable_hash.dig(:data, :attributes), :created)
         else
           render_error("Can't create availability.", @availability.errors.messages, :unprocessable_entity)
         end
@@ -86,7 +86,7 @@ module Api
       # @auth [bearer_jwt]
       def update
         if @availability.update(availability_params)
-          return render_success('Availability updated.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok)
+          return render_success('Availability updated.', AvailabilitySerializer.new(@availability).serializable_hash.dig(:data, :attributes), :ok)
         end
 
         render_error("Can't update availability.", @availability.errors.messages, :unprocessable_entity)
@@ -104,7 +104,7 @@ module Api
       # @tags availabilities
       # @auth [bearer_jwt]
       def destroy
-        return render_success('Availability destroyed.', AvailabilitySerializer.new(@availability).serializable_hash[:data][:attributes], :ok) if @availability.destroy
+        return render_success('Availability destroyed.', AvailabilitySerializer.new(@availability).serializable_hash.dig(:data, :attributes), :ok) if @availability.destroy
 
         render_error("Can't destroy availability.", @availability.errors.messages, :unprocessable_entity)
       end
@@ -161,7 +161,7 @@ module Api
           @availabilities.each(&:save!)
         end
         @availabilities_serialized = @availabilities.map do |availability|
-          AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
+          AvailabilitySerializer.new(availability).serializable_hash.dig(:data, :attributes)
         end
 
         AllDatasChannel.send_all_datas(current_user) unless Rails.env.test?

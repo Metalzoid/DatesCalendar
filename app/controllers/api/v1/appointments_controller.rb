@@ -19,7 +19,7 @@ module Api
       def index
         appointments = Appointment.where(customer_id: current_user.id).or(Appointment.where(seller_id: current_user.id))
         serialized_appointments = appointments.map do |appointment|
-          AppointmentSerializer.new(appointment).serializable_hash[:data][:attributes]
+          AppointmentSerializer.new(appointment).serializable_hash.dig(:data, :attributes)
         end
         return render_success('Appointments found.', serialized_appointments, :ok) if serialized_appointments.count.positive?
         render_error('Appointments not found.', :not_found)
@@ -38,9 +38,9 @@ module Api
       def show
         return if authorization
 
-        appointment = AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes]
+        appointment = AppointmentSerializer.new(@appointment).serializable_hash.dig(:data, :attributes)
         services = @appointment.services.map do |service|
-          ServiceSerializer.new(service).serializable_hash[:data][:attributes]
+          ServiceSerializer.new(service).serializable_hash.dig(:data, :attributes)
         end
         render_success('Appointment found.', { appointment:, services: }, :ok)
       end
@@ -71,7 +71,7 @@ module Api
         @appointment.price = @services.sum(&:price) unless @services.nil?
         if @appointment.save
           create_appointment_services unless @services.nil?
-          render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :created)
+          render_success('Appointment created.', AppointmentSerializer.new(@appointment).serializable_hash.dig(:data, :attributes), :created)
         else
           render_error("Can't create appointment:", @appointment.errors.full_messages.to_sentence, :unprocessable_entity)
         end
@@ -101,7 +101,7 @@ module Api
 
         if @appointment.update(update_params)
           create_appointment_services unless @services.nil?
-          render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash[:data][:attributes], :ok)
+          render_success('Appointment updated.', AppointmentSerializer.new(@appointment).serializable_hash.dig(:data, :attributes), :ok)
         else
           render_error("Can't update appointment.", @appointment.errors.full_messages.to_sentence, :unprocessable_entity)
         end

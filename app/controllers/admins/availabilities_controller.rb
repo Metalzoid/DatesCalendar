@@ -65,7 +65,7 @@ module Admins
       @availabilities = DateManagerService.new(@availability, params[:time], @availability.user).call
       @availabilities.map(&:save!)
       @availabilities_serialized = @availabilities.map do |availability|
-        AvailabilitySerializer.new(availability).serializable_hash[:data][:attributes]
+        AvailabilitySerializer.new(availability).serializable_hash.dig(:data, :attributes)
       end
     end
   end

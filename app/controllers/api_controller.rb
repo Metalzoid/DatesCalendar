@@ -22,7 +22,7 @@ class ApiController < ActionController::API
     @role = params[:role].downcase if params[:role].present?
     @user_id = params[:user_id].to_i if params[:user_id].present?
     @user = User.by_admin(current_user.admin).find_by(id: @user_id)
-    return render_success('User founded by id.', UserSerializer.new(@user).serializable_hash[:data][:attributes], :ok) if @user_id && @user
+    return render_success('User founded by id.', UserSerializer.new(@user).serializable_hash.dig(:data, :attributes), :ok) if @user_id && @user
 
     return if verify_search(@query, @role)
 
@@ -116,7 +116,7 @@ class ApiController < ActionController::API
   end
 
   def serializer(item, serializer)
-    serializer.new(item).serializable_hash[:data][:attributes]
+    serializer.new(item).serializable_hash.dig(:data, :attributes)
   end
 
   protected
