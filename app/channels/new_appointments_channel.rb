@@ -1,7 +1,7 @@
 class NewAppointmentsChannel < ApplicationCable::Channel
   def subscribed
     stream_from "new_appointments_#{current_user.id}"
-    AllDatasChannel.send_appointments
+    NewAppointmentsChannel.send_appointments
   end
 
   def unsubscribed
