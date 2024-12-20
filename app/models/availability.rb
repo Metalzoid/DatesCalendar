@@ -8,7 +8,6 @@ class Availability < ApplicationRecord
   validates :start_date, presence: true
   validates :end_date, presence: true, comparison: { greater_than: :start_date }
   validate :no_overlapping_dates, unless: :skip_validation
-  after_commit :send_data_cable
 
   attr_accessor :skip_validation
 

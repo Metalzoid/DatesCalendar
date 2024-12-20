@@ -4,7 +4,7 @@
 class Appointment < ApplicationRecord
   after_save :create_availability, if: :saved_change_to_status?
   after_save :restore_availabilities, if: :saved_change_to_status?
-  after_commit :send_data_cable
+  after_commit :broadcast_appointments
 
   belongs_to :customer, class_name: 'User'
   belongs_to :seller, class_name: 'User'
@@ -25,15 +25,6 @@ class Appointment < ApplicationRecord
   end
 
   private
-
-  def send_data_cable
-    unless Rails.env.test?
-      AllDatasChannel.send_all_datas(self.customer)
-      AllDatasChannel.send_all_datas(self.seller)
-    end
-
-  end
-
   def transform_date(date)
     I18n.l(date, format: :custom)
   end
@@ -92,5 +83,12 @@ class Appointment < ApplicationRecord
       saved_change_to_end_date&.first || end_date,
       seller.id
     )
+  end
+
+  def broadcast_appointments
+    unless Rails.env.test?
+      NewAppointmentsChannel.send_appointments(self.seller)
+      NewAppointmentsChannel.send_appointments(self.customer)
+    end
   end
 end

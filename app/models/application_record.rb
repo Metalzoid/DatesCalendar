@@ -14,9 +14,4 @@ class ApplicationRecord < ActiveRecord::Base
     formatted_hash.merge!(count_by_day)
     formatted_hash
   end
-
-  def send_data_cable
-    AllDatasChannel.send_all_datas(self.user) unless Rails.env.test?
-  end
-
 end
