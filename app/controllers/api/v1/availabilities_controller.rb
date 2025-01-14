@@ -164,7 +164,6 @@ module Api
           AvailabilitySerializer.new(availability).serializable_hash.dig(:data, :attributes)
         end
 
-        AllDatasChannel.send_all_datas(current_user) unless Rails.env.test?
         render_success('Availabilities created with min and max time.', @availabilities_serialized, :created)
       end
     end
