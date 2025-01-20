@@ -1,6 +1,6 @@
 module Api
   module V1
-    class CustomersController < ApplicationController
+    class CustomersController < ApiController
       before_action :authorization!
       # @summary Returns the list of Customers.
       # @response Customers founded.(200) [Hash{message: String, data: Array<Hash{id: Integer, email: String, firstname: String, lastname: String, company: String, role: String, phone_number: String}>}]
