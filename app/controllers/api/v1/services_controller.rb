@@ -19,7 +19,7 @@ module Api
       # @tags services
       # @auth [bearer_jwt]
       def index
-        @services = Service.by_admin(current_user.admin).where(disabled: false)
+        @services = Service.by_admin(current_user.admin)
         @services = @services.where(user: params[:seller_id]) if params[:seller_id].present?
         @services_serialized = @services.map do |service|
           ServiceSerializer.new(service).serializable_hash.dig(:data, :attributes)
