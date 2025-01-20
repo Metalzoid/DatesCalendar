@@ -28,11 +28,11 @@ module Api
       def index
         @seller = current_user if %w[seller both].include?(current_user.role)
         @seller = User.find(params[:seller_id]) if params[:seller_id].present?
-        @available = params[:available] || true
+
         return render_error('Seller id required.', :bad_request) unless @seller
         return render_error('Seller not found.', :not_found) unless @seller
 
-        @availabilities = fetch_availabilities(@seller)
+        @availabilities = fetch_availabilities(@seller, params[:available] || true)
         @availabilities_serialized = @availabilities.map do |availability|
           AvailabilitySerializer.new(availability).serializable_hash.dig(:data, :attributes)
         end
@@ -128,8 +128,8 @@ module Api
         render_error('You need to be the Seller or Admin to perform this action.', :unauthorized)
       end
 
-      def fetch_availabilities(seller)
-        Availability.by_admin(seller.admin).where(available: @available, user: seller)
+      def fetch_availabilities(seller, available_status)
+        Availability.by_admin(seller.admin).where(available: available_status, user: seller)
       end
 
       def generate_dates(params = {})
