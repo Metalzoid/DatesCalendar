@@ -23,8 +23,6 @@ class User < ApplicationRecord
   validates :role, presence: true, inclusion: { in: roles.keys }
   validates :admin_id, presence: true
 
-  after_commit :send_data_cable, unless: [:saved_change_to_revoked_jwts?, :destroyed?, :saved_change_to_created_at?]
-
   def appointments
     role == 'customer' ? Appointment.where(customer: self) : Appointment.where(seller: self)
   end
@@ -40,10 +38,6 @@ class User < ApplicationRecord
 
   def jwt_revoked?(payload)
     revoked_jwts.include?(payload['jti'])
-  end
-
-  def send_data_cable
-    AllDatasChannel.send_all_datas(self) unless Rails.env.test?
   end
 
   pg_search_scope :search_by_firstname_and_lastname,
