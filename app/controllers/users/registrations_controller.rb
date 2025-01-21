@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require "pry-byebug"
 module Users
   class RegistrationsController < Devise::RegistrationsController
     include RackSessionsFix
@@ -19,8 +19,12 @@ module Users
     # @response_example User couldn't be created successfully. Admin must exist and Admin can't be blank.(422) [{message: "User couldn't be created successfully. Admin must exist and Admin can't be blank."}]
     # @tags Users
     def create
+      # Create avatar cloudinary from params
+      if sign_up_params["avatar"]
+        @avatar = decode_base64_image(sign_up_params["avatar"])
+      end
       @user = build_resource(sign_up_params)
-
+      @user.avatar.attach(@avatar) if @avatar
       if request.headers['APIKEY'].present?
         api_key = extract_api_key(request.headers['APIKEY'])
         current_api_admin = ApiKey.find_by(api_key:)&.admin
@@ -64,8 +68,13 @@ module Users
         current_api_user = User.find(jwt_payload['sub'])
       end
       self.resource = current_api_user
-
-      resource_updated = update_resource(resource, account_update_params)
+      # Update avatar cloudinary
+      if account_update_params["avatar"]
+        avatar = decode_base64_image(account_update_params["avatar"])
+        current_api_user.avatar.attach(avatar)
+      end
+      # If avatar exist, except params avatar
+      resource_updated = update_resource(resource, account_update_params.except(:avatar) || account_update_params)
       yield resource if block_given?
       if resource_updated
         bypass_sign_in resource, scope: resource_name if sign_in_after_change_password?
@@ -102,6 +111,18 @@ module Users
     # end
 
     private
+
+    def decode_base64_image(base64_string)
+      splited_base64 = base64_string.split(',')
+      image_type_splitted = splited_base64.first.split(/[:;]/)
+      image_type = image_type_splitted.select { |a| a.include?("image")} || 'image/png'
+      decoded_image = Base64.decode64(splited_base64[1])
+      {
+        io: StringIO.new(decoded_image),
+        filename: "avatar_#{Time.now.to_i}.#{image_type.first.split("/").last || 'png'}",
+        content_type: image_type.first
+      }
+    end
 
     def respond_with(current_user, _opts = {})
       if resource.persisted?
