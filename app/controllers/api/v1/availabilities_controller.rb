@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require "pry-byebug"
+
 module Api
   module V1
     # Availabilities controller

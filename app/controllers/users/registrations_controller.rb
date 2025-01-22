@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require "pry-byebug"
+
 module Users
   class RegistrationsController < Devise::RegistrationsController
     include RackSessionsFix
