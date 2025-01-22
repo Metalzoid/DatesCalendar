@@ -95,13 +95,13 @@ class Availability < ApplicationRecord
     end
 
     def update_availabilities(params = [])
-      params.each do |availability|
-        ActiveRecord::Base.transaction do
+      ActiveRecord::Base.transaction do
+        params.each do |availability|
           availability.skip_validation = true
           availability.save
         end
       end
-
     end
+    
   end
 end

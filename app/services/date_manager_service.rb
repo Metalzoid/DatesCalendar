@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'pry-byebug'
 class DateManagerService
   def initialize(availability, params, user)
     @availability = availability
@@ -30,6 +30,7 @@ class DateManagerService
 
   def create_daily_availabilities(start_date, end_date)
     while start_date < end_date
+      binding.pry
       current_day_end = calculate_current_day_end(start_date, end_date)
       new_start_date = calculate_new_start_date(start_date)
       temp = Availability.new(user: @user, available: @availability.available, start_date: new_start_date,
@@ -53,6 +54,7 @@ class DateManagerService
   end
 
   def advance_to_next_day(date)
+    binding.pry
     date.change(hour: 0, min: 0) + 1.day
   end
 end

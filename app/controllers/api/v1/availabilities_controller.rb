@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require "pry-byebug"
 module Api
   module V1
     # Availabilities controller
@@ -62,7 +62,7 @@ module Api
 
         @availability = Availability.new(availability_params)
         @availability.user = current_user
-        if params[:time] && @availability.valid?
+        if params[:time]
           handle_time_params
         elsif @availability.save
           render_success('Availability created.', AvailabilitySerializer.new(@availability).serializable_hash.dig(:data, :attributes), :created)
@@ -155,9 +155,8 @@ module Api
       end
 
       def handle_time_params
-        @availabilities = nil
+        @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
         ActiveRecord::Base.transaction do
-          @availabilities = DateManagerService.new(@availability, params[:time], current_user).call
           @availabilities.each(&:save!)
         end
         @availabilities_serialized = @availabilities.map do |availability|
