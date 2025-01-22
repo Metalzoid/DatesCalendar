@@ -11,7 +11,7 @@ class NewAppointmentsChannel < ApplicationCable::Channel
   def self.send_appointments(user)
     appointments = user.appointments
     .select { |appointment| appointment.status == "hold" && appointment.start_date > Time.now }
-    .map { |appointment| AppointmentSerializer.new(appointment).serialzable_hash.dig(:data, :attributes)}
+    .map { |appointment| AppointmentSerializer.new(appointment).serializable_hash.dig(:data, :attributes)}
 
     data = {
       appointments: appointments,
