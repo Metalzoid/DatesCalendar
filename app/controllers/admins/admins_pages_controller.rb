@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'pry-byebug'
 module Admins
   # AdminPages Controller
   class AdminsPagesController < ApplicationController
