@@ -19,23 +19,22 @@ module Users
     # @response_example User couldn't be created successfully. Admin must exist and Admin can't be blank.(422) [{message: "User couldn't be created successfully. Admin must exist and Admin can't be blank."}]
     # @tags Users
     def create
-      # Create avatar cloudinary from params
-      if sign_up_params["avatar"]
-        @avatar = decode_base64_image(sign_up_params["avatar"])
-      end
-      @user = build_resource(sign_up_params)
-      @user.avatar.attach(@avatar) if @avatar
+      @user = build_resource(sign_up_params.except(:avatar) || sign_up_params)
       if request.headers['APIKEY'].present?
         api_key = extract_api_key(request.headers['APIKEY'])
         current_api_admin = ApiKey.find_by(api_key:)&.admin
         unless current_api_admin
           return render json: { message: "Your APIKEY #{api_key} does not match our records." }, status: :unprocessable_entity
         end
-
         @user.admin = current_api_admin
       end
 
       begin
+        # Create avatar cloudinary from params
+        if sign_up_params["avatar"]
+          @avatar = decode_base64_image(sign_up_params["avatar"])
+        end
+        @user.avatar.attach(@avatar) if @avatar
         if @user.save
           handle_successful_signup(@user)
         else

@@ -41,6 +41,10 @@ class User < ApplicationRecord
     revoked_jwts.include?(payload['jti'])
   end
 
+  def avatar_link
+    self.avatar.url
+  end
+
   pg_search_scope :search_by_firstname_and_lastname,
                   against: %i[firstname lastname],
                   using: {
