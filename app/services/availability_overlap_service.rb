@@ -21,7 +21,7 @@ class AvailabilityOverlapService
     Availability
       .where(user_id: @availability.user_id)
       .where.not(id: @availability.id)
-      .where('start_date < ? AND end_date > ?', @availability.end_date, @availability.start_date)
+      .where('start_date <= ? AND end_date >= ?', @availability.end_date, @availability.start_date)
       .order(start_date: :desc)
   end
 
@@ -30,8 +30,8 @@ class AvailabilityOverlapService
       if different_availability_types?(overlapped_availability)
         handle_different_types(overlapped_availability)
       else
-        # Même type de disponibilité : on supprime l'ancienne et on garde la nouvelle
-        overlapped_availability.destroy
+        # Même type de disponibilité : on fusionne les availabilities
+        merge_same_type_availabilities(overlapped_availability)
       end
     end
 
@@ -111,5 +111,21 @@ class AvailabilityOverlapService
     # Ajouter les availabilities modifiées et créées aux résultats
     @resulting_availabilities << overlapped_availability  # L'availability d'origine modifiée
     @resulting_availabilities << new_end_part            # La nouvelle partie après l'indisponibilité
+  end
+
+  def merge_same_type_availabilities(overlapped_availability)
+    # Fusionner les availabilities du même type en étendant les dates
+    # pour couvrir la plus grande plage possible
+
+    # Calculer les nouvelles dates pour englober les deux availabilities
+    new_start_date = [@availability.start_date, overlapped_availability.start_date].min
+    new_end_date = [@availability.end_date, overlapped_availability.end_date].max
+
+    # Mettre à jour la nouvelle availability avec la plage fusionnée
+    @availability.start_date = new_start_date
+    @availability.end_date = new_end_date
+
+    # Supprimer l'ancienne availability car elle est maintenant fusionnée
+    overlapped_availability.destroy
   end
 end
