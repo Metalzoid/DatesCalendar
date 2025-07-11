@@ -40,6 +40,6 @@ RSpec.describe Appointment, type: :model do
     subject.start_date = Time.now + 10.days
     subject.end_date = subject.start_date + service.time.minutes
     expect(subject).to_not be_valid
-    expect(subject.errors[:availability]).to include('Start_date and End_date necessary included in an availability range.')
+    expect(subject.errors[:availability]).to include('Les dates de début et de fin doivent être incluses dans un créneau de disponibilité.')
   end
 end

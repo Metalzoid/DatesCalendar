@@ -2,8 +2,7 @@
 
 # Appointment Model
 class Appointment < ApplicationRecord
-  after_save :create_availability, if: :saved_change_to_status?
-  after_save :restore_availabilities, if: :saved_change_to_status?
+  after_save :handle_availability_changes, if: :saved_change_to_status?
   after_commit :broadcast_appointments
 
   belongs_to :customer, class_name: 'User'
@@ -20,75 +19,39 @@ class Appointment < ApplicationRecord
 
   enum :status, [:hold, :accepted, :finished, :canceled, :refused]
 
-  def self.by_admin(admin)
-    joins(:customer, :seller).merge(User.by_admin(admin))
-  end
+  scope :by_admin, ->(admin) { joins(:customer, :seller).merge(User.by_admin(admin)) }
 
   private
+
   def transform_date(date)
     I18n.l(date, format: :custom)
   end
 
+  # Validation simplifiée déléguée au service
   def check_availability
-    availabilities = Availability.by_admin(seller.admin).where(available: true, user: seller)
-    overlapping_availability = availabilities.any? do |availability|
-      start_date >= availability.start_date && end_date <= availability.end_date
+    availability_service = AppointmentAvailabilityService.new(self)
+    availability_service.validate_appointment_availability
+  end
+
+  # Callback simplifié qui délègue aux services
+  def handle_availability_changes
+    availability_service = AppointmentAvailabilityService.new(self)
+    previous_status = saved_change_to_status&.first
+    current_status = saved_change_to_status&.last || status
+
+    case current_status
+    when 'accepted'
+      availability_service.handle_appointment_acceptance
+    else
+      # Si on passe d'un statut "accepted" à autre chose, on restaure la disponibilité
+      availability_service.handle_appointment_status_change_from_accepted(previous_status) if previous_status == 'accepted'
     end
-    return if overlapping_availability
-
-    errors.add(:availability, 'Start_date and End_date necessary included in an availability range.')
-  end
-
-  def create_availability
-    return unless [saved_change_to_status&.last || status].include?('accepted')
-
-    @availability = Availability.set_unavailability(start_date, end_date, seller)
-  end
-
-  def restore_availabilities
-    return unless saved_change_to_status&.first == 'accepted'
-
-    before_availability = find_availability_before_change
-    current_availability = find_current_availability
-    after_availability = find_availability_after_change
-
-    ActiveRecord::Base.transaction do
-      after_availability.update!(start_date: before_availability.start_date, skip_validation: true)
-      current_availability.destroy!
-      before_availability.destroy!
-    end
-  end
-
-  def find_availability_before_change
-    Availability.find_by(
-      'start_date < ? AND end_date = ? AND user_id = ?',
-      saved_change_to_start_date&.first || start_date,
-      saved_change_to_start_date&.first || start_date,
-      seller.id
-    )
-  end
-
-  def find_current_availability
-    Availability.find_by(
-      start_date: saved_change_to_start_date&.first || start_date,
-      end_date: saved_change_to_end_date&.first || end_date,
-      user: seller
-    )
-  end
-
-  def find_availability_after_change
-    Availability.find_by(
-      'start_date = ? AND end_date > ? AND user_id = ?',
-      saved_change_to_end_date&.first || end_date,
-      saved_change_to_end_date&.first || end_date,
-      seller.id
-    )
   end
 
   def broadcast_appointments
-    unless Rails.env.test?
-      NewAppointmentsChannel.send_appointments(self.seller)
-      NewAppointmentsChannel.send_appointments(self.customer)
-    end
+    return if Rails.env.test?
+
+    NewAppointmentsChannel.send_appointments(seller)
+    NewAppointmentsChannel.send_appointments(customer)
   end
 end
