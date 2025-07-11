@@ -28,28 +28,6 @@ class Availability < ApplicationRecord
     service.restore_availability_after_appointment_cancellation(start_date, end_date)
   end
 
-  # Version simplifiée de set_unavailability maintenant obsolète
-  # Conservée temporairement pour compatibilité, sera supprimée
-  def self.set_unavailability(start_date, end_date, user, availability = nil, overlapping_availabilities = nil)
-    Rails.logger.warn "DEPRECATED: set_unavailability est obsolète. Utilisez create_unavailability_for_user à la place."
-
-    if availability && overlapping_availabilities
-      # Ancien comportement avec gestion des chevauchements
-      service = AvailabilityOverlapService.new(availability, overlapping_availabilities)
-      result = service.call
-
-      ActiveRecord::Base.transaction do
-        result.each do |av|
-          av.skip_validation = true
-          av.save!
-        end
-      end
-    else
-      # Nouveau comportement simplifié
-      create_unavailability_for_user(start_date, end_date, user)
-    end
-  end
-
   private
 
   def no_overlapping_dates
@@ -73,18 +51,21 @@ class Availability < ApplicationRecord
         av.skip_validation = true
       end
 
-      # Sauvegarder uniquement les nouvelles disponibilités (pas self)
+      # Sauvegarder les nouvelles disponibilités créées
       resulting_availabilities.reject { |av| av == self }.each(&:save!)
+
+      # Si self (l'availability d'origine) a été modifiée par le service et est dans les résultats,
+      # on doit aussi la sauvegarder, mais la validation normale du modèle la sauvegarde déjà
     end
   end
 
   def valid_for_overlap_processing?
     # Vérifier que les champs de base sont présents et valides
     start_date.present? &&
-    end_date.present? &&
-    !available.nil? &&
-    user.present? &&
-    start_date < end_date
+      end_date.present? &&
+      !available.nil? &&
+      user.present? &&
+      start_date < end_date
   end
 
   def find_overlapping_availabilities

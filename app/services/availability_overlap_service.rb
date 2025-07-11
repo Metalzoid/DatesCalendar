@@ -94,8 +94,10 @@ class AvailabilityOverlapService
   end
 
   def handle_complete_outside_overlap(overlapped_availability)
-    # L'ancienne disponibilité englobe complètement la nouvelle
-    # On divise l'ancienne en deux parties
+    # L'ancienne disponibilité englobe complètement la nouvelle indisponibilité
+    # On divise l'ancienne en deux parties : avant et après l'indisponibilité
+
+    # Partie après l'indisponibilité - créer une nouvelle availability avec le même type que l'originale
     new_end_part = Availability.new(
       start_date: @availability.end_date,
       end_date: overlapped_availability.end_date,
@@ -103,7 +105,11 @@ class AvailabilityOverlapService
       user: overlapped_availability.user
     )
 
+    # Modifier l'availability d'origine pour qu'elle se termine au début de l'indisponibilité
     overlapped_availability.end_date = @availability.start_date
-    @resulting_availabilities << new_end_part
+
+    # Ajouter les availabilities modifiées et créées aux résultats
+    @resulting_availabilities << overlapped_availability  # L'availability d'origine modifiée
+    @resulting_availabilities << new_end_part            # La nouvelle partie après l'indisponibilité
   end
 end
